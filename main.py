@@ -26,12 +26,12 @@ def main():
     print("💬 开始问答演示")
 
     # 测试问题
-    question = "请告诉我文件里这个项目工作集应当如何命名？"
+    question = "请告诉我文件里这个项目工作集应当如何命名？并帮我解释每个参数的含义，我看到结果里有5.1所以5.1里具体说啥告诉我"
     print(f"\n❓ 问题: {question}")
     print("\n🤔 Agent 思考与行动过程:")
     print("-" * 50)
     # 调用 Agent（设置递归上限，避免模型反复调用工具不收敛）
-    result = agent.invoke({"messages": [("user", question)]}, {"recursion_limit": 8})
+    result = agent.invoke({"messages": [("user", question)]})
     final_answer = result["messages"][-1].content
     print(final_answer)
 

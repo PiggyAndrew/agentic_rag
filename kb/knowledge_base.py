@@ -129,10 +129,13 @@ class PersistentKnowledgeBaseController:
         texts: List[str] = []
         normalized: List[Dict[str, Any]] = []
         vitems: List[Dict[str, Any]] = []
+        non_empty_indices: List[int] = []
         for i, c in enumerate(chunks):
             if isinstance(c, str):
                 normalized.append({"file_id": file_id, "chunk_index": i, "content": c})
                 texts.append(c)
+                if c.strip():
+                    non_empty_indices.append(i)
                 vitems.append({
                     "file_id": file_id,
                     "chunk_index": i,
@@ -149,6 +152,8 @@ class PersistentKnowledgeBaseController:
                     "metadata": c.get("metadata"),
                 })
                 texts.append(content)
+                if content.strip():
+                    non_empty_indices.append(i)
                 vitems.append({
                     "file_id": file_id,
                     "chunk_index": i,
@@ -160,6 +165,8 @@ class PersistentKnowledgeBaseController:
                 s = str(c)
                 normalized.append({"file_id": file_id, "chunk_index": i, "content": s})
                 texts.append(s)
+                if s.strip():
+                    non_empty_indices.append(i)
                 vitems.append({
                     "file_id": file_id,
                     "chunk_index": i,
@@ -168,18 +175,23 @@ class PersistentKnowledgeBaseController:
                     "preview": (s[:200] + "...") if len(s) > 200 else s,
                 })
         try:
-            if texts:
-                embs = self._embedder.embed_texts(texts)
-                for i in range(len(normalized)):
-                    normalized[i]["embedding"] = embs[i].tolist()
-                    vitems[i]["embedding"] = embs[i].tolist()
+            if non_empty_indices:
+                # 仅对非空文本进行嵌入，避免服务端拒绝空字符串导致失败
+                to_embed = [normalized[i]["content"] for i in non_empty_indices]
+                embs = self._embedder.embed_texts(to_embed)
+                for k, i in enumerate(non_empty_indices):
+                    normalized[i]["embedding"] = embs[k].tolist()
+                    vitems[i]["embedding"] = embs[k].tolist()
         except Exception:
+            # 失败时跳过嵌入，不影响片段持久化
             pass
         with open(path, "w", encoding="utf-8") as f:
             json.dump(normalized, f, ensure_ascii=False, indent=2)
         try:
-            if vitems and all("embedding" in vi for vi in vitems):
-                self._vstore.add_items(kb_id, vitems)
+            # 仅追加有嵌入的条目，避免全部因嵌入失败而不写入向量库
+            vitems_embedded = [vi for vi in vitems if "embedding" in vi]
+            if vitems_embedded:
+                self._vstore.add_items(kb_id, vitems_embedded)
         except Exception:
             pass
 
