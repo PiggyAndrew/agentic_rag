@@ -8,4 +8,7 @@ dependencies = [
     "langchain-core>=1.1.0",
     "langchain-openai>=1.1.0",
     "langgraph>=1.0.3",
+    "pypdf>=4.0.0",
+    "sentence-transformers>=2.6.0",
+    "numpy>=1.26",
 ]

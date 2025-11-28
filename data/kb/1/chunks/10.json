@@ -1,0 +1,4094 @@
+[
+  {
+    "file_id": 10,
+    "chunk_index": 0,
+    "content": "2024-04-23  First issue  00  Angus Cheng  Ready Tse   \n      \n      \n            \n  \nSummary of Document Changes  \nChanges to revision",
+    "metadata": {
+      "number": "2024",
+      "title": "04-23  First issue  00  Angus Cheng  Ready Tse",
+      "path": [
+        {
+          "number": "2024",
+          "title": "04-23  First issue  00  Angus Cheng  Ready Tse"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 1,
+    "content": "01",
+    "metadata": {
+      "number": "01",
+      "title": "",
+      "path": [
+        {
+          "number": "01",
+          "title": "GENERAL"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 2,
+    "content": "02",
+    "metadata": {
+      "number": "02",
+      "title": "",
+      "path": [
+        {
+          "number": "02",
+          "title": "WORKS PACKAGE  Works Package Code – Contractor Name –"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 3,
+    "content": "03",
+    "metadata": {
+      "number": "03",
+      "title": "",
+      "path": [
+        {
+          "number": "03",
+          "title": "WIP"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 4,
+    "content": "04",
+    "metadata": {
+      "number": "04",
+      "title": "",
+      "path": [
+        {
+          "number": "04",
+          "title": "COORDINATION  “Company” – “LocakgFbHon” – Purpose"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 5,
+    "content": "05",
+    "metadata": {
+      "number": "05",
+      "title": "",
+      "path": [
+        {
+          "number": "05",
+          "title": "WIP  “Company” – “Staﬀ Name”"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 6,
+    "content": "2023   \n \n \nContents",
+    "metadata": {
+      "number": "2023",
+      "title": "",
+      "path": [
+        {
+          "number": "2023",
+          "title": ""
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 7,
+    "content": "1 Overview  .......................................................................................................................................................... 1",
+    "metadata": {
+      "number": "1",
+      "title": "Overview  .......................................................................................................................................................... 1",
+      "path": [
+        {
+          "number": "1",
+          "title": "Master Program  3rd  May, 2024"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 8,
+    "content": "1.1 Introduction  ............................................................................................................................................... 1",
+    "metadata": {
+      "number": "1.1",
+      "title": "Introduction  ............................................................................................................................................... 1",
+      "path": [
+        {
+          "number": "1",
+          "title": "Master Program  3rd  May, 2024"
+        },
+        {
+          "number": "1.1",
+          "title": "General"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 9,
+    "content": "1.2 References  ................................................................................................................................................ 1",
+    "metadata": {
+      "number": "1.2",
+      "title": "References  ................................................................................................................................................ 1",
+      "path": [
+        {
+          "number": "1",
+          "title": "Master Program  3rd  May, 2024"
+        },
+        {
+          "number": "1.2",
+          "title": "Non-Structural Wall"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 10,
+    "content": "1.2.1 Industry Standards  ............................................................................................................................. 1",
+    "metadata": {
+      "number": "1.2.1",
+      "title": "Industry Standards  ............................................................................................................................. 1",
+      "path": [
+        {
+          "number": "1",
+          "title": "Master Program  3rd  May, 2024"
+        },
+        {
+          "number": "1.2",
+          "title": "Non-Structural Wall"
+        },
+        {
+          "number": "1.2.1",
+          "title": "Industry Standards"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 11,
+    "content": "1.3 Abbreviations ............................................................................................................................................. 2",
+    "metadata": {
+      "number": "1.3",
+      "title": "Abbreviations ............................................................................................................................................. 2",
+      "path": [
+        {
+          "number": "1",
+          "title": "Master Program  3rd  May, 2024"
+        },
+        {
+          "number": "1.3",
+          "title": "Wall Finishes"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 12,
+    "content": "2 Project Information  ........................................................................................................................................ 4",
+    "metadata": {
+      "number": "2",
+      "title": "Project Information  ........................................................................................................................................ 4",
+      "path": [
+        {
+          "number": "2",
+          "title": "4D model linking with Master Program  24 th May, 2024"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 13,
+    "content": "3 Organizational Structure  ............................................................................................................................... 5",
+    "metadata": {
+      "number": "3",
+      "title": "Organizational Structure  ............................................................................................................................... 5",
+      "path": [
+        {
+          "number": "3",
+          "title": "Progress monitoring using Synchro Control Update every Friday starting from"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 14,
+    "content": "3.1 Project Information Function  ..................................................................................................................... 5",
+    "metadata": {
+      "number": "3.1",
+      "title": "Project Information Function  ..................................................................................................................... 5",
+      "path": [
+        {
+          "number": "3",
+          "title": "Progress monitoring using Synchro Control Update every Friday starting from"
+        },
+        {
+          "number": "3.1",
+          "title": "Project Information Function"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 15,
+    "content": "3.2 Roles and Responsibilities  ........................................................................................................................ 6",
+    "metadata": {
+      "number": "3.2",
+      "title": "Roles and Responsibilities  ........................................................................................................................ 6",
+      "path": [
+        {
+          "number": "3",
+          "title": "Progress monitoring using Synchro Control Update every Friday starting from"
+        },
+        {
+          "number": "3.2",
+          "title": "Roles and Responsibilities"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 16,
+    "content": "4 BIM Objective, Use & Deliverables  ............................................................................................................... 8",
+    "metadata": {
+      "number": "4",
+      "title": "BIM Objective, Use & Deliverables  ............................................................................................................... 8",
+      "path": [
+        {
+          "number": "4",
+          "title": "BIM Objective, Use & Deliverables"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 17,
+    "content": "4.1 BIM Objective  ............................................................................................................................................ 8",
+    "metadata": {
+      "number": "4.1",
+      "title": "BIM Objective  ............................................................................................................................................ 8",
+      "path": [
+        {
+          "number": "4",
+          "title": "BIM Objective, Use & Deliverables"
+        },
+        {
+          "number": "4.1",
+          "title": "BIM Objective"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 18,
+    "content": "4.2 BIM Use  .................................................................................................................................................... 8",
+    "metadata": {
+      "number": "4.2",
+      "title": "BIM Use  .................................................................................................................................................... 8",
+      "path": [
+        {
+          "number": "4",
+          "title": "BIM Objective, Use & Deliverables"
+        },
+        {
+          "number": "4.2",
+          "title": "BIM Use"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 19,
+    "content": "4.3 Deliverables  ............................................................................................................................................ 12",
+    "metadata": {
+      "number": "4.3",
+      "title": "Deliverables  ............................................................................................................................................ 12",
+      "path": [
+        {
+          "number": "4",
+          "title": "BIM Objective, Use & Deliverables"
+        },
+        {
+          "number": "4.3",
+          "title": "Deliverables"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 20,
+    "content": "4.4 Key Milestones  ........................................................................................................................................ 13",
+    "metadata": {
+      "number": "4.4",
+      "title": "Key Milestones  ........................................................................................................................................ 13",
+      "path": [
+        {
+          "number": "4",
+          "title": "BIM Objective, Use & Deliverables"
+        },
+        {
+          "number": "4.4",
+          "title": "Key Milestones"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 21,
+    "content": "5 Information Standards  ................................................................................................................................. 15",
+    "metadata": {
+      "number": "5",
+      "title": "Information Standards  ................................................................................................................................. 15",
+      "path": [
+        {
+          "number": "5",
+          "title": "Information Standards"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 22,
+    "content": "5.1 Model Naming Convention  ...................................................................................................................... 15",
+    "metadata": {
+      "number": "5.1",
+      "title": "Model Naming Convention  ...................................................................................................................... 15",
+      "path": [
+        {
+          "number": "5",
+          "title": "Information Standards"
+        },
+        {
+          "number": "5.1",
+          "title": "Model Naming Convention"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 23,
+    "content": "5.2 Object Naming Convention  ..................................................................................................................... 15",
+    "metadata": {
+      "number": "5.2",
+      "title": "Object Naming Convention  ..................................................................................................................... 15",
+      "path": [
+        {
+          "number": "5",
+          "title": "Information Standards"
+        },
+        {
+          "number": "5.2",
+          "title": "Object Naming Convention"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 24,
+    "content": "5.3 Object Type Naming Convention  ............................................................................................................ 16",
+    "metadata": {
+      "number": "5.3",
+      "title": "Object Type Naming Convention  ............................................................................................................ 16",
+      "path": [
+        {
+          "number": "5",
+          "title": "Information Standards"
+        },
+        {
+          "number": "5.3",
+          "title": "Object Type Naming Convention"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 25,
+    "content": "5.4 Workset Naming Convention  .................................................................................................................. 16",
+    "metadata": {
+      "number": "5.4",
+      "title": "Workset Naming Convention  .................................................................................................................. 16",
+      "path": [
+        {
+          "number": "5",
+          "title": "Information Standards"
+        },
+        {
+          "number": "5.4",
+          "title": "Workset Naming Convention"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 26,
+    "content": "5.5 Material Naming Convention ................................................................................................................... 18",
+    "metadata": {
+      "number": "5.5",
+      "title": "Material Naming Convention ................................................................................................................... 18",
+      "path": [
+        {
+          "number": "5",
+          "title": "Information Standards"
+        },
+        {
+          "number": "5.5",
+          "title": "Material Naming Convention"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 27,
+    "content": "5.6 MEP System Type Naming  ..................................................................................................................... 20",
+    "metadata": {
+      "number": "5.6",
+      "title": "MEP System Type Naming  ..................................................................................................................... 20",
+      "path": [
+        {
+          "number": "5",
+          "title": "Information Standards"
+        },
+        {
+          "number": "5.6",
+          "title": "MEP System Type Naming"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 28,
+    "content": "5.7 Model Project Browser Organization  ...................................................................................................... 22",
+    "metadata": {
+      "number": "5.7",
+      "title": "Model Project Browser Organization  ...................................................................................................... 22",
+      "path": [
+        {
+          "number": "5",
+          "title": "Information Standards"
+        },
+        {
+          "number": "5.7",
+          "title": "Model Project Browser Organization"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 29,
+    "content": "5.8 Model View Setting  ................................................................................................................................. 24",
+    "metadata": {
+      "number": "5.8",
+      "title": "Model View Setting  ................................................................................................................................. 24",
+      "path": [
+        {
+          "number": "5",
+          "title": "Information Standards"
+        },
+        {
+          "number": "5.8",
+          "title": "Model View Setting"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 30,
+    "content": "5.8.1 View Type Naming Convention  ........................................................................................................ 24",
+    "metadata": {
+      "number": "5.8.1",
+      "title": "View Type Naming Convention  ........................................................................................................ 24",
+      "path": [
+        {
+          "number": "5",
+          "title": "Information Standards"
+        },
+        {
+          "number": "5.8",
+          "title": "Model View Setting"
+        },
+        {
+          "number": "5.8.1",
+          "title": "View Type Naming Convention"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 31,
+    "content": "5.8.2 View Naming Convention  ................................................................................................................ 25",
+    "metadata": {
+      "number": "5.8.2",
+      "title": "View Naming Convention  ................................................................................................................ 25",
+      "path": [
+        {
+          "number": "5",
+          "title": "Information Standards"
+        },
+        {
+          "number": "5.8",
+          "title": "Model View Setting"
+        },
+        {
+          "number": "5.8.2",
+          "title": "View Naming Convention"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 32,
+    "content": "5.8.3 View Template Naming  .................................................................................................................... 25",
+    "metadata": {
+      "number": "5.8.3",
+      "title": "View Template Naming  .................................................................................................................... 25",
+      "path": [
+        {
+          "number": "5",
+          "title": "Information Standards"
+        },
+        {
+          "number": "5.8",
+          "title": "Model View Setting"
+        },
+        {
+          "number": "5.8.3",
+          "title": "View Template Naming"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 33,
+    "content": "5.9 Schedule and Legends Naming Convention  .......................................................................................... 25",
+    "metadata": {
+      "number": "5.9",
+      "title": "Schedule and Legends Naming Convention  .......................................................................................... 25",
+      "path": [
+        {
+          "number": "5",
+          "title": "Information Standards"
+        },
+        {
+          "number": "5.9",
+          "title": "Schedule and Legends Naming Convention"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 34,
+    "content": "5.10 Level of Information Need  ..................................................................................................................... 26",
+    "metadata": {
+      "number": "5.10",
+      "title": "Level of Information Need  ..................................................................................................................... 26",
+      "path": [
+        {
+          "number": "5",
+          "title": "Information Standards"
+        },
+        {
+          "number": "5.10",
+          "title": "Level of Information Need"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 35,
+    "content": "5.10.1 LOIN Definition  .............................................................................................................................. 26",
+    "metadata": {
+      "number": "5.10.1",
+      "title": "LOIN Definition  .............................................................................................................................. 26",
+      "path": [
+        {
+          "number": "5",
+          "title": "Information Standards"
+        },
+        {
+          "number": "5.10",
+          "title": "Level of Information Need"
+        },
+        {
+          "number": "5.10.1",
+          "title": "LOIN Definition"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 36,
+    "content": "5.10.2 Project LOD Requirement .............................................................................................................. 27",
+    "metadata": {
+      "number": "5.10.2",
+      "title": "Project LOD Requirement .............................................................................................................. 27",
+      "path": [
+        {
+          "number": "5",
+          "title": "Information Standards"
+        },
+        {
+          "number": "5.10",
+          "title": "Level of Information Need"
+        },
+        {
+          "number": "5.10.2",
+          "title": "Project LOD Requirement"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 37,
+    "content": "5.11 LOD Responsibility Matrix  ..................................................................................................................... 28",
+    "metadata": {
+      "number": "5.11",
+      "title": "LOD Responsibility Matrix  ..................................................................................................................... 28",
+      "path": [
+        {
+          "number": "5",
+          "title": "Information Standards"
+        },
+        {
+          "number": "5.11",
+          "title": "LOD Responsibility Matrix"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 38,
+    "content": "5.12 Origin and Orientation  ........................................................................................................................... 28",
+    "metadata": {
+      "number": "5.12",
+      "title": "Origin and Orientation  ........................................................................................................................... 28",
+      "path": [
+        {
+          "number": "5",
+          "title": "Information Standards"
+        },
+        {
+          "number": "5.12",
+          "title": "Origin and Orientation"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 39,
+    "content": "5.13 Grids and Levels  ................................................................................................................................... 28",
+    "metadata": {
+      "number": "5.13",
+      "title": "Grids and Levels  ................................................................................................................................... 28",
+      "path": [
+        {
+          "number": "5",
+          "title": "Information Standards"
+        },
+        {
+          "number": "5.13",
+          "title": "Grids and Levels"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 40,
+    "content": "5.14 Units and Measurements  ...................................................................................................................... 29",
+    "metadata": {
+      "number": "5.14",
+      "title": "Units and Measurements  ...................................................................................................................... 29",
+      "path": [
+        {
+          "number": "5",
+          "title": "Information Standards"
+        },
+        {
+          "number": "5.14",
+          "title": "Units and Measurements"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 41,
+    "content": "5.15 Model Size  ............................................................................................................................................ 29",
+    "metadata": {
+      "number": "5.15",
+      "title": "Model Size  ............................................................................................................................................ 29",
+      "path": [
+        {
+          "number": "5",
+          "title": "Information Standards"
+        },
+        {
+          "number": "5.15",
+          "title": "Model Size"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 42,
+    "content": "5.16 Model Colour Scheme  .......................................................................................................................... 30",
+    "metadata": {
+      "number": "5.16",
+      "title": "Model Colour Scheme  .......................................................................................................................... 30",
+      "path": [
+        {
+          "number": "5",
+          "title": "Information Standards"
+        },
+        {
+          "number": "5.16",
+          "title": "Model Colour Scheme"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 43,
+    "content": "5.17 Shared Parameter  ................................................................................................................................. 30",
+    "metadata": {
+      "number": "5.17",
+      "title": "Shared Parameter  ................................................................................................................................. 30",
+      "path": [
+        {
+          "number": "5",
+          "title": "Information Standards"
+        },
+        {
+          "number": "5.17",
+          "title": "Shared Parameter"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 44,
+    "content": "6 Information Production Methods and Procedure  ..................................................................................... 31",
+    "metadata": {
+      "number": "6",
+      "title": "Information Production Methods and Procedure  ..................................................................................... 31",
+      "path": [
+        {
+          "number": "6",
+          "title": "Information Production Methods and Procedure"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 45,
+    "content": "6.1 Overall BIM Development  ....................................................................................................................... 31",
+    "metadata": {
+      "number": "6.1",
+      "title": "Overall BIM Development  ....................................................................................................................... 31",
+      "path": [
+        {
+          "number": "6",
+          "title": "Information Production Methods and Procedure"
+        },
+        {
+          "number": "6.1",
+          "title": "Overall BIM Development"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 46,
+    "content": "6.2 Common Data Environment  .................................................................................................................... 31",
+    "metadata": {
+      "number": "6.2",
+      "title": "Common Data Environment  .................................................................................................................... 31",
+      "path": [
+        {
+          "number": "6",
+          "title": "Information Production Methods and Procedure"
+        },
+        {
+          "number": "6.2",
+          "title": "Common Data Environment"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 47,
+    "content": "6.2.1 CDE Setup  ....................................................................................................................................... 31",
+    "metadata": {
+      "number": "6.2.1",
+      "title": "CDE Setup  ....................................................................................................................................... 31",
+      "path": [
+        {
+          "number": "6",
+          "title": "Information Production Methods and Procedure"
+        },
+        {
+          "number": "6.2",
+          "title": "Common Data Environment"
+        },
+        {
+          "number": "6.2.1",
+          "title": "CDE Setup"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 48,
+    "content": "6.2.2 CDE Access  ..................................................................................................................................... 31",
+    "metadata": {
+      "number": "6.2.2",
+      "title": "CDE Access  ..................................................................................................................................... 31",
+      "path": [
+        {
+          "number": "6",
+          "title": "Information Production Methods and Procedure"
+        },
+        {
+          "number": "6.2",
+          "title": "Common Data Environment"
+        },
+        {
+          "number": "6.2.2",
+          "title": "CDE Access"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 49,
+    "content": "6.2.3 Functional Section  ........................................................................................................................... 32",
+    "metadata": {
+      "number": "6.2.3",
+      "title": "Functional Section  ........................................................................................................................... 32",
+      "path": [
+        {
+          "number": "6",
+          "title": "Information Production Methods and Procedure"
+        },
+        {
+          "number": "6.2",
+          "title": "Common Data Environment"
+        },
+        {
+          "number": "6.2.3",
+          "title": "Functional Section"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 50,
+    "content": "6.3 Federation Strategy  ................................................................................................................................ 33",
+    "metadata": {
+      "number": "6.3",
+      "title": "Federation Strategy  ................................................................................................................................ 33",
+      "path": [
+        {
+          "number": "6",
+          "title": "Information Production Methods and Procedure"
+        },
+        {
+          "number": "6.3",
+          "title": "Federation Strategy"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 51,
+    "content": "6.3.1 Model Segregation (Division) ........................................................................................................... 33",
+    "metadata": {
+      "number": "6.3.1",
+      "title": "Model Segregation (Division) ........................................................................................................... 33",
+      "path": [
+        {
+          "number": "6",
+          "title": "Information Production Methods and Procedure"
+        },
+        {
+          "number": "6.3",
+          "title": "Federation Strategy"
+        },
+        {
+          "number": "6.3.1",
+          "title": "Model Segregation (Division)"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 52,
+    "content": "6.4 Coordination and Design Issue Management  ......................................................................................... 34",
+    "metadata": {
+      "number": "6.4",
+      "title": "Coordination and Design Issue Management  ......................................................................................... 34",
+      "path": [
+        {
+          "number": "6",
+          "title": "Information Production Methods and Procedure"
+        },
+        {
+          "number": "6.4",
+          "title": "Coordination and Design Issue Management"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 53,
+    "content": "6.4.1 Clash Avoidance  .............................................................................................................................. 34",
+    "metadata": {
+      "number": "6.4.1",
+      "title": "Clash Avoidance  .............................................................................................................................. 34",
+      "path": [
+        {
+          "number": "6",
+          "title": "Information Production Methods and Procedure"
+        },
+        {
+          "number": "6.4",
+          "title": "Coordination and Design Issue Management"
+        },
+        {
+          "number": "6.4.1",
+          "title": "Clash Avoidance"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 54,
+    "content": "6.4.2 Clash Analysis and Reporting  .......................................................................................................... 34",
+    "metadata": {
+      "number": "6.4.2",
+      "title": "Clash Analysis and Reporting  .......................................................................................................... 34",
+      "path": [
+        {
+          "number": "6",
+          "title": "Information Production Methods and Procedure"
+        },
+        {
+          "number": "6.4",
+          "title": "Coordination and Design Issue Management"
+        },
+        {
+          "number": "6.4.2",
+          "title": "Clash Analysis and Reporting"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 55,
+    "content": "6.4.3 Clash Resolution  .............................................................................................................................. 34",
+    "metadata": {
+      "number": "6.4.3",
+      "title": "Clash Resolution  .............................................................................................................................. 34",
+      "path": [
+        {
+          "number": "6",
+          "title": "Information Production Methods and Procedure"
+        },
+        {
+          "number": "6.4",
+          "title": "Coordination and Design Issue Management"
+        },
+        {
+          "number": "6.4.3",
+          "title": "Clash Resolution"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 56,
+    "content": "6.5 3D Modelling Methodology  ..................................................................................................................... 36",
+    "metadata": {
+      "number": "6.5",
+      "title": "3D Modelling Methodology  ..................................................................................................................... 36",
+      "path": [
+        {
+          "number": "6",
+          "title": "Information Production Methods and Procedure"
+        },
+        {
+          "number": "6.5",
+          "title": "3D Modelling Methodology"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 57,
+    "content": "6.6 Drawing Production Methodology  ........................................................................................................... 36",
+    "metadata": {
+      "number": "6.6",
+      "title": "Drawing Production Methodology  ........................................................................................................... 36",
+      "path": [
+        {
+          "number": "6",
+          "title": "Information Production Methods and Procedure"
+        },
+        {
+          "number": "6.6",
+          "title": "Drawing Production Methodology"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 58,
+    "content": "6.6.1 Sheet Configuration  ......................................................................................................................... 36",
+    "metadata": {
+      "number": "6.6.1",
+      "title": "Sheet Configuration  ......................................................................................................................... 36",
+      "path": [
+        {
+          "number": "6",
+          "title": "Information Production Methods and Procedure"
+        },
+        {
+          "number": "6.6",
+          "title": "Drawing Production Methodology"
+        },
+        {
+          "number": "6.6.1",
+          "title": "Sheet Configuration"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 59,
+    "content": "6.6.2 Title Block ......................................................................................................................................... 36",
+    "metadata": {
+      "number": "6.6.2",
+      "title": "Title Block ......................................................................................................................................... 36",
+      "path": [
+        {
+          "number": "6",
+          "title": "Information Production Methods and Procedure"
+        },
+        {
+          "number": "6.6",
+          "title": "Drawing Production Methodology"
+        },
+        {
+          "number": "6.6.2",
+          "title": "Title Block"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 60,
+    "content": "6.6.3 View Title  .......................................................................................................................................... 36",
+    "metadata": {
+      "number": "6.6.3",
+      "title": "View Title  .......................................................................................................................................... 36",
+      "path": [
+        {
+          "number": "6",
+          "title": "Information Production Methods and Procedure"
+        },
+        {
+          "number": "6.6",
+          "title": "Drawing Production Methodology"
+        },
+        {
+          "number": "6.6.3",
+          "title": "View Title"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 61,
+    "content": "6.6.4 Drawing Production  ......................................................................................................................... 37",
+    "metadata": {
+      "number": "6.6.4",
+      "title": "Drawing Production  ......................................................................................................................... 37",
+      "path": [
+        {
+          "number": "6",
+          "title": "Information Production Methods and Procedure"
+        },
+        {
+          "number": "6.6",
+          "title": "Drawing Production Methodology"
+        },
+        {
+          "number": "6.6.4",
+          "title": "Drawing Production"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 62,
+    "content": "6.7 Phase Planning (4D)  ............................................................................................................................... 37",
+    "metadata": {
+      "number": "6.7",
+      "title": "Phase Planning (4D)  ............................................................................................................................... 37",
+      "path": [
+        {
+          "number": "6",
+          "title": "Information Production Methods and Procedure"
+        },
+        {
+          "number": "6.7",
+          "title": "Phase Planning (4D)"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 63,
+    "content": "6.8 Cost Estimation (5D) (TBC)  .................................................................................................................... 38",
+    "metadata": {
+      "number": "6.8",
+      "title": "Cost Estimation (5D) (TBC)  .................................................................................................................... 38",
+      "path": [
+        {
+          "number": "6",
+          "title": "Information Production Methods and Procedure"
+        },
+        {
+          "number": "6.8",
+          "title": "Cost Estimation (5D) (TBC)"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 64,
+    "content": "6.9 As Built Modelling  .................................................................................................................................... 39",
+    "metadata": {
+      "number": "6.9",
+      "title": "As Built Modelling  .................................................................................................................................... 39",
+      "path": [
+        {
+          "number": "6",
+          "title": "Information Production Methods and Procedure"
+        },
+        {
+          "number": "6.9",
+          "title": "As Built Modelling"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 65,
+    "content": "6.10 Asset Information Model ....................................................................................................................... 39",
+    "metadata": {
+      "number": "6.10",
+      "title": "Asset Information Model ....................................................................................................................... 39",
+      "path": [
+        {
+          "number": "6",
+          "title": "Information Production Methods and Procedure"
+        },
+        {
+          "number": "6.10",
+          "title": "Asset Information Model"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 66,
+    "content": "7 Quality Control and Assurance Procedure  ................................................................................................ 40",
+    "metadata": {
+      "number": "7",
+      "title": "Quality Control and Assurance Procedure  ................................................................................................ 40",
+      "path": [
+        {
+          "number": "7",
+          "title": "Quality Control and Assurance Procedure"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 67,
+    "content": "7.1 Quality Control ........................................................................................................................................ 40",
+    "metadata": {
+      "number": "7.1",
+      "title": "Quality Control ........................................................................................................................................ 40",
+      "path": [
+        {
+          "number": "7",
+          "title": "Quality Control and Assurance Procedure"
+        },
+        {
+          "number": "7.1",
+          "title": "Quality Control"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 68,
+    "content": "7.2 Project BIM Audit  .................................................................................................................................... 41",
+    "metadata": {
+      "number": "7.2",
+      "title": "Project BIM Audit  .................................................................................................................................... 41",
+      "path": [
+        {
+          "number": "7",
+          "title": "Quality Control and Assurance Procedure"
+        },
+        {
+          "number": "7.2",
+          "title": "Project BIM Audit"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 69,
+    "content": "8 Software, Hardware, and IT Infrastructure  ................................................................................................. 42",
+    "metadata": {
+      "number": "8",
+      "title": "Software, Hardware, and IT Infrastructure  ................................................................................................. 42",
+      "path": [
+        {
+          "number": "8",
+          "title": "Software, Hardware, and IT Infrastructure"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 70,
+    "content": "8.1 System Performance  .............................................................................................................................. 42",
+    "metadata": {
+      "number": "8.1",
+      "title": "System Performance  .............................................................................................................................. 42",
+      "path": [
+        {
+          "number": "8",
+          "title": "Software, Hardware, and IT Infrastructure"
+        },
+        {
+          "number": "8.1",
+          "title": "System Performance"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 71,
+    "content": "8.2 Software Specification  ............................................................................................................................ 42",
+    "metadata": {
+      "number": "8.2",
+      "title": "Software Specification  ............................................................................................................................ 42",
+      "path": [
+        {
+          "number": "8",
+          "title": "Software, Hardware, and IT Infrastructure"
+        },
+        {
+          "number": "8.2",
+          "title": "Software Specification"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 72,
+    "content": "8.3 Hardware Specification  ........................................................................................................................... 43",
+    "metadata": {
+      "number": "8.3",
+      "title": "Hardware Specification  ........................................................................................................................... 43",
+      "path": [
+        {
+          "number": "8",
+          "title": "Software, Hardware, and IT Infrastructure"
+        },
+        {
+          "number": "8.3",
+          "title": "Hardware Specification"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 73,
+    "content": "8.4 Data Security and Back-Up  ..................................................................................................................... 43  \nAppendix  .......................................................................................................................................................... 44  \nA. Object Naming  ...................................................................................................................................... 44  \nB. RLB 5D Standard  ................................................................................................................................. 53  \nC. LOD Responsibility Matrix  .................................................................................................................... 54  \nD. Shared Parameter  ................................................................................................................................ 57  \nE. CDE Folder Structure  ........................................................................................................................... 61  \n \n  \n \n \n    \n CPX_NTC_BEP    Version | 00  \n         Page    | 1   Date  | 19 APR 2024",
+    "metadata": {
+      "number": "8.4",
+      "title": "Data Security and Back-Up  ..................................................................................................................... 43",
+      "path": [
+        {
+          "number": "8",
+          "title": "Software, Hardware, and IT Infrastructure"
+        },
+        {
+          "number": "8.4",
+          "title": "Data Security and Back-Up"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 74,
+    "content": "1 Overview",
+    "metadata": {
+      "number": "1",
+      "title": "Overview",
+      "path": [
+        {
+          "number": "1",
+          "title": "Master Program  3rd  May, 2024"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 75,
+    "content": "1.1 Introduction  \nThe Contract BIM Execution Plan (BEP) has been prep ared by Newtech Company Limited (NTC) to \ndemonstrate the proposed approach, capability, capa city, and competence to meet the Project’s Exchange  \nInformation Requirements.  \nThis BIM Execution Plan shall address the following:  \n• Project information  \n• BIM Objective, Use and Deliverables  \n• Organizational Structure  \n• Information Standards  \n• Information Production methods and procedure  \n• Software, Hardware, and IT Infrastructure  \n  \nThis BEP is a live document that will be continuously developed as the project requirements evolves throughout \nthe project delivery stage and will reflect the agreed alteration or enhancements to the Information Standards. \nUpdates to this BEP shall be made in agreement with the Client and the appointed project BIM Manager.",
+    "metadata": {
+      "number": "1.1",
+      "title": "Introduction",
+      "path": [
+        {
+          "number": "1",
+          "title": "Master Program  3rd  May, 2024"
+        },
+        {
+          "number": "1.1",
+          "title": "General"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 76,
+    "content": "1.2 References  \nThe BEP is structured to align with the following documents:",
+    "metadata": {
+      "number": "1.2",
+      "title": "References",
+      "path": [
+        {
+          "number": "1",
+          "title": "Master Program  3rd  May, 2024"
+        },
+        {
+          "number": "1.2",
+          "title": "Non-Structural Wall"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 77,
+    "content": "1.2.1 Industry Standards  \n• CIC BIM Standards General, Version 2.1(2021)  \n• CIC BIM Standards for Architecture and Structural Engineering, Version 2.1 (2021)  \n• CIC BIM Standards for Mechanical, Electrical and Plumbing, Version 2 (2021)  \n• CIC BIM Standards for Underground Utilities, December 2021  \n• EMSD BIM-AM Standards and Guidelines, version 2.0, 2019  \n• BS EN ISO 19650-1:2018 Organization and digitization of information about buildings and civil engineering \nworks, including Building Information Modelling (BIM) - Information management using building information \nmodelling. Part 1: Concepts and principles.  \n• BS EN ISO 19650-2:2018 Organization and digitization of information about buildings and civil engineering \nworks, including Building Information Modelling (BIM) - Information management using building information \nmodelling. Part 2: Delivery phase of the assets.  \n  \n  \n  \n  \n  \n \n \n    \n CPX_NTC_BEP    Version | 00  \n         Page    | 2   Date  | 19 APR 2024",
+    "metadata": {
+      "number": "1.2.1",
+      "title": "Industry Standards",
+      "path": [
+        {
+          "number": "1",
+          "title": "Master Program  3rd  May, 2024"
+        },
+        {
+          "number": "1.2",
+          "title": "Non-Structural Wall"
+        },
+        {
+          "number": "1.2.1",
+          "title": "Industry Standards"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 78,
+    "content": "1.3 Abbreviations  \nAbbreviation  Description  \n2D  Two-dimensional Layout Drawing  \n3D  Three-dimensional Building Information Modelling  \n4D  Four-dimensional Building Information Modelling (Time)  \nAIM  Asset Information Model  \nAIR  Asset Information Requirements  \nBEP  BIM Execution Plan  \nBIM  Building Information Modelling  \nCDE  Common Data Environment  \nCIC  Construction Industry Council  \nCOBie  Construction Operation Building information exchange  \nDfMA  Design for Manufacture and Assembly  \nEDMS  Electronic Document Management System  \nFM  Facility Management  \nIFC  Industry Foundation Classes  \nLOD-G  Level of Development – Graphics / Level of Graphics  \nLOD-I  Level of Development – Information / Level of Information  \nLOIN  Level of Information Need  \nMEP  Mechanical, Electrical and Plumbing  \n \n \n    \n CPX_NTC_BEP    Version | 00  \n         Page    | 3   Date  | 19 APR 2024  \n                                                                           \n  \nAbbreviation  Description  \nMiC  Modular Integrated Construction  \nWIP  Work in progress  \n  \n      \n \n \n    \n CPX_NTC_BEP    Version | 00  \n         Page    | 4   Date  | 19 APR 2024",
+    "metadata": {
+      "number": "1.3",
+      "title": "Abbreviations",
+      "path": [
+        {
+          "number": "1",
+          "title": "Master Program  3rd  May, 2024"
+        },
+        {
+          "number": "1.3",
+          "title": "Wall Finishes"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 79,
+    "content": "2 Project Information  \nAppointing Party  Hong Kong Cyberport Management Company Limited (HKCMCL)  \nProject Name  Nominated Sub-Contract for the Design and Construction of Data Services \nPlatform (DSP) for Cyberport Expansion Project at Cyberport  \nProject Number  NT23-011  \nProject Location  Cyberport, Cyberport Rd, Pok Fu Lam  \nProject Start Date  5-MARCH-2023  \nProject Completion Date  30-JUNE-2026  \nProject Description  \nHKCMCL desires to develop the “Cyberport Expansion (Phase 5)”   \n(namely “CPX”).  \nThis project is related to the construction Area of the following:  \n-GF: MEP works of 2 Fuel Pump Rooms  \n-2F: MEP works of 3 LV Switch Rooms  \n-4F: All Builder & MEP works except core areas and future provisions  \n-RF: MEP works 3 Generator Rooms  \n-Other services connecting between the rooms stated above  \n \n  \n  \n  \n  \n  \n\n \n \n    \n CPX_NTC_BEP    Version | 00  \n         Page    | 5   Date  | 19 APR 2024",
+    "metadata": {
+      "number": "2",
+      "title": "Project Information",
+      "path": [
+        {
+          "number": "2",
+          "title": "4D model linking with Master Program  24 th May, 2024"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 80,
+    "content": "3 Organizational Structure",
+    "metadata": {
+      "number": "3",
+      "title": "Organizational Structure",
+      "path": [
+        {
+          "number": "3",
+          "title": "Progress monitoring using Synchro Control Update every Friday starting from"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 81,
+    "content": "3.1 Project Information Function  \nThe list of names and contact details of the individuals fulfilling the necessary project functions for this Project \nare listed in the table below.  \n \n \n  \nDiscipline  Organization  Function  Name  Email  Contact No.  \nSub-\nContractor  \nNewtech \nCompany \nLimited  \nProject Email: cyberport@newtechapac.com  \nBIM Manager  Mr. Ready Tse  readytse@newtechapac.com  60922591  \n  ELV Senior Manager  Mr. Calvin Mak  calvinmak@newtechapac.com  64626998  \n  \nEL Assistant Technical \nManager  Mr. Keith Wong  keithwong@newtechapac.com  97761753  \n  MVAC Senior Engineer  Mr. Kevin Tam  kevintam@newtechapac.com  90807260  \n  FS Assistant Engineer  Mr. Lam Yip  lamyip@newtechapac.com  92484885  \n\n \n \n    \n CPX_NTC_BEP    Version | 00  \n         Page    | 6   Date  | 19 APR 2024  \n                                                                           \n  \nDiscipline  Organization  Function  Name  Email  Contact No.  \nBIM  Vircon Limited  \n(VCL)  \nProject Email: N/A  \nAssistant BIM Manager  Mr. Angus Cheng  anguscheng@vircon.com.hk  94484754  \nBIM Coordinator  Mr. Ben Chan  benchan@vircon.com.hk  96171757  \nBIM Modeler  Mr. Alex Wu  alexwu@vircon.com.hk  26172660  \nBIM Modeler  Mr. Tiffany Tam  tiffanytam@vircon.com.hk  26172660",
+    "metadata": {
+      "number": "3.1",
+      "title": "Project Information Function",
+      "path": [
+        {
+          "number": "3",
+          "title": "Progress monitoring using Synchro Control Update every Friday starting from"
+        },
+        {
+          "number": "3.1",
+          "title": "Project Information Function"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 82,
+    "content": "3.2 Roles and Responsibilities  \n  \n  \nFunction  Organization  Responsibilities  \nBIM Manager  NTC  \n• Manager VCL for overall BIM Quality Control \n• Coordinate with the BIM Team of GCL and Tray \nEngineers of NTC  \n• P\nlan, develop and manage the project BIM standard \nand implementation strategy  \n• Provide quality control and checking procedures  \n• provide advice/guidance to the PM and PMD in  \na) reviewing BIM modelling formats/protocol and co-\nordination;  \nb) reviewing analysis and findings on application b y \nusing different software such as the clash \ndetection and resolving the clashes; and  \nc) providing technical support to the PMD regarding  \nmodelling enquiries.  \nAssistant BIM Manager  VCL  \n• Act as BIM Model Manager on their respective \ndiscipline.   \n• Review and approve models and documentation for \nsubmission.  \n• Lead and manage the BIM process and provide input \nfor BIM Execution Plan  \n• Ensure the \ndeliverables are issued on schedule and in \naccordance with the BIM development programme.  \n \n \n \n    \n CPX_NTC_BEP    Version | 00  \n         Page    | 7   Date  | 19 APR 2024  \n                                                                           \n  \nBIM Coordinator   \n  VCL  \n• Lead the modelling and coordination effort for the \nsub-discipline.   \n• Review and coordinate against interfacing discipline \nmodels.   \n• Conduct regular BIM QA/QC checks.   \n• Record and manage registers, BIM-related issues.   \n• Interface and coordinate with engineers.   \nBIM Modeller   VCL  \n• Responsible for Information modelling works.   \n• Work under the direction of coordinator.   \n• Capture and highlight any discrepancies found in \nInformation model to the BIM Coordinator.   \n• Ensure the geometric and information accuracy of the \nInformation modelling.   \n    \n  \n \n \n    \n CPX_NTC_BEP    Version | 00  \n         Page    | 8   Date  | 19 APR 2024",
+    "metadata": {
+      "number": "3.2",
+      "title": "Roles and Responsibilities",
+      "path": [
+        {
+          "number": "3",
+          "title": "Progress monitoring using Synchro Control Update every Friday starting from"
+        },
+        {
+          "number": "3.2",
+          "title": "Roles and Responsibilities"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 83,
+    "content": "4 BIM Objective, Use & Deliverables",
+    "metadata": {
+      "number": "4",
+      "title": "BIM Objective, Use & Deliverables",
+      "path": [
+        {
+          "number": "4",
+          "title": "BIM Objective, Use & Deliverables"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 84,
+    "content": "4.1 BIM Objective  \n  \nThe objective of the application of BIM is to create a digital building information model for the project and to use \nBIM as a platform to facilitate project planning, s ite administration, safety planning, design coordin ation, clash \ndetection prior to construction, financial planning, minimization of abortive works, waste reduction and efficient \nasset management to achieve the following beneficial purpose:  \n  \n• To minimize design discrepancies, improve design co ordination and deliver a clash-free design using 3D  \nmodelling techniques.  \n• To enhance visual communication between the Contrac tor and all stakeholders, improve mutual \nunderstanding of the design intent and facilitate design review and vetting process.  \n• To support the development of 4D modelling construc tion sequence during the construction stage to \nenhance communication, predict and manage the construction process.    \n• To enhance the payment application process through the development of 5D modelling.  \n• To support the development of asset management by u sing BIM with an as-built BIM model for effective \noperation and maintenance of the buildings.  \n• To support the development of facility management by using as-built BIM for implementation of digital twin \nconcept.  \n• To adopt Digital Twin applications to aid design, construction, and operation.",
+    "metadata": {
+      "number": "4.1",
+      "title": "BIM Objective",
+      "path": [
+        {
+          "number": "4",
+          "title": "BIM Objective, Use & Deliverables"
+        },
+        {
+          "number": "4.1",
+          "title": "BIM Objective"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 85,
+    "content": "4.2 BIM Use  \nThe Sub-Contractor shall make use of BIM Model to f acilitate and optimize the design and construction \ncoordination works for the project. The BIM Uses ar e required to be performed by contractors during \nconstruction stages are as follows and are generally classified as mandatory (\"M\") or optional (\"O\") for execution.     \n  \nBIM Team shall coordinate and manage the workflow for execution and audit the production to ensure smo oth \ncoordination and timely deliverables.  \n  \nBIM Use  Scope of BIM use   \n \nDesign Authoring  \nThe use of BIM software to create and develop a project BIM model and \nplans, elevations, sections, details, shop drawings  and schedules can \nalso be produced by the authoring tools  \nM  N/A  \n \n \n\n \n \n    \n CPX_NTC_BEP    Version | 00  \n         Page    | 9   Date  | 19 APR 2024  \n                                                                           \n  \nBIM Use  Scope of BIM use   \n \nDesign Reviews  View a model or animated walk-throughs of a project, provide feedback \nand validate various design aspects by means of BIM model viewer  M  N/A  \nDrawing  \nGeneration  \n(Drawing  \nProduction)  \nDrawing Generation is a process of using BIM to produce 2D drawings  M  M  \nSustainability \nEvaluation  \nSustainability Evaluation is a process in which a p roject model is \nevaluated based on BEAM Plus, LEED, or other sustai nable / green \nbuilding criteria.  \nM  M  \nCost Estimation  \nCost Estimation / 5D modelling is a process in which BIM can be used \nfor cost estimates throughout the life cycle of a project.  \n  \n(a)  Quantity take-off and cost estimating  \n(b)  5D modelling / cash flow forecasting  \nM  N/A  \n3D/Spatial  \nCoordination  \nSpatial Coordination is the whole process of design  error avoidance \nusing federated Information Models and a collaborat ive shared design \nenvironment.  \nM  N/A  \n\n \n \n    \n CPX_NTC_BEP    Version | 00  \n         Page    | 10   Date  | 19 APR 2024  \n                                                                           \n  \n \nBIM Use  Scope of BIM use   \n \nPhase Planning (4D \nModelling)  \nPhase Planning (4D Modelling) is a process in which  an interactive 4D \nmodel (3D models with the added dimension of time) is utilised to \neffectively plan the construction sequence and space requirements on a \nbuilding site.  \nM  N/A  \nSite Utilization  \nPlanning  \nSite Utilisation Planning is a process of using mod els to graphically \nrepresent both permanent and temporary facilities o n site for all of the \nphases of the construction process. The models should be linked to the \nconstruction schedule (4D) to review space planning , site logistics, \nsequencing requirements, temporary works, and safety.  \nM  N/A  \nAs-Built Modelling   \nAs-Built Modelling for asset management and facilit ies upkeep is a \nprocess used to depict an accurate representation o f the physical \nconditions, environment, and assets of a facility, which shall be adopted \nin construction stage.  \nM  M  \nMaintenance \nScheduling  \nMaintenance Scheduling is a process in which the fu nctionality of the \nbuilding structure (walls, floors, roof etc) and eq uipment serving the \nbuilding (mechanical, electrical, plumbing etc) are  maintained over the \noperational life of a facility. A successful mainte nance program will \nimprove building performance, reduce repairs, and r educe overall \nmaintenance costs.  \nM  M  \nAsset  \nManagement  \nAsset Management is a process of linking an Asset I nformation Model \n(AIM), which shall be developed from the ABIM, and database to an \norganised building management system which should b e used to \nmaintain and operate a facility and its assets. The assets in the AIM for \nasset management shall include buildings, infrastru cture, system, and \nequipment which should be operated, maintained and upgraded.  M  M \n\n \n \n    \n CPX_NTC_BEP    Version | 00  \n         Page    | 11   Date  | 19 APR 2024  \n                                                                           \n  \nBIM Use  Scope of BIM use   \n \nEngineering \nAnalysis  \nEngineering Analysis is a process that uses the Inf ormation Model to \nassist, analyse and optimise different design optio ns to determine the \nmost effective engineering solution to meet design codes and \nAppointing Party's / Client’s requirements.  \nM  N/A  \n     \n\n \n \n    \n CPX_NTC_BEP    Version | 00  \n         Page    | 12   Date  | 19 APR 2024",
+    "metadata": {
+      "number": "4.2",
+      "title": "BIM Use",
+      "path": [
+        {
+          "number": "4",
+          "title": "BIM Objective, Use & Deliverables"
+        },
+        {
+          "number": "4.2",
+          "title": "BIM Use"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 86,
+    "content": "4.3 Deliverables  \n  \nThe following table includes the list of deliverabl es as required in the Appointing Party’s Particular  Specification \nfor BIM:  \n  \nDeliverables  Schedule  \nBIM Execution Plan  1st draft within 2 weeks upon contract commencement  date of \nthe Works.  \nBIM Works Programme Schedule  Within 1 month upon contract commencement date of the \nWorks.  \nClash Analysis Report  Bi-weekly, 2 days before BCM  \nCSD & CBWD Drawing  1st submission within 14 days and approved within 2 8 days \nbefore concreting on each floor.  \n4D Simulation Result  \nWithin 1 month upon start of the Construction Works.  \nWeekly (for comparison between Master programme and \nActual site progress).  \nBIM Audit Report  Bi-monthly  \n5D BIM Simulation  TBC  \nAs Built Model & COBie  Final version within 2 months after issuance of Pra ctical \nCompletion certificate.  \n   \n \n \n \n \n \n  \n \n \n \n \n    \n CPX_NTC_BEP    Version | 00  \n         Page    | 13   Date  | 19 APR 2024",
+    "metadata": {
+      "number": "4.3",
+      "title": "Deliverables",
+      "path": [
+        {
+          "number": "4",
+          "title": "BIM Objective, Use & Deliverables"
+        },
+        {
+          "number": "4.3",
+          "title": "Deliverables"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 87,
+    "content": "4.4 Key Milestones  \nThe below table provides the agreed milestones stag e in consultation with the Project Delivery Team an d the \nAppointing Party.  \n  \nProject Milestone  Scope  Target Date  \nMilestone No. 1  \nBEAM Plus Submission of Provisional Assessment  30-JUN-2023 \nMilestone No. 2 \nSchematic Design Submission & Approval 7-JUL-2023 \nMilestone No. 3 \nDetail Design Submission & Approval 2-OCT-2023 \nMilestone No. 4 \nHKE Submission & Approval 31-DEC-2023 \nMilestone No. 5 \nLong Lead Equipment Procurement  15-JUL-2024  \nMilestone No. 6 \nBEAM Plus Provisional Submission & Approval 31-JAN-2024  \nMilestone No. 7 \nSite Possession  30-MAY-2024  \nMilestone No. 8 \nSite Possession  16-JUL-2024  \nMilestone No. 9 \nEPD Design Drawing Submission & Approval 25-FEB-2025 \nMilestone No. 10 \nLong Lead Equipment Production & Delivery  24-MAY-2024  \nMilestone No. 11 \nSite Installation period  22-MAR-2025  \nMilestone No. 12 \nHKE Electrical system energization at 1/F Tx Room and \nMain Switch Room",
+    "metadata": {
+      "number": "4.4",
+      "title": "Key Milestones",
+      "path": [
+        {
+          "number": "4",
+          "title": "BIM Objective, Use & Deliverables"
+        },
+        {
+          "number": "4.4",
+          "title": "Key Milestones"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 88,
+    "content": "16-DEC-2024  \nMilestone No. 13 \nT&C of Individual equipment in Data Hall & CRAH \ncorridors",
+    "metadata": {
+      "number": "16",
+      "title": "DEC-2024",
+      "path": [
+        {
+          "number": "16",
+          "title": "DEC-2024"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 89,
+    "content": "1-APR-2025  \nMilestone No. 14 \nT&C of Individual equipment of UPS Rooms, Chillers, \nChiller plant Control",
+    "metadata": {
+      "number": "1",
+      "title": "APR-2025",
+      "path": [
+        {
+          "number": "1",
+          "title": "Master Program  3rd  May, 2024"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 90,
+    "content": "26-MAY-2025  \nMilestone No. 15 \nHeat Load Test to Data Hall DC-1 9-JUN-2025 \n \n \n    \n CPX_NTC_BEP    Version | 00  \n         Page    | 14   Date  | 19 APR 2024  \n                                                                           \n  \nProject Milestone  Scope  Target Date  \nMilestone No. 16 \nIST  16-JUN-2025  \nMilestone No. 17 \nHandover date of Data Hall & MMR to ICT Installation \n(Grid line 1 - 14)",
+    "metadata": {
+      "number": "26",
+      "title": "MAY-2025",
+      "path": [
+        {
+          "number": "26",
+          "title": "JUL-2025"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 91,
+    "content": "26-JUN-2025  \nMilestone No. 18 \nHandover date of Data Hall & MMR to ICT Installation \n(Grid line 14 - 101)",
+    "metadata": {
+      "number": "26",
+      "title": "JUN-2025",
+      "path": [
+        {
+          "number": "26",
+          "title": "JUL-2025"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 92,
+    "content": "26-JUL-2025 \nMilestone No. 19 \nTraining, Defect Rectification & Project Handover  13-AUG-2025 \nMilestone No. 20  \nBEAM Plus Final Submission & Approval 30-JUN-2026 \n     \n \n \n    \n CPX_NTC_BEP    Version | 00  \n         Page    | 15   Date  | 19 APR 2024",
+    "metadata": {
+      "number": "26",
+      "title": "JUL-2025",
+      "path": [
+        {
+          "number": "26",
+          "title": "JUL-2025"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 93,
+    "content": "5 Information Standards",
+    "metadata": {
+      "number": "5",
+      "title": "Information Standards",
+      "path": [
+        {
+          "number": "5",
+          "title": "Information Standards"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 94,
+    "content": "5.1 Model Naming Convention  \nAll BIM models shall follow the below model naming convention:  \n  \n{Zone}-{Author}-{Discipline}   \nField  Abbreviafg(HYon  Descripfg(HYon  Organizafg(HYon  \nZone  CP5  Main Building    \nAuthor  NTC  Newtech Company Limited    \nDiscipline  AR-DSP  Architectural (Data Service PlakgFbForm)  NTC  \nMEP-DSP  MEP (Data Service PlakgFbForm)  NTC",
+    "metadata": {
+      "number": "5.1",
+      "title": "Model Naming Convention",
+      "path": [
+        {
+          "number": "5",
+          "title": "Information Standards"
+        },
+        {
+          "number": "5.1",
+          "title": "Model Naming Convention"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 95,
+    "content": "5.2 Object Naming Convention  \n• NTC will comply with the Project BIM Standard for BIM data consistency and integrity.   \n• The standard naming convention is applicable to all project models unless otherwise specified.   \n• All components in the model shall be hosted to the correct level defined in the model. No reference pl ane \nshall be used for component hosting.  \n• Use only letters A-Z, hyphen and numbers 0-9 with parenthesis “()” for all fields.  \n• All fields must be separated by the character “-”.  \n• All the codes defined by consultants regarding mate rials and equipment types shall be provided with a \nparenthesis.  \n• All the NESTED families that are required to be “sh ared” for scheduling should add “NF-“in the prefix of the \ncomponent naming for identification.  \n• Do NOT use any lowercase “x” between dimensions. Instead, first letter of the dimension type should be used \nto clarify the subsequent value of dimension and di mensions shall be listed in the alphabetical order of the \nabbreviation.   \n \n \n \n \n \n \n \n \n \n \n \n  \n \n \n    \n CPX_NTC_BEP    Version | 00  \n         Page    | 16   Date  | 19 APR 2024  \n                                                                           \n  \nAbbreviation  Description  \nA  Angle  \nD  Depth/ Diameter  \nH  Height  \nL  Length  \nR  Radius  \nT  Thickness  \nW  Width  \n  \n• Within a field, space can be added to separate words.  \nSee Appendix A for object naming.",
+    "metadata": {
+      "number": "5.2",
+      "title": "Object Naming Convention",
+      "path": [
+        {
+          "number": "5",
+          "title": "Information Standards"
+        },
+        {
+          "number": "5.2",
+          "title": "Object Naming Convention"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 96,
+    "content": "5.3 Object Type Naming Convention  \nSee Appendix A for object type naming.",
+    "metadata": {
+      "number": "5.3",
+      "title": "Object Type Naming Convention",
+      "path": [
+        {
+          "number": "5",
+          "title": "Information Standards"
+        },
+        {
+          "number": "5.3",
+          "title": "Object Type Naming Convention"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 97,
+    "content": "5.4 Workset Naming Convention  \nWorksets and worksharing are key components, not on ly in a collaborative workflow, but also in effecti ve and \nefficient project workflows, even where only a single user is present. Enabling worksharing and using worksets \nto sub-divide project models into segments provides the opportunity to have multiple users working in the same \nproject file concurrently.   \n \nWorksets shall be created in following the below Naming Convention:  \n  \nWorkset Naming Convenfg(HYon   \n{Author}_{Discipline}_{DescripkgFbHon}  \n \nx_Datum_Grid/ Level/ etc.  \n \nx_Link  \n \n  \n{Author} : refer to Section 5.1 for Author list   \n{Discipline} : refer to Section 5.1 for Discipline list   \n{Description} : description of scope  \n \n \n \n  \n \n \n    \n CPX_NTC_BEP    Version | 00  \n         Page    | 17   Date  | 19 APR 2024  \n                                                                           \n  \nWorkset Naming Examples  \nName  Descripfg(HYon  \nx_Datum_Grid  Grids in Architectural model  \nx_Datum_Level  Levels in structural model  \nx_Datum_ReferencePlane  Reference Planes in archite ctural model  \nx_Datum_ScopeBox  Scope box  \nx_Datum_PointCloud  Point cloud  \nx_Placeholder  Placeholder  \nx_TempWork  Temporary work  \nNTC_AR-DSP_4F Default workset for architectural lev el \nNTC_MEP-DSP_AC Default workset for HVAC service \nNTC_MEP-DSP_EL Default workset for Electrical servi ce \nNTC_MEP-DSP_FS Default workset for Fire service \nNTC_MEP-DSP_EMG Default workset for Emergency Gener ator service \nNTC_MEP -DSP_CBWD  Default workset for  MEP scope  \nNTC_MEP-DSP_Clearance Default workset for MEP scope  \nNTC_MEP-DSP_Maintenance Space Default workset for M EP scope \nNTC_MEP -DSP_Hanger  Default workset for  Hanger  \nNTC_MEP-DSP_Plinth Default workset for Plinth \n \n  \n \n \n \n \n    \n CPX_NTC_BEP    Version | 00  \n         Page    | 18   Date  | 19 APR 2024",
+    "metadata": {
+      "number": "5.4",
+      "title": "Workset Naming Convention",
+      "path": [
+        {
+          "number": "5",
+          "title": "Information Standards"
+        },
+        {
+          "number": "5.4",
+          "title": "Workset Naming Convention"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 98,
+    "content": "5.5 Material Naming Convention  \nAll building materials should be named systematically as follows:    \n  \nMaterial Naming Convenfg(HYon   \n{Author}_{Material Code}_{DescripkgFbHon}  \n \n  \nMaterial Code shall follow the code assigned in the  tender drawings. Unless otherwise specified, the f ollowing \nmaterial abbreviation code should apply:  \n \nMaterial  Abbreviafg(HYon  \nABS  ABS  \nAluminium  AL  \nBlack Steel  BS  \nBronze  BR  \nCarbon Steel  CS  \nCast Iron  CI  \nConcrete  CC  \nCopper  CU  \nDuckgFbHle Iron  DI  \nElectrical Metallic Tubing  EMT  \nFiberglass  FG  \nFlexible PVC  FPVC  \nFlexible Steel  FS  \nGalvanized Iron / Steel  GI  \nGlass Fiber PlaskgFbHc  GFP  \nMalleable Iron  MI  \nMild Steel  MS  \nNylon  NY  \n \n \n    \n CPX_NTC_BEP    Version | 00  \n         Page    | 19   Date  | 19 APR 2024  \n                                                                           \n  \nMaterial  Abbreviafg(HYon  \nPolyester  PY  \nPolyethylene  PE  \nPolyurethane  PU  \nPVC  PVC  \nSpun Concrete  SC  \nStainless Steel  SS  \nUPVC  UPVC  \nVitriﬁed Clay  VC  \nPipe Grade - Medium Duty  MD  \nPipe Grade - Heavy Duty  HD  \nPipe Grade - DuckgFbHle Iron EN545 Class K9  K9  \nInsulakgFbHon - CFC Free  CFC  \nInsulakgFbHon - Fire rated enclosure  FRP  \nInsulakgFbHon - Fibreglass  FFG  \n     \n \n \n    \n CPX_NTC_BEP    Version | 00  \n         Page    | 20   Date  | 19 APR 2024",
+    "metadata": {
+      "number": "5.5",
+      "title": "Material Naming Convention",
+      "path": [
+        {
+          "number": "5",
+          "title": "Information Standards"
+        },
+        {
+          "number": "5.5",
+          "title": "Material Naming Convention"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 99,
+    "content": "5.6 MEP System Type Naming  \nPipework and ductwork need to be assigned with a pipe system as setup in the Revit template:  \nPipe System Name  Roufg(HYng Descripfg(HYon  Type Name  \nFire Service (FS)  Gas Suppression System Pipe  FS-GSS  \nHVAC (AC)  Condensate Drain Pipe  AC-CDP  \nCondensing Water Return Pipe  AC-CDWR  \nCondensing Water Supply Pipe  AC-CDWS  \n Chilled Water Return Pipe AC-CHWR \n Chilled Water Supply Pipe AC-CHWS \n HumidiﬁcakgFbHon Water Supply  AC -FWS  \n  \n \nDuct System Name  Roufg(HYng Descripfg(HYon  Type Name  \nHVAC (AC)  Exhaust Air Duct  AC-EAD  \nFresh Air Duct  AC-FAD  \nPrimary Air Duct  AC-PAD  \nReturn Air Duct  AC-RAD  \n Supply Air Duct  AC -SAD  \nElectrical (EL)  Trunking  ELV-MOBILE  \nELV-DCIM \nELV -CP  \nELV-POWER  \nELV-UPS  \nELV-FS  \nELV-DARK FIBRE  \nELV-ICT/WiFi/GPON  \n \n \n    \n CPX_NTC_BEP    Version | 00  \n         Page    | 21   Date  | 19 APR 2024  \n                                                                           \n  \nDuct System Name  Roufg(HYng Descripfg(HYon  Type Name  \nElectrical (EL)  Trunking  ELV -SECURITY/ CCTV  \nELV- PUBLIC  ADDRESS \nSYSTEM \nELV -SUB  \nELV-ISP \nELV-FTNS \nELV -PWR  \nEL-BUSDUCT-4000A \nEL-BUSDUCT-5000A \nEL-EARTHING \n  \n \n \n    \n CPX_NTC_BEP    Version | 00  \n         Page    | 22   Date  | 19 APR 2024",
+    "metadata": {
+      "number": "5.6",
+      "title": "MEP System Type Naming",
+      "path": [
+        {
+          "number": "5",
+          "title": "Information Standards"
+        },
+        {
+          "number": "5.6",
+          "title": "MEP System Type Naming"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 100,
+    "content": "5.7 Model Project Browser Organization  \n  \nThe Project Browser shows a logical hierarchy for a ll views, schedules, sheets, groups, and other part s of the \ncurrent project. Each branch can be expanded and collapsed to hide or reveal lower-level items in the tree.  \n  \nThe Views under Project Browser are grouped under t he scheme named (CPS) to manage the Views by Group \nand Sub-group attributes.   \n  \nView Group  View Sub-group  View Name",
+    "metadata": {
+      "number": "5.7",
+      "title": "Model Project Browser Organization",
+      "path": [
+        {
+          "number": "5",
+          "title": "Information Standards"
+        },
+        {
+          "number": "5.7",
+          "title": "Model Project Browser Organization"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 101,
+    "content": "00 GENERAL  BIM AUDIT    \nEXPORT  Navisworks Export  \nBIM360 Publish View  \nRevizto Export",
+    "metadata": {
+      "number": "00",
+      "title": "GENERAL  BIM AUDIT",
+      "path": [
+        {
+          "number": "00",
+          "title": "GENERAL  Project Datum – Grids, Levels, etc"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 102,
+    "content": "01 DRAWING  AI/Sketch (Architecture)  AI No + (Date)  \nSketch No + (Date)  \nMaster Layout Plan  CBWD_SeckgFbHon  \nCSD_SeckgFbHon  \nMEP_Floor Plan  \nMEP_SeckgFbHon  \nWIP SeckgFbHon",
+    "metadata": {
+      "number": "01",
+      "title": "DRAWING  AI/Sketch (Architecture)  AI No + (Date)",
+      "path": [
+        {
+          "number": "01",
+          "title": "GENERAL"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 103,
+    "content": "02 WORKS PACKAGE  “Works Package Number” – “Contractor Name”  Brief DescripkgFbHon",
+    "metadata": {
+      "number": "02",
+      "title": "WORKS PACKAGE  “Works Package Number” – “Contractor Name”  Brief DescripkgFbHon",
+      "path": [
+        {
+          "number": "02",
+          "title": "WORKS PACKAGE  Works Package Code – Contractor Name –"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 104,
+    "content": "04 COORDINATION  “Company” – “LocakgFbHon” – Purpose",
+    "metadata": {
+      "number": "04",
+      "title": "COORDINATION  “Company” – “LocakgFbHon” – Purpose",
+      "path": [
+        {
+          "number": "04",
+          "title": "COORDINATION  “Company” – “LocakgFbHon” – Purpose"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 105,
+    "content": "05 WIP  “Company” – “Staﬀ Name”    \n  \n \n \n \n \n \n \n \n \n \n \n \n \n    \n CPX_NTC_BEP    Version | 00  \n         Page    | 23   Date  | 19 APR 2024  \n                                                                           \n  \nSchedule Group  Schedule Sub-group",
+    "metadata": {
+      "number": "05",
+      "title": "WIP  “Company” – “Staﬀ Name”",
+      "path": [
+        {
+          "number": "05",
+          "title": "WIP  “Company” – “Staﬀ Name”"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 106,
+    "content": "00 GENERAL  Project Datum – Grids, Levels, etc  \nProject View List, Project Sheet List  \nProject Room List  \nProject Model Groups  \nProject RVT Links  \nMass  \nParts  \nAssemblies",
+    "metadata": {
+      "number": "00",
+      "title": "GENERAL  Project Datum – Grids, Levels, etc",
+      "path": [
+        {
+          "number": "00",
+          "title": "GENERAL  Project Datum – Grids, Levels, etc"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 107,
+    "content": "01 DRAWING  Works Packages Number – Works Contractor –  \nDrawing Package Number & DescripkgFbHon",
+    "metadata": {
+      "number": "01",
+      "title": "DRAWING  Works Packages Number – Works Contractor –",
+      "path": [
+        {
+          "number": "01",
+          "title": "GENERAL"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 108,
+    "content": "02 BQ/SOR  Works Package Number – Works Contractor",
+    "metadata": {
+      "number": "02",
+      "title": "BQ/SOR  Works Package Number – Works Contractor",
+      "path": [
+        {
+          "number": "02",
+          "title": "WORKS PACKAGE  Works Package Code – Contractor Name –"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 109,
+    "content": "03 WIP    \n  \nSheet Group  Sheet Sub-group",
+    "metadata": {
+      "number": "03",
+      "title": "WIP",
+      "path": [
+        {
+          "number": "03",
+          "title": "WIP"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 110,
+    "content": "01-GENERAL",
+    "metadata": {
+      "number": "01",
+      "title": "GENERAL",
+      "path": [
+        {
+          "number": "01",
+          "title": "GENERAL"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 111,
+    "content": "02-WORKS PACKAGE  Works Package Code – Contractor Name –  \nDrawings Set Name  \n  \n  \n  \n  \n \n \n    \n CPX_NTC_BEP    Version | 00  \n         Page    | 24   Date  | 19 APR 2024",
+    "metadata": {
+      "number": "02",
+      "title": "WORKS PACKAGE  Works Package Code – Contractor Name –",
+      "path": [
+        {
+          "number": "02",
+          "title": "WORKS PACKAGE  Works Package Code – Contractor Name –"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 112,
+    "content": "5.8 Model View Setting",
+    "metadata": {
+      "number": "5.8",
+      "title": "Model View Setting",
+      "path": [
+        {
+          "number": "5",
+          "title": "Information Standards"
+        },
+        {
+          "number": "5.8",
+          "title": "Model View Setting"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 113,
+    "content": "5.8.1 View Type Naming Convention  \nFloor plan, Ceiling Plan, Structural plan, Section and Elevation view types shall be named according t o the \nfollowing naming convention:  \n  \nView Type Naming Convenfg(HYon   \n{Code}_{DescripkgFbHon}  \n \n  \n{Code}: discipline code or XREF  \n{Description}: description of purpose of view  \n  \nExample   \nAR_Working  \n \nAR_CoordinakgFbHon  \n \nAR_General Arrangement  \n \nAC_Duct  \n \nXREF_Architecture  \n \n  \n  \n \n \n    \n CPX_NTC_BEP    Version | 00  \n         Page    | 25   Date  | 19 APR 2024",
+    "metadata": {
+      "number": "5.8.1",
+      "title": "View Type Naming Convention",
+      "path": [
+        {
+          "number": "5",
+          "title": "Information Standards"
+        },
+        {
+          "number": "5.8",
+          "title": "Model View Setting"
+        },
+        {
+          "number": "5.8.1",
+          "title": "View Type Naming Convention"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 114,
+    "content": "5.8.2 View Naming Convention  \n All views created within a Revit project shall be named according to the following naming convention:  \nView Naming Convenfg(HYon   \n{TYPE}_{LV}_{AREA}_{PURPOSE}  \n \n  \n{TYPE} – View types (FP: Floor plan, SC: Section, EL: Elevation, DV: Drafting views, etc.)   {LV} \n– Optional. Level denotation     \n{AREA} – Designation of Area    \n{PURPOSE} – Description of purpose of view  \nExample   \nFP_2F_LV Switch Room F_Master Plan  \n \nRCP_4F_Data Hall 1_Working  \n \nSC_4F_VIP Corridor_presentakgFbHon  \n \nEL_GF_Fuel Pump Room A_Room Detail",
+    "metadata": {
+      "number": "5.8.2",
+      "title": "View Naming Convention",
+      "path": [
+        {
+          "number": "5",
+          "title": "Information Standards"
+        },
+        {
+          "number": "5.8",
+          "title": "Model View Setting"
+        },
+        {
+          "number": "5.8.2",
+          "title": "View Naming Convention"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 115,
+    "content": "5.8.3 View Template Naming  \nWhile object styles will be included in Model template, it is recommended that all graphic overrides are applied at \nthe View template level rather than relying on Object styles setting in the model.",
+    "metadata": {
+      "number": "5.8.3",
+      "title": "View Template Naming",
+      "path": [
+        {
+          "number": "5",
+          "title": "Information Standards"
+        },
+        {
+          "number": "5.8",
+          "title": "Model View Setting"
+        },
+        {
+          "number": "5.8.3",
+          "title": "View Template Naming"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 116,
+    "content": "5.9 Schedule and Legends Naming Convention  \nView Naming Convenfg(HYon   \n{CODE}_{CATEGORY}_{PURPOSE}  \n \n  \n{CODE} : Discipline Code    \n{Category} : Category of the scheduled element    \n{Purpose} : Description of purpose of view   \nExample   \nAR_Door_Type  \n \nAR_Areas_Gross  \n \nAR_Legend_WallType  \n \nAR_Window_Type  \n \nAR_Room_Finishes  \n \n \n \n    \n CPX_NTC_BEP    Version | 00  \n         Page    | 26   Date  | 19 APR 2024  \n                                                                           \n  \n  \nView Filters Naming Convenfg(HYon   \n{CODE}_{CATEGORY}_{DESCRIPTION}  \n \n  \n{CODE} : Discipline Code    \n{Category} : Category of the Revit element  \n{Description} : Description of purpose of view filter  \n  \nExample   \nGlobal_View_Working  \n \nGlobal_View_NOT_Working  \n \nAR_Door_Glass  \n \nAC_Duct_Supply",
+    "metadata": {
+      "number": "5.9",
+      "title": "Schedule and Legends Naming Convention",
+      "path": [
+        {
+          "number": "5",
+          "title": "Information Standards"
+        },
+        {
+          "number": "5.9",
+          "title": "Schedule and Legends Naming Convention"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 117,
+    "content": "5.10 Level of Information Need   \nThe Level of Information Need is used to clearly define the degree of information required according to its purpose, \nquality, quantity, and granularity of the information.",
+    "metadata": {
+      "number": "5.10",
+      "title": "Level of Information Need",
+      "path": [
+        {
+          "number": "5",
+          "title": "Information Standards"
+        },
+        {
+          "number": "5.10",
+          "title": "Level of Information Need"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 118,
+    "content": "5.10.1 LOIN Definition  \nThe Level of Information Need (LOIN) (formerly know n as Level of Development (LOD)) enables Appointing  \nParties / Clients, architects, engineers, contracto rs, quantity surveyors and facility managers to cle arly specify \nthe content of models at each stage of a project. There are mainly three components in LOIN which are LODG, \nLOD-I and DOC.",
+    "metadata": {
+      "number": "5.10.1",
+      "title": "LOIN Definition",
+      "path": [
+        {
+          "number": "5",
+          "title": "Information Standards"
+        },
+        {
+          "number": "5.10",
+          "title": "Level of Information Need"
+        },
+        {
+          "number": "5.10.1",
+          "title": "LOIN Definition"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 119,
+    "content": "5.10.1.1  Level of Graphics (LOD-G) Definition  \nGraphical representation can mean many things withi n a model and should be subdivided as there can  be  \ndifferent needs for modelling (3D), drawing (2D), a nd visualization. The geometry for drawings is ofte n \ndependent upon symbology which sometimes varies dep ending on the selected scale. Four generic levels o f \ngraphical representation are identified as LOD-G notations.   \n  \nThese are numbered from LOD-G 100 to LOD-G 400 and defined in the table below:  \n  \nLOD-G  Definition",
+    "metadata": {
+      "number": "5.10.1.1",
+      "title": "Level of Graphics (LOD-G) Definition",
+      "path": [
+        {
+          "number": "5",
+          "title": "Information Standards"
+        },
+        {
+          "number": "5.10",
+          "title": "Level of Information Need"
+        },
+        {
+          "number": "5.10.1",
+          "title": "LOIN Definition"
+        },
+        {
+          "number": "5.10.1.1",
+          "title": "Level of Graphics (LOD-G) Definition"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 120,
+    "content": "100  The model element is graphically represented within  the model by a symbol or generic \nrepresentation or rough 3D shape.",
+    "metadata": {
+      "number": "100",
+      "title": "The model element is graphically represented within  the model by a symbol or generic",
+      "path": [
+        {
+          "number": "100",
+          "title": "The model element is graphically represented within  the model by a symbol or generic"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 121,
+    "content": "200  The model element is graphically represented within the model as a generic system, object, \nor assembly with approximate quantities, assumed size, shape, location, and orientation.  \nThe assumed spaces required for access and maintenance shall be indicated.  \n \n \n    \n CPX_NTC_BEP    Version | 00  \n         Page    | 27   Date  | 19 APR 2024",
+    "metadata": {
+      "number": "200",
+      "title": "The model element is graphically represented within the model as a generic system, object,",
+      "path": [
+        {
+          "number": "200",
+          "title": "The model element is graphically represented within the model as a generic system, object,"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 122,
+    "content": "300  The model element is graphically represented within the model as a specific system, object \nor assembly in terms of quantity, size, shape, loca tion, and orientation. The model shall \ninclude details of the spaces required for handling  installation, operation and maintenance, \nand the interface details for checking and coordination with other models/objects.",
+    "metadata": {
+      "number": "300",
+      "title": "The model element is graphically represented within the model as a specific system, object",
+      "path": [
+        {
+          "number": "300",
+          "title": "The model element is graphically represented within the model as a specific system, object"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 123,
+    "content": "400  The model element is graphically represented within the Model as a specific system, object \nor assembly in terms of size, shape, location, quan tity, and orientation with detailing for \nfabrication, assembly, and installation.",
+    "metadata": {
+      "number": "400",
+      "title": "The model element is graphically represented within the Model as a specific system, object",
+      "path": [
+        {
+          "number": "400",
+          "title": "500"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 124,
+    "content": "500  Not used.",
+    "metadata": {
+      "number": "500",
+      "title": "Not used.",
+      "path": [
+        {
+          "number": "500",
+          "title": "Not used."
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 125,
+    "content": "5.10.1.2  Level of Graphics (LOD-I) Definition  \nLevel of Information (LOD-I) is the description of non-graphical information in a model element and wi ll evolve \nas the project progresses. LOD-I requirements shoul d be defined and agreed beforehand as identified wi thin \nthe AIR. Provision of a data dictionary against whi ch product data templates can be prepared facilitat es the \ndelivery of verifiable data. As the required LOD-I varies for each project, this Standards does not aim to provide \nan exhaustive list of information for each model element, but instead indicates a suitable approach for adoption.   \n  \nTo specify LOIN, and how information is to be delivered, the specifiers should identify the following prerequisites:    \n• Purposes of the information to be delivered.    \n• Information delivery milestones.    \n• Parties who will request and deliver information; and    \n• Objects in one or more breakdown structures.    \n  \nThe LOD-I required for the model elements should be determined based on their intended usage and should NOT \nbe over specified.",
+    "metadata": {
+      "number": "5.10.1.2",
+      "title": "Level of Graphics (LOD-I) Definition",
+      "path": [
+        {
+          "number": "5",
+          "title": "Information Standards"
+        },
+        {
+          "number": "5.10",
+          "title": "Level of Information Need"
+        },
+        {
+          "number": "5.10.1",
+          "title": "LOIN Definition"
+        },
+        {
+          "number": "5.10.1.2",
+          "title": "Level of Graphics (LOD-I) Definition"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 126,
+    "content": "5.10.2 Project LOD Requirement  \n  \nVCL will develop models in accordance with the Level of Development (LOD) specified below during construction \ndevelopment.  \n  \nProject Stage  Minimum Level of Development  \nConstruckgFbHon  LOD -G 400  \nAs-built  LOD-I 500  \n  \nFor detail of minimum LOD requirement on each model elements in each discipline, please refer to Appendix C.  \n     \nThe BIM Manager shall coordinate and update the LOD  matrices and requirements to meet the project need . \nThe LOD requirement on model data shall also refer to the BIM standards which cover the 5D data requirement \nin line with SMM4. Please refer to Appendix B.  \n  \n  \n \n \n    \n CPX_NTC_BEP    Version | 00  \n         Page    | 28   Date  | 19 APR 2024",
+    "metadata": {
+      "number": "5.10.2",
+      "title": "Project LOD Requirement",
+      "path": [
+        {
+          "number": "5",
+          "title": "Information Standards"
+        },
+        {
+          "number": "5.10",
+          "title": "Level of Information Need"
+        },
+        {
+          "number": "5.10.2",
+          "title": "Project LOD Requirement"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 127,
+    "content": "5.11 LOD Responsibility Matrix  \nSee Appendix C for Model LOD Responsibility Matrix.",
+    "metadata": {
+      "number": "5.11",
+      "title": "LOD Responsibility Matrix",
+      "path": [
+        {
+          "number": "5",
+          "title": "Information Standards"
+        },
+        {
+          "number": "5.11",
+          "title": "LOD Responsibility Matrix"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 128,
+    "content": "5.12 Origin and Orientation  \nProject coordinates shall follow the Hong Kong Metric Grid Coordinates and Datum Elevation system. All models \nshall be included with “Shared Location”, namely, “ True Coordinates”, for ease of finding reference be tween \nmodels.      \nAll discipline teams are required to use the Project Template prepared by the project BIM Manager to develop the \nBIM model. The template ensures all teams' model has the same internal coordinates.  \n“Project North” in models shall be parallel to the short grid. The project base point shall be referred to the HK1980 \nGrid System actual location of the project.  \nPoint  Easting (mm)  Northing (mm)  Elevation or Site \nDatum (mPD)  \nAngle to  True \nNorth (°)  \nSurvey Point  E 831370000  N 813396000  0  55 °36’35”  \nProject Basepoint  E 831370000  N 813396000  0  55 °36’35”  \n   \n Project Template   \nDirectory in ACC  100 BIM/1.6 – Project Templates & Library/1.6.1 – Revit Template  \nLatest Version  CPX.Project Template-V1.rvt",
+    "metadata": {
+      "number": "5.12",
+      "title": "Origin and Orientation",
+      "path": [
+        {
+          "number": "5",
+          "title": "Information Standards"
+        },
+        {
+          "number": "5.12",
+          "title": "Origin and Orientation"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 129,
+    "content": "5.13 Grids and Levels  \n \nFloor  Level (mPD)  \nAll grids shall refer to Architectural models.    \n  \nAll levels shall refer to Structural level.    \n\n \n \n    \n CPX_NTC_BEP    Version | 00  \n         Page    | 29   Date  | 19 APR 2024  \n                                                                           \n  \nB2  -4.250  \nB1  -0.850  \nG/F  +6.000  \n1/F  +12.500  \n2/F  +17.400  \n2M/F  +21.600  \n3/F  +24.200  \n4/F  +28.400  \n5/F  +34.400  \n6/F  +38.900  \n7/F  +43.400  \n8/F  +47.900  \nR/F  +52.400  \nUR/F  +58.000",
+    "metadata": {
+      "number": "5.13",
+      "title": "Grids and Levels",
+      "path": [
+        {
+          "number": "5",
+          "title": "Information Standards"
+        },
+        {
+          "number": "5.13",
+          "title": "Grids and Levels"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 130,
+    "content": "5.14 Units and Measurements  \nThe common unit system of measurement will be Metric Units.     \nAll project model length unit should be set to mill imetres. All elements in the models shall be modell ed to exact \ndesign dimension. Refer to below setting for other Revit Project Units settings.  \nThe units of measurement will follow the format as per the below:  \nDescription  Units  Example value and \nabbreviation  Accuracy  \nLength  Millimetres  1 mm  0 decimal places  \nAngle  Decimal degrees  0.001°  3 decimal places  \nArea  Square meters  0.001 m 2  3 decimal places  \nVolume  Cubic meters  0.001 m 3  3 decimal places  \nSlope  Decimal degrees  0.001°  3 decimal places  \nMass density  Kilograms per cubic \nmeter",
+    "metadata": {
+      "number": "5.14",
+      "title": "Units and Measurements",
+      "path": [
+        {
+          "number": "5",
+          "title": "Information Standards"
+        },
+        {
+          "number": "5.14",
+          "title": "Units and Measurements"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 131,
+    "content": "0.001 kg/m 3  3 decimal places",
+    "metadata": {
+      "number": "0.001",
+      "title": "kg/m 3  3 decimal places",
+      "path": [
+        {
+          "number": "0.001",
+          "title": "kg/m 3  3 decimal places"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 132,
+    "content": "5.15 Model Size  \nIt is recommended to keep the size of a single model to be within 600MB. If it is larger than agreed size limit, the \nproject team should consider further segregation of the model.    \n \n \n    \n CPX_NTC_BEP    Version | 00  \n         Page    | 30   Date  | 19 APR 2024",
+    "metadata": {
+      "number": "5.15",
+      "title": "Model Size",
+      "path": [
+        {
+          "number": "5",
+          "title": "Information Standards"
+        },
+        {
+          "number": "5.15",
+          "title": "Model Size"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 133,
+    "content": "5.16 Model Colour Scheme  \nAll system can be distinguished by different color code, they are set using “filter” in the Revit visibility orders and \nRevizto Appearance Profiler. The basics color code are as follow:  \nDiscipline    Presentation Color  \nRed  Green  Blue  Color Palette  \nArchitectural  175  235  240    \nStructural  255  120  15    \nHVAC  0  255  0    \nElectrical  210  160  0    \nFire Services  255  0  0    \nDrainage  0  0  255    \nPlumbing  0  255  255    \nGas  255  0  255    \nFuel  255  128  192    \nExisting  192  192  192",
+    "metadata": {
+      "number": "5.16",
+      "title": "Model Colour Scheme",
+      "path": [
+        {
+          "number": "5",
+          "title": "Information Standards"
+        },
+        {
+          "number": "5.16",
+          "title": "Model Colour Scheme"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 134,
+    "content": "5.17 Shared Parameter  \nShared parameters are standardized parameter definitions that are stored in a text file independent of any family \nfile or Revit project. All discipline BIM leads are  required to use and apply those shared parameters in Revit \nfamilies or projects for standardization and consistency of data stored across projects.    \nThe project shared parameter is shared and located in ACC hub. Any request by consultants on change or  \naddition of parameters is required to be made to the team and they are required to provide grounds for approval \nby HKCMCL. BIM manager reserves the right to make changes to the CPS.Shared Parameter to suit the project \nBIM development needs whenever necessary.  \nAll project parameters shall be Shared Parameter unless otherwise approved by BIM manager. No other \nproject parameters that are not listed here shall be added to project files. When there’s a need for additional \nproject parameter, discipline BIM coordinator shall request BIM manager for the new parameters.  \n  \nDirectory in ACC  100 BIM/Library/Shared Parameter  \nLatest Version  CPS. Shard Parameter-V7.txt  \n  \nSee Appendix D for project shared parameters.  \n    \n \n \n    \n CPX_NTC_BEP    Version | 00  \n         Page    | 31   Date  | 19 APR 2024",
+    "metadata": {
+      "number": "5.17",
+      "title": "Shared Parameter",
+      "path": [
+        {
+          "number": "5",
+          "title": "Information Standards"
+        },
+        {
+          "number": "5.17",
+          "title": "Shared Parameter"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 135,
+    "content": "6 Information Production Methods and Procedure",
+    "metadata": {
+      "number": "6",
+      "title": "Information Production Methods and Procedure",
+      "path": [
+        {
+          "number": "6",
+          "title": "Information Production Methods and Procedure"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 136,
+    "content": "6.1 Overall BIM Development  \nThe overall BIM development workflow is illustrated as follows:",
+    "metadata": {
+      "number": "6.1",
+      "title": "Overall BIM Development",
+      "path": [
+        {
+          "number": "6",
+          "title": "Information Production Methods and Procedure"
+        },
+        {
+          "number": "6.1",
+          "title": "Overall BIM Development"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 137,
+    "content": "6.2 Common Data Environment  \nAutodesk Construction Cloud (ACC) will be used for Project Management System (PMS) for this project and is \nowned by HKCMCL and maintained by Lead Architect. The ACC platform will be the Common Data Environment \nfor this project and will also be used for document /administration management, design coordination, an d \nsubmittal process.",
+    "metadata": {
+      "number": "6.2",
+      "title": "Common Data Environment",
+      "path": [
+        {
+          "number": "6",
+          "title": "Information Production Methods and Procedure"
+        },
+        {
+          "number": "6.2",
+          "title": "Common Data Environment"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 138,
+    "content": "6.2.1 CDE Setup  \nACC Account Name  Hong Kong Cyberport Management Company Limited  \nProject Name  CPX CONSTRUCTION MAIN CONTRACT  \nProject URL  https://acc.autodesk.com/docs/files/projects/caaeb131-78e7-486a-b455-\na1548bcba917?folderUrn=urn%3Aadsk.wipprod%3Afs.folder%3Aco.xUpjmzg4 \nT5CorG3RKyD7bQ&viewModel=detail&moduleId=folders  \n \nFolder Structure  Refer to Appendix E  \nThe Lead Architect and HKCMCL will be notified, for their approval, any change in personnel or account use.  \nTo serve the purpose of BIM implementation as the c ollaborative process, all shared project Informatio n shall \nbe shared in a Common Data Environment (CDE). There shall be only one CDE used for a single project as the \nsingle source of truth.",
+    "metadata": {
+      "number": "6.2.1",
+      "title": "CDE Setup",
+      "path": [
+        {
+          "number": "6",
+          "title": "Information Production Methods and Procedure"
+        },
+        {
+          "number": "6.2",
+          "title": "Common Data Environment"
+        },
+        {
+          "number": "6.2.1",
+          "title": "CDE Setup"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 139,
+    "content": "6.2.2 CDE Access  \nIn accordance with ISO 19650 and CIC BIM Standards, the following access will be applied to the functional area \nof the CDE:  \nWork in Progress  - Information containers in this state should not be visible or accessible to any other task \nteam  \n  \nDesign 2D drawings  \n& BIM model \nConstruction BIM  \nModel \nUpdate model  \nfollowing  \noutstanding RFIs,  \nAIs  \nUndertake clash  \ndetection and  \nupdate to resolve  \nclashes  \nUpdate to as  - built  \nconditions  \nInput LOD  - \nI 500  \ninformation  \nrequirements  \nSubmission as as  - \nbuilt model \n \n \n    \n CPX_NTC_BEP    Version | 00  \n         Page    | 32   Date  | 19 APR 2024  \n                                                                           \n  \nShared - Information containers in the shared states should be visible and accessible but should not be \neditable . If editing is required, an information container should be returned to the work in progress state fo r \namendment and resubmission by its author.  \nArchived - the CDE shall provide a read-only interface  that enable viewing and retrieving such Project Record \nin the same fashion as what and how could be seen d uring design and construction stages before handove r. \nThe linkage and relationship among the model files and other documentations shall be retained in this read-only \nCDE interface.",
+    "metadata": {
+      "number": "6.2.2",
+      "title": "CDE Access",
+      "path": [
+        {
+          "number": "6",
+          "title": "Information Production Methods and Procedure"
+        },
+        {
+          "number": "6.2",
+          "title": "Common Data Environment"
+        },
+        {
+          "number": "6.2.2",
+          "title": "CDE Access"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 140,
+    "content": "6.2.3 Functional Section",
+    "metadata": {
+      "number": "6.2.3",
+      "title": "Functional Section",
+      "path": [
+        {
+          "number": "6",
+          "title": "Information Production Methods and Procedure"
+        },
+        {
+          "number": "6.2",
+          "title": "Common Data Environment"
+        },
+        {
+          "number": "6.2.3",
+          "title": "Functional Section"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 141,
+    "content": "6.2.3.1 Work in Progress  \nThe Work in Progress (WIP) Section of the CDE is wh ere different Task Team creates the information. \nInformation being developed by its originator or Task Team in this state should not be visible to or accessible to \nany other Task team.",
+    "metadata": {
+      "number": "6.2.3.1",
+      "title": "Work in Progress",
+      "path": [
+        {
+          "number": "6",
+          "title": "Information Production Methods and Procedure"
+        },
+        {
+          "number": "6.2",
+          "title": "Common Data Environment"
+        },
+        {
+          "number": "6.2.3",
+          "title": "Functional Section"
+        },
+        {
+          "number": "6.2.3.1",
+          "title": "Work in Progress"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 142,
+    "content": "6.2.3.2 Shared  \nEstablished to allow the use of current information that had been released for an identified purpose with a known \nlevel of risk associated with it.  \nThe purpose of the shared state is to enable constructive and collaborative development of the information model.",
+    "metadata": {
+      "number": "6.2.3.2",
+      "title": "Shared",
+      "path": [
+        {
+          "number": "6",
+          "title": "Information Production Methods and Procedure"
+        },
+        {
+          "number": "6.2",
+          "title": "Common Data Environment"
+        },
+        {
+          "number": "6.2.3",
+          "title": "Functional Section"
+        },
+        {
+          "number": "6.2.3.2",
+          "title": "Shared"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 143,
+    "content": "6.2.3.3 Published  \nPublished Information represents identified contrac tual deliverables to be produced at specific milest ones or \ninformation against specific deliverables.  \nThe published state is used for information that has been authorized for use.",
+    "metadata": {
+      "number": "6.2.3.3",
+      "title": "Published",
+      "path": [
+        {
+          "number": "6",
+          "title": "Information Production Methods and Procedure"
+        },
+        {
+          "number": "6.2",
+          "title": "Common Data Environment"
+        },
+        {
+          "number": "6.2.3",
+          "title": "Functional Section"
+        },
+        {
+          "number": "6.2.3.3",
+          "title": "Published"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 144,
+    "content": "6.2.3.4 Archive  \nThe archive state is used to hold a journal and rec ord of information containers that have been shared  and \npublished during the information management process as well as the audit trail of their development.  \n \n  \n  \n\n \n \n    \n CPX_NTC_BEP    Version | 00  \n         Page    | 33   Date  | 19 APR 2024",
+    "metadata": {
+      "number": "6.2.3.4",
+      "title": "Archive",
+      "path": [
+        {
+          "number": "6",
+          "title": "Information Production Methods and Procedure"
+        },
+        {
+          "number": "6.2",
+          "title": "Common Data Environment"
+        },
+        {
+          "number": "6.2.3",
+          "title": "Functional Section"
+        },
+        {
+          "number": "6.2.3.4",
+          "title": "Archive"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 145,
+    "content": "6.3 Federation Strategy  \nFederation strategies and Information container bre akdown structures are important concepts in managin g the \nfederated information models in accordance with ISO 19650.  \nFederation and information container breakdown will be used to:  \n  \n• Allow different task teams to work on different parts of the information model simultaneously.   \n• Ease Information transmission by reducing the sizes of individual information containers.  \n• Federation and information container breakdown can also be used to help define scopes of services for \ndifferent task teams.   \n• Support Information Security",
+    "metadata": {
+      "number": "6.3",
+      "title": "Federation Strategy",
+      "path": [
+        {
+          "number": "6",
+          "title": "Information Production Methods and Procedure"
+        },
+        {
+          "number": "6.3",
+          "title": "Federation Strategy"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 146,
+    "content": "6.3.1 Model Segregation (Division)  \nIt is recommended to divide the Information model into separate files to enable better Information Authoring \nand management. To achieve this, considerations to the Information container breakdown structure as defined \nby the appointing party, planned BIM uses, and scope of service have been identified.   \n  \nFor efficient handling of the Information models, the model may be divided into:   \n• Building  \n• Discipline/Trade  \n• System  \n• Sub-system  \n  \nEach task team working within the spatial boundaries should locate the systems, components, or construction \nelements they are responsible for. The modelling practices for all individual BIM models shall be consistent so \nthat they could be combined into a federated model  \n  \nAll the models will be federated using the master f iles for coordination, standard checking, and BIM a udit. All \ndiscipline models must maintain the same coordinate system as per project template.   \n  \nThe model structure is subject to change as project  development progresses. For any change in the mode l \nsegregation structure, discipline BIM lead will inform the Project BIM manager and HKCMCL for approval.  \n  \nIt was proposed and agreed with teams to segregate the models using the following structure to suit for the need \nof the development and management of model by different discipline teams.    \n \nList of models is recorded in the following table:  \n \n \n \n \n \n \n \n \nModel Name  Description  \nCP5-NTC-AR-DSP.rvt  DSP AR Model \nCP5-NTC-MEP-DSP.rvt  DSP MEP Model – CSD & CBWD  \n \n \n    \n CPX_NTC_BEP    Version | 00  \n         Page    | 34   Date  | 19 APR 2024",
+    "metadata": {
+      "number": "6.3.1",
+      "title": "Model Segregation (Division)",
+      "path": [
+        {
+          "number": "6",
+          "title": "Information Production Methods and Procedure"
+        },
+        {
+          "number": "6.3",
+          "title": "Federation Strategy"
+        },
+        {
+          "number": "6.3.1",
+          "title": "Model Segregation (Division)"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 147,
+    "content": "6.4 Coordination and Design Issue Management  \nThe Multi discipline spatial coordination shall be carried out in three stages:",
+    "metadata": {
+      "number": "6.4",
+      "title": "Coordination and Design Issue Management",
+      "path": [
+        {
+          "number": "6",
+          "title": "Information Production Methods and Procedure"
+        },
+        {
+          "number": "6.4",
+          "title": "Coordination and Design Issue Management"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 148,
+    "content": "6.4.1 Clash Avoidance  \nThis first stage involves the exchange and use, thr ough the CDE, of verified Information Models that w ill be \nreferenced by the task teams into their own working model. This process supports “clash avoidance” and leads \nto the creation of reasonably coordinated Information Models from the beginning of the design stage.",
+    "metadata": {
+      "number": "6.4.1",
+      "title": "Clash Avoidance",
+      "path": [
+        {
+          "number": "6",
+          "title": "Information Production Methods and Procedure"
+        },
+        {
+          "number": "6.4",
+          "title": "Coordination and Design Issue Management"
+        },
+        {
+          "number": "6.4.1",
+          "title": "Clash Avoidance"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 149,
+    "content": "6.4.2 Clash Analysis and Reporting  \nThe second stage will be the use of a 3D based clas h analysis and reporting by the Revizto listed in S ection \n8.2. NTC will use a cloud-based collaboration platf orm that allow users to collaborate with, analyse, and audit \nthe latest Information model.  \nNTC shall carry out clash analysis Bi-weekly or as required by the project throughout the project peri od. NTC \nwill resolve all major system clashes prior to cons truction by identifying and resolving clashes among  different \ndisciplines. This procedure will be documented to provide the required reporting on the resolution requirements \nof the remaining coordination issues to the corresponding task teams. The clash analysis will also consider the \nintegration of third-party Information models to support the interface management.   \nIn addition to clash detection, NTC will check othe r spatial coordination requirements like headroom \nrequirements, working spaces for building services operations, and maintenance activities such as equi pment \nreplacements.  \nThe Clash analysis and report shall include the following:  \n• Process overview (including software used)  \n• Responsibilities (person responsible to address the issue)  \n• Clash outputs  \n• Clash resolution process  \n• Action plan with target completion schedule to handle and resolve detected clashes  \n• Tolerance levels (mm) for different disciplines  \n• Operation clearance  \n• Maintenance clearance",
+    "metadata": {
+      "number": "6.4.2",
+      "title": "Clash Analysis and Reporting",
+      "path": [
+        {
+          "number": "6",
+          "title": "Information Production Methods and Procedure"
+        },
+        {
+          "number": "6.4",
+          "title": "Coordination and Design Issue Management"
+        },
+        {
+          "number": "6.4.2",
+          "title": "Clash Analysis and Reporting"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 150,
+    "content": "6.4.3 Clash Resolution  \nThe third stage is Clash Resolution. This is the stage where different task teams resolve remaining design and \ncoordination issues that require the input and deci sion of more than one task team. This can be done t hrough \nregular coordination workshops to progressively close out those residual design and coordination issue s. This \nCoordination workshops should have a set of agenda on what issues to be discussed in the meeting and what \nissues can be resolved “Closed”. Model updated in design option with “Solved” status & updated in construction \nmodel with “Closed” status.  \nStatus in Revizto issue tracker:  \n  \n  \n\n \n \n    \n CPX_NTC_BEP    Version | 00  \n         Page    | 35   Date  | 19 APR 2024  \n                                                                           \n  \n \n  \n    \nRevizto Issue Stamp preset for coordination as below:  \nDSP/NSC – Stamp for internal issue coordination  \n  \n    \n  \n    \nFederation of  \nmodels in Revizto  \nRun overall clash  \ntests  \nExtract numbers for  \nprogress reporting  \nIdentify key clashes  \nrequiring Design  \nTeam input  \nKey clashes show in  \nweekly Revizto  \nDashboard  \nAssign responsibility  \nto resolve  \nUse Revizto to track  \nuntil closed out  \n\n \n \n    \n CPX_NTC_BEP    Version | 00  \n         Page    | 36   Date  | 19 APR 2024",
+    "metadata": {
+      "number": "6.4.3",
+      "title": "Clash Resolution",
+      "path": [
+        {
+          "number": "6",
+          "title": "Information Production Methods and Procedure"
+        },
+        {
+          "number": "6.4",
+          "title": "Coordination and Design Issue Management"
+        },
+        {
+          "number": "6.4.3",
+          "title": "Clash Resolution"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 151,
+    "content": "6.5 3D Modelling Methodology  \nThe Modelling Strategy will support the management of multi-user work-sharing, Internal coordination, and \ncollaborative Information exchange between different task teams. This will include the development, production \nand handover of Information, design revision, and clash resolution.  \nThe development of the Information Model will adopt the following best modelling practice guidelines:   \n• No more than one Building/Structure shall be modelled in a single file.  \n• Split the model into separate files, to enable a better model authoring and management. Subdividing the \nmodel (Model Segregation) in consideration of:   \n• The Task Team shall not duplicate any information generated by other task teams. Only discipline specific \nelements will be modelled in a discipline file.   \n• Clear definition of Data ownership throughout the l ife cycle of the project should be defined and \ndocumented to avoid duplicating elements and coordination errors.   \n• Models that require multiple users to access, should adopt a work-set process.  \n• The Information model must be clear, accurate and concise, and contain no ambiguities. The Task team \nshall not generate information that contains any superfluous detail.  \n• Spatially coordinate geometrical components with other geometrical components and cross-reference  \nall information with information shared with the ap propriate suitability within the project’s common d ata \nenvironment.   \n• When required, Model the existing infrastructure an d systems in sufficient detail to provide integrati on \nwith the works under the contract.  \n• All model files are recommended to be kept at a rea sonable size in order to maintain workable files an d \nensure manageable navigation of the information model. The BIM Manager will monitor the performance \nand will consider re-structuring the Information model when the file size exceeds the recommended limit.  \n• Encourage the practice of minimum detailing without compromising quality.",
+    "metadata": {
+      "number": "6.5",
+      "title": "3D Modelling Methodology",
+      "path": [
+        {
+          "number": "6",
+          "title": "Information Production Methods and Procedure"
+        },
+        {
+          "number": "6.5",
+          "title": "3D Modelling Methodology"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 152,
+    "content": "6.6 Drawing Production Methodology",
+    "metadata": {
+      "number": "6.6",
+      "title": "Drawing Production Methodology",
+      "path": [
+        {
+          "number": "6",
+          "title": "Information Production Methods and Procedure"
+        },
+        {
+          "number": "6.6",
+          "title": "Drawing Production Methodology"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 153,
+    "content": "6.6.1 Sheet Configuration  \nAll sheets should be prepared with title block displaying sheet number and following sheet numbering convention \nand sheet title. When there are more than two views  in a sheet, view titles should be displayed with n umeric \ndetail number assigned in consecutive order. When s heets are exported as other formats, e.g., PDF or D WG, \nthe same sheet number should be used as individual file name. Sheet numbering convention may be adopte d \nby the team as drawing sheets are being developed.",
+    "metadata": {
+      "number": "6.6.1",
+      "title": "Sheet Configuration",
+      "path": [
+        {
+          "number": "6",
+          "title": "Information Production Methods and Procedure"
+        },
+        {
+          "number": "6.6",
+          "title": "Drawing Production Methodology"
+        },
+        {
+          "number": "6.6.1",
+          "title": "Sheet Configuration"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 154,
+    "content": "6.6.2 Title Block  \nAll sheets created and issued shall be prepared with a standard title block. Correct scale bar should be included \nwithin the title block. If the drawings are planar views (e.g., Floor plan, RCP, site plan, layout plan, etc.), North \nArrow symbol should be properly set.  \nBIM Manager will update the client title block to include any project specific information.",
+    "metadata": {
+      "number": "6.6.2",
+      "title": "Title Block",
+      "path": [
+        {
+          "number": "6",
+          "title": "Information Production Methods and Procedure"
+        },
+        {
+          "number": "6.6",
+          "title": "Drawing Production Methodology"
+        },
+        {
+          "number": "6.6.2",
+          "title": "Title Block"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 155,
+    "content": "6.6.3 View Title  \nIf there are more than two views in a sheet, view t itles must be placed with proper title, detail numb er and \nreference numbers assigned regardless of discipline. Standard view title is included in project template. In Model \nTemplate, “Sheet_Reference_01” through “Sheet_Reference_04” shared parameters for views are prepared for \nmanual back reference to be displayed in view title . If a view has been referenced from another view, usually \nfrom a smaller scale view, referencing sheet number should be manually inputted.  \n  \n \n \n    \n CPX_NTC_BEP    Version | 00  \n         Page    | 37   Date  | 19 APR 2024",
+    "metadata": {
+      "number": "6.6.3",
+      "title": "View Title",
+      "path": [
+        {
+          "number": "6",
+          "title": "Information Production Methods and Procedure"
+        },
+        {
+          "number": "6.6",
+          "title": "Drawing Production Methodology"
+        },
+        {
+          "number": "6.6.3",
+          "title": "View Title"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 156,
+    "content": "6.6.4 Drawing Production  \nNTC shall generate drawings in the required file fo rmat from the BIM model to facilitate the co-ordina tion and \noperation for the construction of the work.   \n  \nFor detail drawings such as architectural details, building services schematic /diagrams /drawings, an d \nreinforcement details which requires a level of acc uracy may not be generated from BIM model. Alternat ive \nsoftware, i.e., non-BIM authoring software like AutoCad, could be used and these 2D drawings shall be prepared \nin accordance with the Project CAD Standard.",
+    "metadata": {
+      "number": "6.6.4",
+      "title": "Drawing Production",
+      "path": [
+        {
+          "number": "6",
+          "title": "Information Production Methods and Procedure"
+        },
+        {
+          "number": "6.6",
+          "title": "Drawing Production Methodology"
+        },
+        {
+          "number": "6.6.4",
+          "title": "Drawing Production"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 157,
+    "content": "6.7 Phase Planning (4D)  \nNTC will make use of the coordinated 4D model to simulate all construction process of works by NTC to: \n• Establish relationships between the programme and s equence of construction activities including the \ndelivery of material and equipment to be carried out during the construction.  \n• Demonstrate the Contractor’s works sequences  \n• Identify potential time and spatial conflicts  \n• Optimize the use of critical resources  \n• Enhance construction process control \n• Minimize disturbance to the neighbourhood  \n• Better co-ordinate with affected parties and resolve interfacing issues at early stages  \n• Monitor procurement status of project materials  \n• Facilitate the preparation of Financial ModelThe 4D simulations shall be demonstrated in monthly intervals \nlinking all activities in the master program and it  shall be automatically matched with the activities  as \nshown in the master program with appropriate file format.   \n  \nNTC shall submit a 4D Simulation Result including but not limited to:  \n  \n• 4D simulation report  \n• 4D simulation video(s)  \n• BIM native model(s).  \n• Models(s) for 4D simulation platform.  \n• Linked project program or equivalent deliverable  \n \n \n \n \n\n \n \n    \n CPX_NTC_BEP    Version | 00  \n         Page    | 38   Date  | 19 APR 2024  \n                                                                           \n  \n4D BIM Workflow  \n \n \nSubmission schedule of 4D simulation  \nNo.  Description  Submission Date",
+    "metadata": {
+      "number": "6.7",
+      "title": "Phase Planning (4D)",
+      "path": [
+        {
+          "number": "6",
+          "title": "Information Production Methods and Procedure"
+        },
+        {
+          "number": "6.7",
+          "title": "Phase Planning (4D)"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 158,
+    "content": "1 Master Program  3rd  May, 2024",
+    "metadata": {
+      "number": "1",
+      "title": "Master Program  3rd  May, 2024",
+      "path": [
+        {
+          "number": "1",
+          "title": "Master Program  3rd  May, 2024"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 159,
+    "content": "2 4D model linking with Master Program  24 th May, 2024",
+    "metadata": {
+      "number": "2",
+      "title": "4D model linking with Master Program  24 th May, 2024",
+      "path": [
+        {
+          "number": "2",
+          "title": "4D model linking with Master Program  24 th May, 2024"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 160,
+    "content": "3 Progress monitoring using Synchro Control Update every Friday starting from \n7\nth  Jun,2024",
+    "metadata": {
+      "number": "3",
+      "title": "Progress monitoring using Synchro Control Update every Friday starting from",
+      "path": [
+        {
+          "number": "3",
+          "title": "Progress monitoring using Synchro Control Update every Friday starting from"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 161,
+    "content": "6.8 Cost Estimation (5D) (TBC)  \nNTC will reconcile the quantities derived according  to contract documents and the Quantity-Take-Off (Q TO) \nextracted from the Base Model.  \n \nNTC will prepare a financial model based on the 4D model for the following criteria:  \n1.  Interim payment simulation in video format with dyn amic bar chart showing time and cost relation ship for \nmajor construction activities;  \n2.  Cashflow forecast to compare actual cashflow against planned cashflow; and  \n3.  Estimate of variations including the schedule for the coast of omission and addition.  \n \n \n\n \n \n    \n CPX_NTC_BEP    Version | 00  \n         Page    | 39   Date  | 19 APR 2024",
+    "metadata": {
+      "number": "6.8",
+      "title": "Cost Estimation (5D) (TBC)",
+      "path": [
+        {
+          "number": "6",
+          "title": "Information Production Methods and Procedure"
+        },
+        {
+          "number": "6.8",
+          "title": "Cost Estimation (5D) (TBC)"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 162,
+    "content": "6.9 As Built Modelling  \nAll as-built drawings will be generated from the as -built model directly for submission. VCL will deve lop the as-\nbuilt BIM model up to LOD500 and shall comply to the project BIM standards.  \n  \nNTC will verify the dimensions and setting-out of t he as-built models to reflect the actual site condi tions \naccurately through 360° camera photos of each room,  corridor and all other places that need to be reco rded  \nbefore ceiling close if necessary.",
+    "metadata": {
+      "number": "6.9",
+      "title": "As Built Modelling",
+      "path": [
+        {
+          "number": "6",
+          "title": "Information Production Methods and Procedure"
+        },
+        {
+          "number": "6.9",
+          "title": "As Built Modelling"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 163,
+    "content": "6.10 Asset Information Model  \nNTC will input the asset information into the as-bu ilt model based on latest requirements specified by  the \nArchitect during construction phase and referring to latest Building Information Modelling for Asset Management \n(BIM-AM) Standards and Guidelines issued by the Electrical and Mechanical Services Department.  \nNTC will provide COBie file format, which is data f ile format exported from the as-built model, as one  of the as-\nbuilt deliverables.  \n  \n\n \n \n    \n CPX_NTC_BEP    Version | 00  \n         Page    | 40   Date  | 19 APR 2024",
+    "metadata": {
+      "number": "6.10",
+      "title": "Asset Information Model",
+      "path": [
+        {
+          "number": "6",
+          "title": "Information Production Methods and Procedure"
+        },
+        {
+          "number": "6.10",
+          "title": "Asset Information Model"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 164,
+    "content": "7 Quality Control and Assurance Procedure",
+    "metadata": {
+      "number": "7",
+      "title": "Quality Control and Assurance Procedure",
+      "path": [
+        {
+          "number": "7",
+          "title": "Quality Control and Assurance Procedure"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 165,
+    "content": "7.1 Quality Control  \nEach discipline BIM lead shall be responsible for performing quality control checks for their designs, dataset, and \nmodel properties before submitting their deliverables.  \nChecks  Definition  In charge  Software \nProgramme(S)  Frequency  \nVisual Check  \nEnsure there are no unintended model \ncomponents, and the design intent has \nbeen followed  \nDiscipline  \nBIM  \nCoordinator \n \nAutodesk Revit  Weekly  \nCheck that families are being correctly \nused.  \nObserve unreasonable modelling errors  \nGeometry satisfied required LOD- G level \nat the corresponding phase  \n3D  \nCoordination  \nCheck  \nDetect problems in the model where two \nbuilding components are clashing  \nincluding soft and hard clashes  \nDiscipline  \nBIM  \nCoordinator  \nAutodesk  \nNavisworks \nManage  \nWeekly  \nStandards \nCheck  \n  \nEnsure that the Project BIM standards and \nBEP have been followed (e.g.: fonts, \ndimensions, line styles, levels, file naming \nand room numbering.)  \nDiscipline  \nBIM  \nCoordinator \n \nAutodesk Revit  Weekly  \nModel data \nIntegrity \ncheck  \nThe process used to ensure that the \nproject data set has no undefined, \nincorrectly defined, or duplicated elements \nand satisfied the required LOD-G level at \nthe corresponding phase. Reporting \nprocess on non-compliant elements and \ncorrective action plans.  \nDiscipline  \nBIM  \nCoordinator \n \nAutodesk Revit  Weekly  \nBIM Design \nValidation  \nEnsure design intent and data \nincorporated are accurate and correct by \ndesigner.  \nDiscipline  \nBIM  \nSupport  \nEngineer  \nAutodesk  \nNavisworks \nManage  \nWeekly  \nDocument  \nDeliverable  \nCheck (DOC)  \nEnsure documentations are generated \nfrom the Single Source of Truth  \nInformation Model.  \nProject BIM \nManager  N/A  Weekly  \n    \n  \n \n \n    \n CPX_NTC_BEP    Version | 00  \n         Page    | 41   Date  | 19 APR 2024",
+    "metadata": {
+      "number": "7.1",
+      "title": "Quality Control",
+      "path": [
+        {
+          "number": "7",
+          "title": "Quality Control and Assurance Procedure"
+        },
+        {
+          "number": "7.1",
+          "title": "Quality Control"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 166,
+    "content": "7.2 Project BIM Audit  \nBIM Manager should review all disciplines models an d ensure compliance with BIM BEP and Client BIM \nStandard. Discipline BIM lead are required to follow up and address the issue. Audit report should be attached \nin CSD submission.  \n Model Check Items  \nItem  Definition  \nModel size  \nCheck if the model size is kept within agreed limit . Typically, it is \nrecommended to keep the size of a single model to b e within 300MB. If it is \nlarger than agreed size limit, the project team sho uld consider further \nsegregation of the model.  \nWorkset  Check if model elements are assigned to correct work sets.  \nPurge Unused  Check if there are unnecessary families loaded on to the project model.  \nModel Warnings  Go through model warnings and identify errors that should be resolved.  \nModel Audit  Last successful model audit time. Model audit shoul d be carried out weekly \nat minimum.  \nModel Alignment  \nCheck if the model is assigned with correct coordinates, project north, project \nbasepoint and internal origin. All project models w ithin the same project \nshould be linked with correct alignment without manual adjustment.  \nView Management  Check if the browser organization aligned with the standard  \nNaming Convention  Check if naming convention of model elements (sheets, views, families, \netc.)  \nProject Parameter  Check if the project parameter aligned with the standard  \nGraphic Standard  Check compliance of graphic standards (line weight, object style, annotation \nelements, etc.)  \nModel coordination  Check spatial coordination requirements (see section 7.4.2)  \n  \n    \n  \n \n \n    \n CPX_NTC_BEP    Version | 00  \n         Page    | 42   Date  | 19 APR 2024",
+    "metadata": {
+      "number": "7.2",
+      "title": "Project BIM Audit",
+      "path": [
+        {
+          "number": "7",
+          "title": "Quality Control and Assurance Procedure"
+        },
+        {
+          "number": "7.2",
+          "title": "Project BIM Audit"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 167,
+    "content": "8 Software, Hardware, and IT Infrastructure",
+    "metadata": {
+      "number": "8",
+      "title": "Software, Hardware, and IT Infrastructure",
+      "path": [
+        {
+          "number": "8",
+          "title": "Software, Hardware, and IT Infrastructure"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 168,
+    "content": "8.1 System Performance  \nData Backup  \nAll backup schedules will be aligned to the busines s continuity plans, regulatory and the Information Retention \nPolicy and Guideline.  \n  \n3rd Party/ Vendor Management  \nService level agreements (SLAs) will define the exp ected performance for each required security contro l, \ndescribe measurable outcomes, and identify remedies and response requirements for any identified instance of \nnon-compliance.  \n  \nCapacity Planning  \nDesignated staff will handle any potential system i nterruption or performance degradation detected bot h during \nand after office hours in a timely manner.",
+    "metadata": {
+      "number": "8.1",
+      "title": "System Performance",
+      "path": [
+        {
+          "number": "8",
+          "title": "Software, Hardware, and IT Infrastructure"
+        },
+        {
+          "number": "8.1",
+          "title": "System Performance"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 169,
+    "content": "8.2 Software Specification  \nThe required software is listed in the below table:  \nDiscipline of Works  Software  Version  Submission \nFile Format  \nArchitectural & MEP  \nAutodesk Revit  2023  .rvt  \nMiC  Autodesk Revit  2023  .rvt  \nModel Federation  Autodesk Navisworks Manage  2020  .nwd  \nOnline BIM Issue Tracking Platform for \nBIM Collaboration and Coordination  Autodesk Construction Cloud  N/A  N/A  \n4D Simulation  Synchro 4D  2023 .spx/.mp4  \n4D Checking  Synchro Control N/A  \nShared \nlicense with \nclient, \nconsultant and \nproject team  \n5D BIM  TBC  TBC  TBC  \nAutomation for Model Production  Dynamo for Revit  2.6.1  .dyn  \nAs-built Modeling  Autodesk   \nBIM Interoperability Tools  9.0.8119.0  .xml  \n   \n \n \n    \n CPX_NTC_BEP    Version | 00  \n         Page    | 43   Date  | 19 APR 2024  \n                                                                           \n  \nThe use of additional software not specified, proprietary or freeware, including software plug-ins, object enablers \nor viewers etc., by the sub-contractor in the project under contract with HKCMCL shall seek approval by HKCMCL.    \nAny software upgrade during the course of the proje ct shall be reviewed, coordinated, and approved by the BIM \nManager. Implementation of any upgrade shall be in line with the BIM Guidelines.",
+    "metadata": {
+      "number": "8.2",
+      "title": "Software Specification",
+      "path": [
+        {
+          "number": "8",
+          "title": "Software, Hardware, and IT Infrastructure"
+        },
+        {
+          "number": "8.2",
+          "title": "Software Specification"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 170,
+    "content": "8.3 Hardware Specification  \nSpecifications   \nOperating System   Microsoft Windows 10 64-bit Professional  \nCPU Type  Intel i7-9850H vPro  \nMemory  32GB DDR4 2666MHz (2x16GB)  \nVideo Display Resolutions  NVIDIA® Quadro RTX™ 4000 8GB GDDR6  \nDisk Space  1 TB PCIe SSD  \nConnectivity  Internet connection for license registration and prerequisite component \ndownload",
+    "metadata": {
+      "number": "8.3",
+      "title": "Hardware Specification",
+      "path": [
+        {
+          "number": "8",
+          "title": "Software, Hardware, and IT Infrastructure"
+        },
+        {
+          "number": "8.3",
+          "title": "Hardware Specification"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 171,
+    "content": "8.4 Data Security and Back-Up  \nIt is important that all project information is man aged securely and responsibly to safeguard the inte grity and \navailability of both our client’s and the Project Delivery Team’s information.  \nNTC will ensure all data associated with the projec t shall be securely stored and protected from unaut horized \naccess, distribution, or use. When sharing informat ion, due consideration shall be given to the enviro nment in \nwhich the data is shared. NTC will ensure and estab lish adequate access rights to related stakeholders  to \nprevent any possible data loss, corruption, data misuse or deliberate damage throughout the project an d shall \ncomply with the project policy on information security.  \nWhere a security policy based on ISO 19650 Part 5 –  Information management using building information \nmodelling is required, significant planning and spe cialist advice may be required which is not within the scope \nof this document.  \n  \n \n \n    \n CPX_NTC_BEP    Version | 00  \n         Page    | 44   Date  | 19 APR 2024  \n                                                                           \n  \nAppendix  \nA. Object Naming  \n  \n1.  ARCHITECTURAL",
+    "metadata": {
+      "number": "8.4",
+      "title": "Data Security and Back-Up",
+      "path": [
+        {
+          "number": "8",
+          "title": "Software, Hardware, and IT Infrastructure"
+        },
+        {
+          "number": "8.4",
+          "title": "Data Security and Back-Up"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 172,
+    "content": "1.1  General  \n−  All concrete grade should be named in “XX/XX” format.   \n−  Hose reel door or Water Meter cabinet door and alik e should be modelled as part of their respective \ncomponent as a whole.",
+    "metadata": {
+      "number": "1.1",
+      "title": "General",
+      "path": [
+        {
+          "number": "1",
+          "title": "Master Program  3rd  May, 2024"
+        },
+        {
+          "number": "1.1",
+          "title": "General"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 173,
+    "content": "1.2  Non-Structural Wall  \nCategory:  Wall (System Family)     RLB 5D Ref.  \nFamily Naming:  Basic Wall (Fixed)     \nType Naming:     \nWall \nGroup \n \nWall Core \nMaterial  \nWall Type  Concrete \nGrade  \nFire Resistance \nRating  \nThickness \n 1.13 \n1.14 \n1.32 \n1.33 \n1.34 \n1.35",
+    "metadata": {
+      "number": "1.2",
+      "title": "Non-Structural Wall",
+      "path": [
+        {
+          "number": "1",
+          "title": "Master Program  3rd  May, 2024"
+        },
+        {
+          "number": "1.2",
+          "title": "Non-Structural Wall"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 174,
+    "content": "1.36",
+    "metadata": {
+      "number": "1.36",
+      "title": "",
+      "path": [
+        {
+          "number": "1",
+          "title": "Master Program  3rd  May, 2024"
+        },
+        {
+          "number": "1.36",
+          "title": ""
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 175,
+    "content": "2.6  \nCORE  Brick Wall  (XX)    1 <60mins FRR>  T150  \nBlock Wall  (XX)    2 <120mins FRR>  T200  \nDry Wall  (XX)        \nGypsum \nBlock  \n(XX)    \n  \n Example   \nFamily Name:   Basic Wall  \nType Name:   CORE_Dry Wall_(XX)_0_T150",
+    "metadata": {
+      "number": "2.6",
+      "title": "",
+      "path": [
+        {
+          "number": "2",
+          "title": "4D model linking with Master Program  24 th May, 2024"
+        },
+        {
+          "number": "2.6",
+          "title": "Duct Fittings"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 176,
+    "content": "1.3  Wall Finishes  \nCategory:  Wall (System Family)    RLB 5D Ref.  \nFamily Naming:  Basic Wall (Fixed)    \nType Naming:    \nWall \nGroup  \nWall Core \nMaterial  \nMaterial Type \nCode  \nFire Resistance \nRating  \nThickness \n Section 5  \n  \nFIN  Paint  (XX)  0  T20  \nTile        \n  \n  Example   \nFamily Name:    Basic Wall  \nType Name:    FIN_Paint_(XX)_0_T20  \n  \n  \n  \n \n \n    \n CPX_NTC_BEP    Version | 00  \n         Page    | 45   Date  | 19 APR 2024",
+    "metadata": {
+      "number": "1.3",
+      "title": "Wall Finishes",
+      "path": [
+        {
+          "number": "1",
+          "title": "Master Program  3rd  May, 2024"
+        },
+        {
+          "number": "1.3",
+          "title": "Wall Finishes"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 177,
+    "content": "1.4  Floor Finishes  \nCategory:  Floor (System Family)    RLB 5D Ref.  \nFamily Naming:  Floor (Fixed)    \nType Naming:    \nFloor Category  Material  Material Type Code  Tile Size   \n(if applicable)  \nThickness  Section 4  \n  \nRFS <Raised  \nFloor System>  \n (XX)   (XX)   L600W600   T300  \n  \n   Example   \nFamily Name:     Floor  \nType Name:     RFS_(XX)_(XX)_L600W600_T300",
+    "metadata": {
+      "number": "1.4",
+      "title": "Floor Finishes",
+      "path": [
+        {
+          "number": "1",
+          "title": "Master Program  3rd  May, 2024"
+        },
+        {
+          "number": "1.4",
+          "title": "Floor Finishes"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 178,
+    "content": "1.5  Ceiling  \nCategory:  Ceiling (System Family)   RLB 5D Ref.  \nFamily Naming:  Basic Ceiling (Fixed)/ Compound Ceiling (Fixed)   \nType Naming:   \nCeiling Material  Ceiling Code  Type/Identifier  Tile Size  Overall  \nThickness  \nSection 6  \n  \nAluminium  (XX)  C Strip  L300W300  T100  \nPaint          \nPlastering          \n  \n   Example   \nFamily Name:     Ceiling  \nType Name:     Aluminium_(XX)_C Strip_L300W300_T100  \n  \n \n \n    \n CPX_NTC_BEP    Version | 00  \n         Page    | 46   Date  | 19 APR 2024",
+    "metadata": {
+      "number": "1.5",
+      "title": "Ceiling",
+      "path": [
+        {
+          "number": "1",
+          "title": "Master Program  3rd  May, 2024"
+        },
+        {
+          "number": "1.5",
+          "title": "Ceiling"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 179,
+    "content": "1.6  Door  \nCategory:  Door  RLB 5D Ref.  \nFamily Naming:    \nDoor Material  Door Panel  Description   \nPlaster Laminate (PL)  SS {Single Swing}     \nWood (WD)  DS {Double Swing}    \nGlass (GL)  SL {Sliding}    \nStainless Steel (SS)       \nType Naming:    \nDoor Type  Door Size {Door Leaf}  Fire Resistance Rating \n(Integrity/Insulation)",
+    "metadata": {
+      "number": "1.6",
+      "title": "Door",
+      "path": [
+        {
+          "number": "1",
+          "title": "Master Program  3rd  May, 2024"
+        },
+        {
+          "number": "1.6",
+          "title": "Door"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 180,
+    "content": "2.12",
+    "metadata": {
+      "number": "2.12",
+      "title": "",
+      "path": [
+        {
+          "number": "2",
+          "title": "4D model linking with Master Program  24 th May, 2024"
+        },
+        {
+          "number": "2.12",
+          "title": "Mechanical Equipment"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 181,
+    "content": "3.31  \n3.5~10  (XXXX)  H2100W850  60/60  \nShared Parameter:    \nCPS.Acoustic Requirement   \nCPS.Rough Height   \nCPS.Rough Width   \nCPS.Leaf Height   \nCPS.Leaf Width   \nCPS.Thickness  \n \n  \n  Example   \nFamily Name:    WD_DS_SWING DOOR  \nType Name:    (XXXX)_H2900W1000/1000_60/60",
+    "metadata": {
+      "number": "3.31",
+      "title": "",
+      "path": [
+        {
+          "number": "3",
+          "title": "Progress monitoring using Synchro Control Update every Friday starting from"
+        },
+        {
+          "number": "3.31",
+          "title": ""
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 182,
+    "content": "1.7  Louvre  \nCategory:  Air Terminal (Customized Family)   RLB 5D Ref.  \nFamily Naming:     \nLouver  Group  Frame  \nMaterial  \nLouver Blade  Description  \nLOU  Aluminium (AL)  Double Bank    \nType Naming:       \nLouver Type  Size  Fire Resistance Rating  \n(Integrity/Insulation)",
+    "metadata": {
+      "number": "1.7",
+      "title": "Louvre",
+      "path": [
+        {
+          "number": "1",
+          "title": "Master Program  3rd  May, 2024"
+        },
+        {
+          "number": "1.7",
+          "title": "Louvre"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 183,
+    "content": "2.13  \n(L001)  H1350W1000  60/60    \n \n  Example   \nFamily Name:    LOU_AL_Double Bank  \nType Name:    (L001)_H1350W1000_60/60  \n  \n \n \n    \n CPX_NTC_BEP    Version | 00  \n         Page    | 47   Date  | 19 APR 2024  \n                                                                           \n  \n2.  MEP",
+    "metadata": {
+      "number": "2.13",
+      "title": "",
+      "path": [
+        {
+          "number": "2",
+          "title": "4D model linking with Master Program  24 th May, 2024"
+        },
+        {
+          "number": "2.13",
+          "title": "Pipe Accessories"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 184,
+    "content": "2.1  Air Terminals  \nCategory:  Air Terminals     RLB 5D Ref.  \nFamily Naming:      \nCategory  Air Terminals \nType  \nAir Terminals \nMaterial  \nMounting  Description \n(Optional)  \nAir Terminals  Diffuser  Aluminium  Ceiling  (XXXX)  \n  Grill    Wall    \nType Naming:      \nAir Terminals   \nCode  \nAir Terminals \nSize  \n      \n  \nAG01  H600W600",
+    "metadata": {
+      "number": "2.1",
+      "title": "Air Terminals",
+      "path": [
+        {
+          "number": "2",
+          "title": "4D model linking with Master Program  24 th May, 2024"
+        },
+        {
+          "number": "2.1",
+          "title": "Air Terminals"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 185,
+    "content": "2.2  Cable Tray Fittings  \nCategory:  Cable Tray Fittings   RLB 5D Ref.  \nFamily Naming:  Basic Ceiling (Fixed)/ Compound Ceiling (Fixed)   \nCategory  Fittings Type  Direction  Shape  Description \n(Optional)  \nCable Tray Fittings  Bend  Horizontal  Channel  (XXXX)  \n  Cross  Vertical  Ladder    \n  Tee        \n  InBend        \n  OutBend        \nType Naming:    \nCable Tray Fittings Type   10.23  \n  \n(XXXX)   \nParameter:    \n- Brand  \n- Model  \n \n  \n  \n \n \n    \n CPX_NTC_BEP    Version | 00  \n         Page    | 48   Date  | 19 APR 2024",
+    "metadata": {
+      "number": "2.2",
+      "title": "Cable Tray Fittings",
+      "path": [
+        {
+          "number": "2",
+          "title": "4D model linking with Master Program  24 th May, 2024"
+        },
+        {
+          "number": "2.2",
+          "title": "Cable Tray Fittings"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 186,
+    "content": "2.3  Conduit Fittings  \nCategory:  Conduit Fittings    RLB 5D Ref.  \nFamily Naming:      \nCategory  Fittings Type  Fittings Material  Description (Optional)  \nConduit  \nFittings  \nElbow  Cast Zinc  (XXXX)  \n  Junction Box      \nType Naming:     \nConduit Fittings Type       \n(XXXX)    \nParameter:     \n- Brand   \n- Model",
+    "metadata": {
+      "number": "2.3",
+      "title": "Conduit Fittings",
+      "path": [
+        {
+          "number": "2",
+          "title": "4D model linking with Master Program  24 th May, 2024"
+        },
+        {
+          "number": "2.3",
+          "title": "Conduit Fittings"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 187,
+    "content": "2.4  Duct Accessories  \nCategory:  Duct Accessories   RLB 5D Ref.  \nFamily Naming:     \nCategory  Fittings Type  Description (Optional)  \nDuct Accessories  Air Filter  (XXXX)  \n  Damper    \n  Silencer    \nParameter:    \n- Brand   \n- Model",
+    "metadata": {
+      "number": "2.4",
+      "title": "Duct Accessories",
+      "path": [
+        {
+          "number": "2",
+          "title": "4D model linking with Master Program  24 th May, 2024"
+        },
+        {
+          "number": "2.4",
+          "title": "Duct Accessories"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 188,
+    "content": "7.28",
+    "metadata": {
+      "number": "7.28",
+      "title": "",
+      "path": [
+        {
+          "number": "7",
+          "title": "Quality Control and Assurance Procedure"
+        },
+        {
+          "number": "7.28",
+          "title": ""
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 189,
+    "content": "39",
+    "metadata": {
+      "number": "39",
+      "title": "",
+      "path": [
+        {
+          "number": "39",
+          "title": ""
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 190,
+    "content": "49",
+    "metadata": {
+      "number": "49",
+      "title": "",
+      "path": [
+        {
+          "number": "49",
+          "title": ""
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 191,
+    "content": "2.5  Duct Terminals  \nCategory:  Duct Terminals   RLB 5D Ref.  \nFamily Naming:     \nCategory  Description  \nDuct Terminals  (XXXX)  \nParmeter:    \n- Brand   \n- Model  \n   \n \n  \n \n \n    \n CPX_NTC_BEP    Version | 00  \n         Page    | 49   Date  | 19 APR 2024",
+    "metadata": {
+      "number": "2.5",
+      "title": "Duct Terminals",
+      "path": [
+        {
+          "number": "2",
+          "title": "4D model linking with Master Program  24 th May, 2024"
+        },
+        {
+          "number": "2.5",
+          "title": "Duct Terminals"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 192,
+    "content": "2.6  Duct Fittings  \nCategory:  Duct Fittings   RLB 5D Ref.  \nFamily Naming:     \nCategory  Fittings Type  Description (Optional)  \nDuct Fittings  Bend  (XXXX)  \n  Cross    \n  Tee    \n  Transition    \n  Endcap    \nType Naming:    \nDuct Fittings Type   7.20",
+    "metadata": {
+      "number": "2.6",
+      "title": "Duct Fittings",
+      "path": [
+        {
+          "number": "2",
+          "title": "4D model linking with Master Program  24 th May, 2024"
+        },
+        {
+          "number": "2.6",
+          "title": "Duct Fittings"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 193,
+    "content": "10.9",
+    "metadata": {
+      "number": "10.9",
+      "title": "",
+      "path": [
+        {
+          "number": "10.9",
+          "title": ""
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 194,
+    "content": "21",
+    "metadata": {
+      "number": "21",
+      "title": "",
+      "path": [
+        {
+          "number": "21",
+          "title": ""
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 195,
+    "content": "23",
+    "metadata": {
+      "number": "23",
+      "title": "",
+      "path": [
+        {
+          "number": "23",
+          "title": ""
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 196,
+    "content": "33",
+    "metadata": {
+      "number": "33",
+      "title": "",
+      "path": [
+        {
+          "number": "33",
+          "title": ""
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 197,
+    "content": "36",
+    "metadata": {
+      "number": "36",
+      "title": "",
+      "path": [
+        {
+          "number": "36",
+          "title": ""
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 198,
+    "content": "44",
+    "metadata": {
+      "number": "44",
+      "title": "",
+      "path": [
+        {
+          "number": "44",
+          "title": ""
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 199,
+    "content": "47  \n(XXXX)   \nParameter:    \n- Brand   \n- Model",
+    "metadata": {
+      "number": "47",
+      "title": "",
+      "path": [
+        {
+          "number": "47",
+          "title": ""
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 200,
+    "content": "2.7  Duct Placeholders  \nCategory:  Duct Placeholders   RLB 5D Ref.  \nFamily Naming:     \nCategory  Description  \nDuct Placeholders  (XXXX)  \nParameter:    \n- Brand   \n- Model",
+    "metadata": {
+      "number": "2.7",
+      "title": "Duct Placeholders",
+      "path": [
+        {
+          "number": "2",
+          "title": "4D model linking with Master Program  24 th May, 2024"
+        },
+        {
+          "number": "2.7",
+          "title": "Duct Placeholders"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 201,
+    "content": "2.8  Electrical Equipment  \nCategory:  Electrical Equipment   RLB 5D Ref.  \nFamily Naming:     \nCategory  Fittings Type  Description (Optional)  \nElectrical Equipment  Emergency Generator  (XXXX)  \n  Switch Board    \n  Junction Box    \n  Panel Board    \nParameter:    \n- Brand   \n- Model  \n 7.53",
+    "metadata": {
+      "number": "2.8",
+      "title": "Electrical Equipment",
+      "path": [
+        {
+          "number": "2",
+          "title": "4D model linking with Master Program  24 th May, 2024"
+        },
+        {
+          "number": "2.8",
+          "title": "Electrical Equipment"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 202,
+    "content": "54  \n  \n  \n \n \n    \n CPX_NTC_BEP    Version | 00  \n         Page    | 50   Date  | 19 APR 2024",
+    "metadata": {
+      "number": "54",
+      "title": "",
+      "path": [
+        {
+          "number": "54",
+          "title": ""
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 203,
+    "content": "2.9  Electrical Fixtures  \nCategory:  Electrical Fixtures   RLB 5D Ref.  \nFamily Naming:     \nCategory  Fittings Type  Description (Optional)  \nElectrical Fixtures  Appliance  (XXXX)  \n  Emergency Power Point    \n  Outlet    \n  Sensor    \n  Switch    \nParameter:    \n- Brand   \n- Model",
+    "metadata": {
+      "number": "2.9",
+      "title": "Electrical Fixtures",
+      "path": [
+        {
+          "number": "2",
+          "title": "4D model linking with Master Program  24 th May, 2024"
+        },
+        {
+          "number": "2.9",
+          "title": "Electrical Fixtures"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 204,
+    "content": "2.10  Fire Alarm Devices  \nCategory:  Fire Alarm Devices    RLB 5D Ref.  \nFamily Naming:      \nCategory  Type  Mounting  Description (Optional)  \nFire Alarm Devices  Fire Alarm Speaker  Ceiling    \n  Fire Alarm Bell  Wall    \n  Smoke Detector      \nParameter:     \n- Brand   \n- Model  \n8.23~30  \n  \n \n  \n \n \n    \n CPX_NTC_BEP    Version | 00  \n         Page    | 51   Date  | 19 APR 2024",
+    "metadata": {
+      "number": "2.10",
+      "title": "Fire Alarm Devices",
+      "path": [
+        {
+          "number": "2",
+          "title": "4D model linking with Master Program  24 th May, 2024"
+        },
+        {
+          "number": "2.10",
+          "title": "Fire Alarm Devices"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 205,
+    "content": "2.11  Lighting Fixtures  \nCategory:  Lighting Fixtures    RLB 5D Ref.  \nFamily Naming:      \nCategory  Type  Mounting  Description (Optional)  \nLighting Fixtures  Spot  Ceiling    \nType Naming:     \nLighting Size     10.17 18  \nL100W200    \nD100    \nParameter:     \n- Brand   \n- Model",
+    "metadata": {
+      "number": "2.11",
+      "title": "Lighting Fixtures",
+      "path": [
+        {
+          "number": "2",
+          "title": "4D model linking with Master Program  24 th May, 2024"
+        },
+        {
+          "number": "2.11",
+          "title": "Lighting Fixtures"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 206,
+    "content": "2.12  Mechanical Equipment  \nCategory:  Mechanical Equipment   RLB 5D Ref.  \nFamily Naming:     \nCategory  Type  Description (Optional)  \nMechanical \nEquipment  \nAir Conditioner  (XXXX)  \n \n  Condenser    \n  Fan    \nType Naming:     \nSize    7.32",
+    "metadata": {
+      "number": "2.12",
+      "title": "Mechanical Equipment",
+      "path": [
+        {
+          "number": "2",
+          "title": "4D model linking with Master Program  24 th May, 2024"
+        },
+        {
+          "number": "2.12",
+          "title": "Mechanical Equipment"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 207,
+    "content": "43",
+    "metadata": {
+      "number": "43",
+      "title": "",
+      "path": [
+        {
+          "number": "43",
+          "title": ""
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 208,
+    "content": "52  L200W200H300    \nParameter:     \n- Brand   \n- Model  \n  \n  \n  \n \n \n    \n CPX_NTC_BEP    Version | 00  \n         Page    | 52   Date  | 19 APR 2024",
+    "metadata": {
+      "number": "52",
+      "title": "L200W200H300",
+      "path": [
+        {
+          "number": "52",
+          "title": "L200W200H300"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 209,
+    "content": "2.13  Pipe Accessories  \nCategory:  Pipe Accessories   RLB 5D Ref.  \nFamily Naming:     \nCategory  Type  Description (Optional)  \nPipe Accessories  Valve  (XXXX)  \nType Naming:    \nSize     \nD50   \nParameter:    \n- Brand   \n- Model",
+    "metadata": {
+      "number": "2.13",
+      "title": "Pipe Accessories",
+      "path": [
+        {
+          "number": "2",
+          "title": "4D model linking with Master Program  24 th May, 2024"
+        },
+        {
+          "number": "2.13",
+          "title": "Pipe Accessories"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 210,
+    "content": "2.14  Pipe Fittings  \nCategory:  Pipe Fittings    RLB 5D Ref.  \nFamily Naming:      \nCategory  Fittings Type  Fittings \nMaterial  \nDescription (Optional)  \nPipe Fittings  Cross  Cast Zinc  (XXXX)  \n  Elbow  Steel    \n  Flange  Aluminum    \n  Reducer  PVC    \n  Tee  Galvanized  \nIron(GI)  \n  \nType Naming:     \nPipe Fittings Type    5  \n(XXXX)  9.2  \nParameter:   \n- Brand   \n- Model  \n  \n \n  \n \n \n    \n CPX_NTC_BEP    Version | 00  \n         Page    | 53   Date  | 19 APR 2024",
+    "metadata": {
+      "number": "2.14",
+      "title": "Pipe Fittings",
+      "path": [
+        {
+          "number": "2",
+          "title": "4D model linking with Master Program  24 th May, 2024"
+        },
+        {
+          "number": "2.14",
+          "title": "Pipe Fittings"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 211,
+    "content": "2.15  Security Devices  \nCategory:  Security Devices   RLB 5D Ref.  \nFamily Naming:     \nCategory  Type  Description (Optional)  \nSecurity Devices  CCTV  (XXXX)  \n  Card_Reader    \n  Electric_Lock    \n  Key_Card    \nParameter:    \n- Brand   \n- Model  \n   \n   \nB. RLB 5D Standard  \n  \nPlease refer to separate attachment “Appendix B-RLB 5D Standard”.  \n     \n \n \n    \n CPX_NTC_BEP    Version | 00  \n         Page    | 54   Date  | 19 APR 2024  \n                                                                           \n  \nC. LOD Responsibility Matrix  \nThe LOD Matrix in the table below outline minimum m odelling requirement and respective level of develo pment \nat different project stages. Minimum modelling requirement and LOD are project specific.  \n  \n      A. Architecture / Interior Design & \nFitting Out            \nItem \nNo.   \nModel Element \nList   Required   \nConstruction Stage    As-built \nStage    \nAUT   LOD-G   LOD-I   AUT   LOD-G   LOD-I   \nA01   \nRoom space, \ncorridor, plant & \nequipment room   \nY   Newtech 100 -  Newtech 100 -  \nA02   Openings   Y   Newtech  100  100  Newtech  100  100  \nA03   \nInterior wall / \npartition / non-\nstructural wall with \nfinishes   \nY   Newtech 400 400 Newtech 400 500 \nA04 \nRaised floor \nsystem and false \nceiling   \nY   Newtech 400 400 Newtech 400 500 \nA05 Interior design and \nfitout works   Y   Newtech 400 400 Newtech 400 500 \nA06 Interior lighting \n(FOH area)   Y   Newtech 400 400 Newtech 400 500 \nA07  Door   Y   Newtech  400  400  Newtech  400  500  \nA08 \nLouvre  on  \nexternal  \nwall/internal wall   \nY   Newtech 400 400 Newtech 400 500 \nA09 \nRailing, \nbalustrade, \nhandrail   \nY   Newtech 400 400 Newtech 400 500 \nA10 Access ladder and \ncatwalk   Y   Newtech 400 400 Newtech 400 500 \nA11 Maintenance \nplatform   Y   Newtech 400 400 Newtech 400 500 \nA12 \nFinishes on  \narchitectural \nelements   \nY   Newtech 400 400 Newtech 400 500 \nA13 Exit sign   Y   Newtech  400  400  Newtech  400  500  \n   \n \n  \n    B. M&E – Mechanical Ventilation and Air Conditionin g      \nItem \nNo.   Model Element List   Required   \nConstruction Stage    As-built \nStage    \nAUT   LOD-G   LOD-I  AUT  LOD-G  LOD-I  \nB01 Ductwork   Y   Newtech 400 400 Newtech 400 500 \nB02 \nDiffuser, air boot, air  \nY   Newtech 400 400 Newtech 400 500 \ngrill   \nB03 Fire damper   Y   Newtech 400 400 Newtech 400 500 \nB04 Fan coil unit   Y   Newtech 400 400 Newtech 400 500  \nB05 Chiller   Y   Newtech 400 400 Newtech 400 500 \nB06 Chilled water pump   Y   Newtech 400 400 Newtech 40 0 500 \nB07 \nSplit-type indoor & \noutdoor air \nconditioning unit   \nY   Newtech 400 400 Newtech 400 500 \nB08 Refrigerant pipe   Y   Newtech 400 400 Newtech 400 500 \n \n \n    \n CPX_NTC_BEP    Version | 00  \n         Page    | 55   Date  | 19 APR 2024  \n                                                                           \n  \nB09 Chilled water pipe   Y   Newtech 400 400 Newtech 40 0 500 \nB10 Condensate drain \npipe   Y   Newtech 400 400 Newtech 400 500 \nB11 Control panel   Y   Newtech 400 400 Newtech 400 500  \nB12 BMS panel   Y   Newtech 400 400 Newtech 400 500 \nB13 BMS control & \nmonitoring module   Y   Newtech 400 400 Newtech 400 500 \n \nC. M&E – Fire Services  \nItem \nNo.   Model Element List   Required   \nConstruction Stage  As-built Stage  \nAUT   LOD-G   LOD-I   AUT   LOD-G   LOD-I   \nC01 \nFire alarm system, \nalarm bell, gongs & \nbreak glass unit   \nY   Newtech 400 400 Newtech 400 500 \nC02 Fire detection, heat \nor smoke detectors   Y   Newtech 400 400 Newtech 400 500 \nC03 AFA panel   Y   Newtech 400 400 Newtech 400 500 \nC04 \nPortable \nhandoperated \napproved \nappliance, fire \nextinguisher   \nY   Newtech 400 400 Newtech 400 500 \nC05 \nFM200 and related \nequipment, valve \nand etc.   \nY   Newtech 400 400 Newtech 400 500 \n  \n    D.M&E – Electri cal     \nItem \nNo.   Model Element List  Required   \n Construction Sta  ge   As-built Stage   \nAUT   LOD-G   LOD-I   AUT   LOD-G   LOD-I   \nD01   \nCable tray, trunking, \ncable containment, \nbusduct, busbar, \nbusway, power  \nfeed   \nY   \nNewtech",
+    "metadata": {
+      "number": "2.15",
+      "title": "Security Devices",
+      "path": [
+        {
+          "number": "2",
+          "title": "4D model linking with Master Program  24 th May, 2024"
+        },
+        {
+          "number": "2.15",
+          "title": "Security Devices"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 212,
+    "content": "400  400  \nNewtech",
+    "metadata": {
+      "number": "400",
+      "title": "400",
+      "path": [
+        {
+          "number": "400",
+          "title": "500"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 213,
+    "content": "400  500  \nD02   Generator or  \nEmergency generator   Y   Newtech  400  400  Newtech  400  500  \nD03   \nGenerator exhaust flue \nincl. acoustic treatment  \nY   \n  \nNewtech",
+    "metadata": {
+      "number": "400",
+      "title": "500",
+      "path": [
+        {
+          "number": "400",
+          "title": "500"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 214,
+    "content": "400  400  \nNewtech",
+    "metadata": {
+      "number": "400",
+      "title": "400",
+      "path": [
+        {
+          "number": "400",
+          "title": "500"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 215,
+    "content": "400  500  \nD04   \nDiesel tank & fuel pipes  \nY   \nNewtech",
+    "metadata": {
+      "number": "400",
+      "title": "500",
+      "path": [
+        {
+          "number": "400",
+          "title": "500"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 216,
+    "content": "400  400  \nNewtech",
+    "metadata": {
+      "number": "400",
+      "title": "400",
+      "path": [
+        {
+          "number": "400",
+          "title": "500"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 217,
+    "content": "400  500  \nD05   Electric Meter   Y   Newtech  400  400  Newtech  400  500  \nD06   Transformer   N             \nD07   Switchboard, \nswitchgear   Y   Newtech  400  400  Newtech  400  500  \nD08   \nConcealed and cast-in \nplace conduit   N               \nD09   \nOutlet, wall switch, \nsecurity device, card \naccess and “Plug \nmould” (socket point)   \nY   \nNewtech",
+    "metadata": {
+      "number": "400",
+      "title": "500",
+      "path": [
+        {
+          "number": "400",
+          "title": "500"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 218,
+    "content": "400  400  \nNewtech",
+    "metadata": {
+      "number": "400",
+      "title": "400",
+      "path": [
+        {
+          "number": "400",
+          "title": "500"
+        }
+      ]
+    }
+  },
+  {
+    "file_id": 10,
+    "chunk_index": 219,
+    "content": "400  500  \nD10   Light fitting   Y   Newtech  400  400  Newtech  400  500  \nD11   Emergency lighting   Y   Newtech  400  400  Newtech  400  500  \n \n \n    \n CPX_NTC_BEP    Version | 00  \n         Page    | 56   Date  | 19 APR 2024  \n                                                                           \n  \nD12   Landscape lighting   N         \nD13   Emergency power  \npoint   Y   Newtech  400  400  Newtech  400  500  \nD14   Exit sign   Y   Newtech  400  400  Newtech  400  500  \nD15   Lightning rod   N         \n \n   \n  E. Specialist System     \nItem \nNo.   Model Element List   Required   \nConstruction Stage   As-built Stage   \nAUT   LOD-G   LOD-I   AUT   LOD-G   LOD-I   \nG01  Computer racking, \nservers etc.   Y   Newtech  400  400  Newtech  400  500  \nG02  \nSecurity system \nincluding smart card \naccess and CCTV \ncamera   \nY   Newtech  400  400  Newtech  400  500  \n  \n    \n  \n \n \n    \n CPX_NTC_BEP    Version | 00  \n         Page    | 57   Date  | 19 APR 2024  \n                                                                           \n  \nD. Shared Parameter  \nCPS.SHARED PARAMETER   PROJECT PARAMETER   As Built \n(Y/N)  \nExample \n(From AI001)  GROUP  NAME  DATAT  \nYPE  \nDISCIPLINE  PARAMETER \nGROUP  \nTYPE/  \nINSTANCE  \nVALUE PER \nGROUP  \nCATEGORY \nASSIGNED  \n0.Project Setup  CPS.Schedule Group  TEXT  COMMON  IdenkgFbHty Data  Instance  Group  Schedule  Y    \n0.Project Setup  CPS.Schedule Subgroup  TEXT  COMMON  IdenkgFbHty Data  Instance  Group  Schedule  Y    \n0.Project Setup  CPS.Sheet Group  TEXT  COMMON  IdenkgFbHty Data  Instance  Group  Sheet  Y    \n0.Project Setup  CPS.Sheet Subgroup  TEXT  COMMON  IdenkgFbHty Data  Instance  Group  Sheet  Y    \n0.Project Setup  CPS.View Group  TEXT  COMMON  IdenkgFbHty Data  Instance  Group  View  Y    \n0.Project Setup  CPS.View Subgroup  TEXT  COMMON  IdenkgFbHty Data  Instance  Group  View  Y    \n1.Standard  \nDimension  \nCPS.AFFL  LENGTH  COMMON  IdenkgFbHty Data  Type  Group  Categories  Y    \n1.Standard  \nDimension  \nCPS.Area  AREA  COMMON  IdenkgFbHty Data  Type  Group  Categories  Y    \n1.Standard  \nDimension  \nCPS.ASFL  LENGTH  COMMON  IdenkgFbHty Data  Type  Group  Categories  Y    \n1.Standard  \nDimension  \nCPS.BokgFWHom Level  LENGTH  COMMON  IdenkgFbHty Data  Type  Group  Categories  Y    \n1.Standard  \nDimension  \nCPS.Center Level  LENGTH  COMMON  IdenkgFbHty Data  Type  Group  Categories  Y    \n1.Standard  \nDimension  \nCPS.Depth  LENGTH  COMMON  IdenkgFbHty Data  Type  Group  Categories  Y  100  \n1.Standard  \nDimension  \nCPS.Diameter  LENGTH  COMMON  IdenkgFbHty Data  Type  Group  Categories  Y  100  \n1.Standard  \nDimension  \nCPS.ElevakgFbHon  LENGTH  COMMON  IdenkgFbHty Data  Type  Group  Categories  Y    \n1.Standard  \nDimension  \nCPS.Height  LENGTH  COMMON  IdenkgFbHty Data  Type  Group  Categories  Y  100  \n1.Standard  \nDimension  \nCPS.Invert Level   LENGTH  COMMON  IdenkgFbHty Data  Type  Group  Categories  Y    \n1.Standard  \nDimension  \nCPS.Length  LENGTH  COMMON  IdenkgFbHty Data  Type  Group  Categories  Y  100  \n1.Standard  \nDimension  \nCPS.Thickness  LENGTH  COMMON  IdenkgFbHty Data  Type  Group  Categories  Y  10  \n1.Standard  \nDimension  \nCPS.Top Level  LENGTH  COMMON  IdenkgFbHty Data  Type  Group  Categories  Y    \n1.Standard  \nDimension  \nCPS.Width  LENGTH  COMMON  IdenkgFbHty Data  Type  Group  Categories  Y  20  \n2.General  CPS.Asset ID  TEXT  COMMON  IdenkgFbHty Data  Type  Group  Categories  Y    \n2.General  CPS.LocakgFbHon  TEXT  COMMON  IdenkgFbHty Data  Type  Group  Categories  Y    \n2.General  CPS.Material SpeciﬁcakgFbHon  TEXT  COMMON  IdenkgFbHty Data  Type  Group  Categories  Y    \n2.General  CPS.Material Submission  TEXT  COMMON  IdenkgFbHty Data  Type  Group  Categories  Y    \n2.General  CPS.Part ID  TEXT  COMMON  IdenkgFbHty Data  Type  Group  Categories  Y    \n3.Drawing  \nProduckgFbHon  \nCPS.Approved Date  TEXT  COMMON  IdenkgFbHty Data  Instance  Group  Sheet  Y    \n3.Drawing  \nProduckgFbHon  \nCPS.BD Reference  TEXT  COMMON  IdenkgFbHty Data  Instance  Group  Sheet  Y    \n3.Drawing  \nProduckgFbHon  \nCPS.Checked Date  TEXT  COMMON  IdenkgFbHty Data  Instance  Group  Sheet  Y    \n3.Drawing  \nProduckgFbHon  \nCPS.Contract Number  TEXT  COMMON  IdenkgFbHty Data  Instance  Group  Sheet  Y    \n3.Drawing  \nProduckgFbHon  \nCPS.Drawn Date  TEXT  COMMON  IdenkgFbHty Data  Instance  Group  Sheet  Y    \n \n \n    \n CPX_NTC_BEP    Version | 00  \n         Page    | 58   Date  | 19 APR 2024  \n                                                                           \n  \n \nCPS.SHARED PARAMETER   PROJECT PARAMETER   As Built \n(Y/N)  \nExample \n(From AI001)  GROUP  NAME  DATAT  \nYPE  \nDISCIPLINE  PARAMETER \nGROUP  \nTYPE/  \nINSTANCE  \nVALUE PER \nGROUP  \nCATEGORY \nASSIGNED  \n3.Drawing  \nProduckgFbHon  \nCPS.FSD Ref  TEXT  COMMON  IdenkgFbHty Data  Instance  Group  Sheet  Y    \n3.Drawing  \nProduckgFbHon  \nCPS.Paper Size  TEXT  COMMON  IdenkgFbHty Data  Instance  Group  Sheet  Y    \n3.Drawing  \nProduckgFbHon  \nCPS.Preﬁx Sheet Number  TEXT  COMMON  IdenkgFbHty Data  Instance  Group  Sheet  Y    \n3.Drawing  \nProduckgFbHon  \nCPS.Sheet Issue DescripkgFbHon  TEXT  COMMON  IdenkgFbHty Data  Instance  Group  Sheet  Y    \n3.Drawing  \nProduckgFbHon  \nCPS.Sheet Scale  TEXT  COMMON  IdenkgFbHty Data  Instance  Group  Sheet  Y    \n4.ConstruckgFbHon  CPS.AckgFbHvity ID  TEXT  COMMON  ConstruckgFbHon  Instance  Group  Categories  Y    \n4.ConstruckgFbHon  CPS.Bill Number  TEXT  COMMON  ConstruckgFbHon  Instance  Group  Categories  N    \n4.ConstruckgFbHon  CPS.ClassiﬁcakgFbHon  TEXT  COMMON  ConstruckgFbHon  Instance  Group  Categories  N    \n4.ConstruckgFbHon  CPS.Cost Code  TEXT  COMMON  ConstruckgFbHon  Instance  Group  Categories  N    \n4.ConstruckgFbHon  CPS.Country of Origin  TEXT  COMMON  ConstruckgFbHon  Instance  Group  Categories  N    \n4.ConstruckgFbHon  CPS.Design Consultant  TEXT  COMMON  ConstruckgFbHon  Instance  Group  Categories  Y  DSCO-DSP  \n4.ConstruckgFbHon  CPS.Design Revision  TEXT  COMMON  ConstruckgFbHon  Instance  Group  Categories  Y  AI002  \n4.ConstruckgFbHon  CPS.Works Package ID  TEXT  COMMON  ConstruckgFbHon  Instance  Group  Categories  Y  NSC  \n4.ConstruckgFbHon  CPS.Payment No.  TEXT  COMMON  ConstruckgFbHon  Instance  Group  Categories  Y  IP02  \n4.ConstruckgFbHon  CPS.Progress Date  TEXT  COMMON  ConstruckgFbHon  Instance  Group  Categories  Y  22/4/2023  \n4.ConstruckgFbHon  CPS.Progress Remark  TEXT  COMMON  ConstruckgFbHon  Instance  Group  Categories  Y    \n4.ConstruckgFbHon  CPS.Status  TEXT  COMMON  ConstruckgFbHon  Instance  Group  Categories  Y    \n5.Architectural  CPS.A.AcouskgFbHc Requirement TEXT  COMMON  IdenkgFbHty Data  Type  Group  Door  Y    \n5.Architectural  CPS.A.BD Door Mark  TEXT  COMMON  IdenkgFbHty Data  Type  Group  Door  Y  GW2A  \n5.Architectural  CPS.A.Door Leaf Height  LENGTH  COMMON  IdenkgFbHty Data  Type  Group  Door  Y  100  \n5.Architectural  CPS.A.Door Leaf Thickness  LENGTH  COMMON  IdenkgFbHty Data  Type  Group  Door  Y  400  \n5.Architectural  CPS.A.Door Leaf Width  TEXT  COMMON  IdenkgFbHty Data  Type  Group  Door  Y    \n5.Architectural  CPS.A.Face Material Inside  TEXT  COMMON  IdenkgFbHty Data  Type  Group  Door  Y  MT-03  \n5.Architectural  CPS.A.Face Material Outside  TEXT  COMMON  IdenkgFbHty Data  Type  Group  Door  Y  MT-03  \n5.Architectural  CPS.A.Front of House  TEXT  COMMON  IdenkgFbHty Data  Instance  Group  Room  Y  NA  \n5.Architectural  CPS.A.FRR InsulakgFbHon  TEXT  COMMON  IdenkgFbHty Data  Type  Group  Door  Y  100  \n5.Architectural  CPS.A.FRR Intergrity  TEXT  COMMON  IdenkgFbHty Data  Type  Group  Door  Y  100  \n5.Architectural  CPS.A.Ironmongery Type  TEXT  COMMON  IdenkgFbHty Data  Type  Group  Door  Y    \n5.Architectural  CPS.A.Louvre  YES/NO  COMMON  IdenkgFbHty Data  Type  Group  Door  Y    \n5.Architectural  CPS.A.Remarks  TEXT  COMMON  IdenkgFbHty Data  Type  Group  Door  Y  LV5  \n5.Architectural  CPS.A.Room Type  TEXT  COMMON  IdenkgFbHty Data  Instance  Group  Room  Y    \n5.Architectural  CPS.A.Security  YES/NO  COMMON  IdenkgFbHty Data  Type  Group  Door  Y    \n5.Architectural  CPS.A.Smoke Seal  YES/NO  COMMON  IdenkgFbHty Data  Type  Group  Door  Y    \n5.Architectural  CPS.A.Vision Panel  YES/NO  COMMON  IdenkgFbHty Data  Type  Group  Door  Y    \n \n \n    \n CPX_NTC_BEP    Version | 00  \n         Page    | 59   Date  | 19 APR 2024  \n                                                                           \n  \nCPS.SHARED PARAMETER   PROJECT PARAMETER   As Built \n(Y/N)  \nExample \n(From AI001)  GROUP  NAME  DATAT  \nYPE  \nDISCIPLINE  PARAMETER \nGROUP  \nTYPE/  \nINSTANCE  \nVALUE PER \nGROUP  \nCATEGORY \nASSIGNED  \n6.Structural  CPS.S.Beam Type  TEXT  COMMON  IdenkgFbHty Data  Type  Group  Structural \nFraming  \nN   \n6.Structural  CPS.S.Bellout Depth  LENGTH  COMMON  IdenkgFbHty Data  Type  Group  Categories  N   \n6.Structural  CPS.S.Bellout Diameter  LENGTH  COMMON  IdenkgFbHty Data  Type  Group  Categories  N   \n6.Structural  CPS.S.Bellout Radius  LENGTH  COMMON  IdenkgFbHty Data  Type  Group  Categories  N   \n6.Structural  CPS.S.Cap Thickness  LENGTH  COMMON  IdenkgFbHty Data  Type  Group  Categories  N   \n6.Structural  CPS.S.Casing Thickness  LENGTH  COMMON  IdenkgFbHty Data  Type  Group  Categories  N   \n6.Structural  CPS.S.Column Type  TEXT  COMMON  IdenkgFbHty Data  Instance  Group  Columns,  \nStructural  \nColumns  \nN \n  \n6.Structural  CPS.S.Concrete Grade  TEXT  COMMON  IdenkgFbHty Data  Type  Group  Categories  N  \n6.Structural  CPS.S.Cut oﬀ level  LENGTH  COMMON  IdenkgFbHty Data  Type  Group  Categories  N   \n6.Structural  CPS.S.Drop Panel  YES/NO  COMMON  IdenkgFbHty Data  Type  Group  Categories  N   \n6.Structural  CPS.S.Embedded H-Pile  LENGTH  COMMON  IdenkgFbHty Data  Type  Group  Categories  N   \n6.Structural  CPS.S.Pile Diameter  LENGTH  COMMON  IdenkgFbHty Data  Type  Group  Categories  N   \n6.Structural  CPS.S.Pile Length  LENGTH  COMMON  IdenkgFbHty Data  Type  Group  Categories  N   \n6.Structural  CPS.S.Pile Radius  LENGTH  COMMON  IdenkgFbHty Data  Type  Group  Categories  N   \n6.Structural  CPS.S.Rock Socket Diameter  LENGTH  COMMON  IdenkgFbHty Data  Type  Group  Categories  N   \n6.Structural  CPS.S.Rock Socket Radius  LENGTH  COMMON  IdenkgFbHty Data  Type  Group  Categories  N   \n6.Structural  CPS.S.Shakg44W Diameter  LENGTH  COMMON  IdenkgFbHty Data  Type  Group  Categories  N  \n6.Structural  CPS.S.Slab Gradient  TEXT  COMMON  IdenkgFbHty Data  Type  Group  Categories  N   \n6.Structural  CPS.S.Socket Length  LENGTH  COMMON  IdenkgFbHty Data  Type  Group  Categories  N   \n6.Structural  CPS.S.Steel Plate Thickness  LENGTH  COMMON  IdenkgFbHty Data  Type  Group  Categories  N   \n6.Structural  CPS.S.Steel Plate Width  LENGTH  COMMON  IdenkgFbHty Data  Type  Group  Categories  N   \n6.Structural  CPS.S.TentakgFbHve Rockhead \nLevel  \nLENGTH  COMMON  IdenkgFbHty Data  Type  Group  Categories  N   \n6.Structural  CPS.S.Top Level of Pile Cap  LENGTH  COMMON  IdenkgFbHty Data  Instance  Group  Categories  N   \n6.Structural  CPS.S.TentakgFbHve Bedrock \nLevel at Pile Shakg44W  \nLENGTH  COMMON  IdenkgFbHty Data  Instance  Group  Categories  N   \n6.Structural  CPS.S.Shakg44W Length in Rock \nSocket  \nLENGTH  COMMON  IdenkgFbHty Data  Instance  Group  Categories  N   \n6.Structural  CPS.S.Cut Oﬀ Level of Pile  LENGTH  COMMON  IdenkgFbHty Data  Instance  Group  Categories  N   \n6.Structural  CPS.S.EﬀeckgFbHve Length in \nRock Socket  \nLENGTH  COMMON  IdenkgFbHty Data  Instance  Group  Categories  N   \n6.Structural  CPS.S.Waterprooﬁng  TEXT  COMMON  Materials and \nFinishes  \nInstance  Group  Categories  N  \n6.Structural  CPS.S.FRR  TEXT  COMMON  Materials and \nFinishes  \nInstance  Group  Categories  N  \n7.Mechanical,  \nElectrical and  \nPlumbing  \nCPS.M.Equipment Air Flow  TEXT  COMMON  IdenkgFbHty Data  Instance  Group  Categories  \nY  0.43m3/s  \n7.Mechanical,  \nElectrical and  \nPlumbing  \nCPS.M.Equipment Capacity  TEXT  COMMON  IdenkgFbHty Data  Instance  Group  Categories  \nY  400Pa  \n \n \n    \n CPX_NTC_BEP    Version | 00  \n         Page    | 60   Date  | 19 APR 2024  \n                                                                           \n  \nCPS.SHARED PARAMETER   PROJECT PARAMETER   As Built \n(Y/N)  \nExample \n(From AI001)  GROUP  NAME  DATAT  \nYPE  \nDISCIPLINE  PARAMETER \nGROUP  \nTYPE/  \nINSTANCE  \nVALUE PER \nGROUP  \nCATEGORY \nASSIGNED  \n7.Mechanical,  \nElectrical and  \nPlumbing  \nCPS.M.Equipment ID  TEXT  COMMON  IdenkgFbHty Data  Instance  Group  Categories  \nY  EAF-B2-004  \n7.Mechanical,  \nElectrical and  \nPlumbing  \nCPS.M.Equipment Water \nFlow  \nTEXT  COMMON  IdenkgFbHty Data  Instance  Group  Categories  \nY  2.5L/s  \n8.Façade  CPS.F.Façade System  TEXT  COMMON  IdenkgFbHty Data  Type  Group  Categories  N  \n8.Façade  CPS.F.Façade Material Code  TEXT  COMMON  IdenkgFbHty Data  Type  Group  Categories  N   \n9.MiC  CPS.MiC Module  TEXT  COMMON  IdenkgFbHty Data  Type  Group  Categories  N    \n9.MiC  CPS.MiC ID  TEXT  COMMON  IdenkgFbHty Data  Type  Group  Categories  N   \n \n \n \n \n \n \n    \n CPX_NTC_BEP    Version | 00  \n         Page    | 61   Date  | 19 APR 2024  \n                                                                           \n  \nE. CDE Folder Structure  \n \nTable of folder description  \nFolder Name  NSC 03 Data \nServices \nPlatform  \nContractors  BIM  3D BIM \nModels  \nArchive  Published  \nDescription  All files \nrelated to \nDSP  \nAll submittals \nby DSP sub-\ncontractor  \nAll DSP files \nrelated to \nBIM  \nAll DSP BIM \nmodel \nsubmittals  \nRecord of \ninformation \nfor audit trail \nof \ndevelopment  \nInformation \nAuthorised \nfor \nConstruction \n \nFolder Name  Shared  WIP  Arch  MEP  Navisworks  / \nDescription  Information \napproved for \nsharing with \nother \nstakeholders  \nWorking DSP \nmodels  \nWorking \nDSP Arch \nModels  \nWorking \nDSP MEP \nModels  \nNative \nprogress \nmodel \nsubmission  \n/",
+    "metadata": {
+      "number": "400",
+      "title": "500",
+      "path": [
+        {
+          "number": "400",
+          "title": "500"
+        }
+      ]
+    }
+  }
+]
