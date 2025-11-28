@@ -1,7 +1,6 @@
 from typing import List, Dict
 import json
 from langchain_core.tools import tool
-from kb.ingestion import ingest_pdf
 
 
 def build_tools(kb_controller, kb_id: int):

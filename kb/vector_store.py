@@ -1,5 +1,6 @@
 import os
 import json
+import shutil
 from typing import List, Dict, Any, Optional
 import numpy as np
 
@@ -104,3 +105,53 @@ class LocalVectorStore:
             })
         return results
 
+    def delete_items(self, kb_id: int, filter: Dict[str, Any]) -> int:
+        """根据过滤条件删除若干向量与其元信息，返回删除的数量
+
+        - 支持过滤键：`file_id`、`chunk_index`、`filename`
+        """
+        self._ensure_store(kb_id)
+        emb_path = self._emb_path(kb_id)
+        meta_path = self._meta_path(kb_id)
+        if not os.path.exists(meta_path):
+            return 0
+        with open(meta_path, "r", encoding="utf-8") as f:
+            meta = json.load(f)
+        if not meta:
+            return 0
+        def match(m: Dict[str, Any]) -> bool:
+            if filter.get("file_id") is not None and int(m.get("file_id", -1)) != int(filter.get("file_id")):
+                return False
+            if filter.get("chunk_index") is not None and int(m.get("chunk_index", -1)) != int(filter.get("chunk_index")):
+                return False
+            if filter.get("filename") is not None and m.get("filename") != filter.get("filename"):
+                return False
+            return True
+        keep_indices: List[int] = []
+        delete_count = 0
+        for i, m in enumerate(meta):
+            if match(m):
+                delete_count += 1
+            else:
+                keep_indices.append(i)
+        if delete_count == 0:
+            return 0
+        new_meta = [meta[i] for i in keep_indices]
+        with open(meta_path, "w", encoding="utf-8") as f:
+            json.dump(new_meta, f, ensure_ascii=False, indent=2)
+        if os.path.exists(emb_path):
+            embs = np.load(emb_path)
+            if embs.ndim == 1:
+                embs = embs.reshape(1, -1)
+            if keep_indices:
+                new_embs = embs[keep_indices, :]
+                np.save(emb_path, new_embs)
+            else:
+                os.remove(emb_path)
+        return delete_count
+
+    def clear(self, kb_id: int) -> None:
+        """清空指定知识库的向量存储目录"""
+        dirp = self._store_dir(kb_id)
+        if os.path.exists(dirp):
+            shutil.rmtree(dirp, ignore_errors=True)

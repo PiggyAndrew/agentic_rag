@@ -30,8 +30,8 @@ def main():
     print(f"\n❓ 问题: {question}")
     print("\n🤔 Agent 思考与行动过程:")
     print("-" * 50)
-    # 调用 Agent
-    result = agent.invoke({"messages": [("user", question)]})
+    # 调用 Agent（设置递归上限，避免模型反复调用工具不收敛）
+    result = agent.invoke({"messages": [("user", question)]}, {"recursion_limit": 8})
     final_answer = result["messages"][-1].content
     print(final_answer)
 

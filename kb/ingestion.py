@@ -1,7 +1,6 @@
 from typing import List, Dict, Any
 from pypdf import PdfReader
 import re
-from .embeddings import SentenceEmbeddingProvider
 
 
 def read_pdf_text(pdf_path: str) -> str:

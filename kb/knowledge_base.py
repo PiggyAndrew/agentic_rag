@@ -1,10 +1,11 @@
 from dataclasses import dataclass
 from typing import List, Dict, Tuple, Any, Optional
 import numpy as np
-from .embeddings import SentenceEmbeddingProvider
+from .embeddings import get_default_embedder
 from .vector_store import LocalVectorStore
 import json
 import os
+import shutil
 
 
 @dataclass
@@ -36,11 +37,11 @@ class PersistentKnowledgeBaseController:
       - `chunks/{file_id}.json`：对应文件的片段内容数组
     """
 
-    def __init__(self, base_dir: str = "data/kb", embedder: Optional[SentenceEmbeddingProvider] = None):
+    def __init__(self, base_dir: str = "data/kb", embedder: Optional[Any] = None):
         """初始化控制器并确保基础目录存在"""
         self.base_dir = base_dir
         os.makedirs(self.base_dir, exist_ok=True)
-        self._embedder = embedder or SentenceEmbeddingProvider()
+        self._embedder = embedder or get_default_embedder()
         self._vstore = LocalVectorStore(base_dir=self.base_dir)
 
     def _kb_dir(self, kb_id: int) -> str:
@@ -64,6 +65,18 @@ class PersistentKnowledgeBaseController:
         if not os.path.exists(files_path):
             with open(files_path, "w", encoding="utf-8") as f:
                 json.dump({"files": [], "next_id": 1}, f, ensure_ascii=False, indent=2)
+
+    def createKnowledgeBase(self, kb_id: int) -> None:
+        """创建或重置一个知识库的基础目录与索引"""
+        os.makedirs(self._kb_dir(kb_id), exist_ok=True)
+        self._ensure_kb(kb_id)
+        with open(self._files_path(kb_id), "w", encoding="utf-8") as f:
+            json.dump({"files": [], "next_id": 1}, f, ensure_ascii=False, indent=2)
+        self._vstore.clear(kb_id)
+
+    def deleteKnowledgeBase(self, kb_id: int) -> None:
+        """删除整个知识库目录，包括文件索引、片段与向量存储"""
+        shutil.rmtree(self._kb_dir(kb_id), ignore_errors=True)
 
     def _load_files(self, kb_id: int) -> Dict:
         """加载文件列表与下一个可用ID"""
@@ -90,6 +103,21 @@ class PersistentKnowledgeBaseController:
         meta["next_id"] = file_id + 1
         self._save_files(kb_id, meta)
         return info
+
+    def deleteFile(self, kb_id: int, file_id: int) -> bool:
+        """删除指定文件的元信息、片段与其向量索引"""
+        meta = self._load_files(kb_id)
+        files = meta.get("files", [])
+        new_files = [f for f in files if int(f.get("id")) != int(file_id)]
+        if len(new_files) == len(files):
+            return False
+        meta["files"] = new_files
+        self._save_files(kb_id, meta)
+        chunk_path = os.path.join(self._chunks_dir(kb_id), f"{int(file_id)}.json")
+        if os.path.exists(chunk_path):
+            os.remove(chunk_path)
+        self._vstore.delete_items(kb_id, {"file_id": int(file_id)})
+        return True
 
     def save_chunks(self, kb_id: int, file_id: int, chunks: List[Any]) -> None:
         """将片段内容持久化到 `chunks/{file_id}.json`
@@ -139,15 +167,21 @@ class PersistentKnowledgeBaseController:
                     "metadata": None,
                     "preview": (s[:200] + "...") if len(s) > 200 else s,
                 })
-        if texts:
-            embs = self._embedder.embed_texts(texts)
-            for i in range(len(normalized)):
-                normalized[i]["embedding"] = embs[i].tolist()
-                vitems[i]["embedding"] = embs[i].tolist()
+        try:
+            if texts:
+                embs = self._embedder.embed_texts(texts)
+                for i in range(len(normalized)):
+                    normalized[i]["embedding"] = embs[i].tolist()
+                    vitems[i]["embedding"] = embs[i].tolist()
+        except Exception:
+            pass
         with open(path, "w", encoding="utf-8") as f:
             json.dump(normalized, f, ensure_ascii=False, indent=2)
-        if vitems:
-            self._vstore.add_items(kb_id, vitems)
+        try:
+            if vitems and all("embedding" in vi for vi in vitems):
+                self._vstore.add_items(kb_id, vitems)
+        except Exception:
+            pass
 
     def _filename_of(self, kb_id: int, file_id: int) -> str:
         """根据文件ID获取文件名"""
