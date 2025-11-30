@@ -1,0 +1,97 @@
+{
+  // 使用 IntelliSense 了解相关属性。
+  // 悬停以查看现有属性的描述。
+  // 欲了解更多信息，请访问: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Python: Test Scripts (pick in test folder)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/test/${input:testScript}",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "envFile": "${workspaceFolder}/.env",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}"
+      }
+    },
+    {
+      "name": "Python: Agent Structured Output",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/test/test_agent_structured.py",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "envFile": "${workspaceFolder}/.env",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}"
+      }
+    },
+    {
+      "name": "Python: Agent Export Check",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/test/test_agent_export.py",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "envFile": "${workspaceFolder}/.env",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}"
+      }
+    },
+    {
+      "name": "Python: Ingest PDF (GUI)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/test/test_ingest_pdf.py",
+      "args": ["--gui"],
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "envFile": "${workspaceFolder}/.env",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}",
+        "INGEST_USE_LLM_HEADING": "true"
+      }
+    },
+    {
+      "name": "Python: Read CHM",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/test/test_read_chm.py",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "envFile": "${workspaceFolder}/.env",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}"
+      }
+    },
+    {
+      "name": "Python: Search Vectors",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/test/test_search_vectors.py",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "envFile": "${workspaceFolder}/.env",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}"
+      }
+    }
+  ],
+  "inputs": [
+    {
+      "id": "testScript",
+      "type": "pickString",
+      "description": "选择要运行的测试脚本",
+      "options": [
+        "test_agent_structured.py",
+        "test_agent_export.py",
+        "test_ingest_pdf.py",
+        "test_read_chm.py",
+        "test_read_persisted.py",
+        "test_search_vectors.py"
+      ]
+    }
+  ]
+}

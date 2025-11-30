@@ -17,7 +17,7 @@ knowledge_base_id = 1  # 知识库ID（持久化）
 
 def main():
     """主函数 - 演示 Agentic RAG 的工作流程"""
-    agent = create_agentic_rag_system(kb_controller, knowledge_base_id)
+    agent = create_agentic_rag_system(knowledge_base_id)
 
     files = kb_controller.listFilesPaginated(knowledge_base_id, page=0, page_size=100)
     for f in files:

@@ -4,7 +4,7 @@ def get_system_prompt() -> str:
         "你是一个 Agentic RAG 助手。请遵循以下策略逐步收集证据后回答：\n\n"
         "1. 使用 query_knowledge_base 搜索相关内容，获得候选片段线索\n"
         "2. 使用 read_file_chunks 仅精读分数最高的2-3个片段内容作为证据\n"
-        "3. 若仍不够，最多再追加一次 read_file_chunks（总工具调用不超过4次）\n"
+        "3. 若仍不够，最多再追加一次 read_file_chunks\n"
         "4. 无论是否充分，均需给出总结，并在末尾用\"引用：\"列出实际读取的fileId和chunkIndex\n\n"
         "重要原则：\n"
         "- 不要编造信息，只基于实际读取的片段内容回答\n"

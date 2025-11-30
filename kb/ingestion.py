@@ -1,6 +1,12 @@
-from typing import List, Dict, Any
-from pypdf import PdfReader
+from typing import List, Dict, Any, Optional
+import os
 import re
+import html
+from pypdf import PdfReader
+from .splitters import (
+    NormalSplitter,
+    AdaptiveSplitter,
+)
 
 
 def read_pdf_text(pdf_path: str) -> str:
@@ -15,77 +21,63 @@ def read_pdf_text(pdf_path: str) -> str:
         texts.append(page.extract_text() or "")
     return "\n".join(texts).strip()
 
+    
+def read_chm_text(chm_path: str) -> str:
+    """读取 CHM 文件为纯文本（使用 pychm + beautifulsoup4；无系统命令回退）。
 
-def split_text(text: str, chunk_size: int = 500, overlap: int = 100) -> List[str]:
-    """将长文本按定长切片并设置重叠区，返回片段列表
-
-    - `chunk_size`：每个片段的目标长度（字符数）
-    - `overlap`：相邻片段的重叠长度，提升语义连续性
+    - 依赖：`pychm`（解析 CHM），`beautifulsoup4`（解析 HTML）
+    - 若未安装依赖，会抛出明确的错误提示以指导安装
+    - 文本解析：去除脚本/样式/注释，提取可读文本，适合后续拆分与索引
     """
-    if chunk_size <= 0:
-        raise ValueError("chunk_size 必须为正数")
-    if overlap < 0 or overlap >= chunk_size:
-        raise ValueError("overlap 必须为非负且小于 chunk_size")
-    text = (text or "").strip()
-    chunks: List[str] = []
-    start = 0
-    n = len(text)
-    while start < n:
-        end = min(start + chunk_size, n)
-        chunk = text[start:end]
-        chunks.append(chunk)
-        if end == n:
-            break
-        start = end - overlap
-    return chunks
+    if not os.path.isfile(chm_path):
+        raise FileNotFoundError(f"CHM 文件不存在：{chm_path}")
+
+    try:
+        from pychm import ChmFile  # type: ignore
+    except Exception:
+        raise RuntimeError(
+            "缺少依赖：请安装 pychm 和 beautifulsoup4。\n"
+            "pip install pychm beautifulsoup4"
+        )
+
+    chm = ChmFile(chm_path)
+    try:
+        content = chm.get_content()
+    except Exception as e:
+        raise RuntimeError(f"读取 CHM 内容失败: {e}")
+
+    if not content:
+        return ""
+
+    if isinstance(content, (bytes, bytearray)):
+        try:
+            html_str = content.decode("utf-8")
+        except Exception:
+            html_str = content.decode("latin-1", errors="replace")
+    else:
+        html_str = str(content)
+
+    try:
+        from bs4 import BeautifulSoup  # type: ignore
+        soup = BeautifulSoup(html_str, "html.parser")
+        text = soup.get_text(" ", strip=True)
+        return text
+    except Exception:
+        # bs4 不可用时，回退为简单的正则去标签（仍不使用系统命令）
+        text = re.sub(r"(?is)<script.*?>.*?</script>", "", html_str)
+        text = re.sub(r"(?is)<style.*?>.*?</style>", "", text)
+        text = re.sub(r"(?is)<!--.*?-->", "", text)
+        text = re.sub(r"(?is)<[^>]+>", " ", text)
+        text = html.unescape(text)
+        text = re.sub(r"\s+", " ", text).strip()
+        return text
 
 
-def split_by_numbered_headings(text: str) -> List[Dict[str, Any]]:
-    """按编号标题进行分割，生成包含层级路径的片段字典列表
-
-    - 标题格式示例：`1 Overview`、`1.1 Introduction`、`1.2.1 Industry Standards`
-    - 返回的每个片段包含 `content` 与 `metadata`，其中 `metadata` 包括：
-      - `number`：编号，如 `1.2.1`
-      - `title`：标题文本，如 `Industry Standards`
-      - `path`：从大到小的层级路径列表，如 `[{"number": "1", "title": "Overview"}, {"number": "1.2", "title": "References"}, {"number": "1.2.1", "title": "Industry Standards"}]`
-    """
-    lines = (text or "").splitlines()
-    heading_re = re.compile(r"^\s*(\d+(?:\.\d+)*)(?:\s+|\s*[\-\u2013]\s*)(.+?)\s*$")
-    heads: List[Dict[str, Any]] = []
-    for i, line in enumerate(lines):
-        m = heading_re.match(line)
-        if m:
-            num = m.group(1).strip()
-            title = m.group(2).strip()
-            if title.lower() == "contents":
-                continue
-            heads.append({"index": i, "number": num, "title": title})
-
-    if not heads:
-        return [{"content": "\n".join(lines).strip(), "metadata": {"number": "", "title": "", "path": []}}]
-
-    number_to_title: Dict[str, str] = {h["number"]: h["title"] for h in heads}
-    chunks: List[Dict[str, Any]] = []
-
-    for idx, h in enumerate(heads):
-        start = h["index"]
-        end = heads[idx + 1]["index"] if idx + 1 < len(heads) else len(lines)
-        content = "\n".join(lines[start:end]).strip()
-        segs = h["number"].split(".")
-        path = []
-        for j in range(1, len(segs) + 1):
-            key = ".".join(segs[:j])
-            if key in number_to_title:
-                path.append({"number": key, "title": number_to_title[key]})
-        chunks.append({
-            "content": content,
-            "metadata": {"number": h["number"], "title": h["title"], "path": path},
-        })
-    return chunks
+## 兼容保留：拆分函数已迁移至 kb.splitters 模块
 
 
-def ingest_pdf(kb_controller, kb_id: int, pdf_path: str, chunk_size: int = 500, overlap: int = 100):
-    """读取指定PDF文件，按编号标题分割并持久化；若未匹配到标题则回退为定长分割
+def ingest_pdf(kb_controller, kb_id: int, pdf_path: str, chunk_size: int = 500, overlap: int = 100, use_llm_headings: Optional[bool] = None):
+    """读取指定PDF文件，优先识别目录并保持完整；否则按编号标题分割，最后回退为定长分割
 
     - `kb_controller`：持久化知识库控制器实例
     - `kb_id`：知识库ID
@@ -94,11 +86,21 @@ def ingest_pdf(kb_controller, kb_id: int, pdf_path: str, chunk_size: int = 500, 
     - 返回：创建的文件元信息对象
     """
     text = read_pdf_text(pdf_path)
-    heading_chunks = split_by_numbered_headings(text)
-    chunks = heading_chunks if heading_chunks and heading_chunks[0].get("metadata", {}).get("number") else [
-        {"content": c, "metadata": {"number": "", "title": "", "path": []}} for c in split_text(text, chunk_size=chunk_size, overlap=overlap)
-    ]
+    use_llm = (
+        bool(str(os.getenv("INGEST_USE_LLM_HEADING", "")).lower() in {"1", "true", "yes"})
+        if use_llm_headings is None else bool(use_llm_headings)
+    )
+    adaptive_chunks = AdaptiveSplitter(use_llm=use_llm).split(text)
+    if adaptive_chunks and adaptive_chunks[0].get("metadata", {}).get("number") == "" and adaptive_chunks[0].get("metadata", {}).get("type") == "toc":
+        chunks = adaptive_chunks
+    else:
+        if adaptive_chunks and adaptive_chunks[0].get("metadata", {}).get("number"):
+            chunks = adaptive_chunks
+        else:
+            chunks = NormalSplitter(chunk_size=chunk_size, overlap=overlap).split(text)
     filename = pdf_path.split("/")[-1].split("\\")[-1]
     info = kb_controller.add_file(kb_id, filename=filename, chunk_count=len(chunks), status="done")
     kb_controller.save_chunks(kb_id, file_id=info.id, chunks=chunks)
     return info
+
+

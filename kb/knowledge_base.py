@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from typing import List, Dict, Tuple, Any, Optional
 import numpy as np
 from .embeddings import get_default_embedder
+from .rerank import get_default_reranker, Reranker
 from .vector_store import LocalVectorStore
 import json
 import os
@@ -222,13 +223,34 @@ class PersistentKnowledgeBaseController:
         return out
 
     def search(self, kb_id: int, query: str) -> List[Dict]:
-        """基于向量嵌入的语义检索，返回相关性最高的片段"""
+        """基于向量嵌入的语义检索，并可选通过 Reranker 进行二次排序。
+
+        - Reranker 通过 `get_default_reranker()` 选择：Noop 或 CrossEncoder。
+        - 使用 provider 模式统一封装，便于扩展与替换实现。
+        """
         q = (query or "").strip()
         if not q:
             return []
         q_vec = self._embedder.embed_text(q)
-        results = self._vstore.query_embeddings(kb_id, q_vec, top_k=5)
-        return results
+
+        # 选取 Reranker provider 并确定预候选数量
+        reranker: Reranker = get_default_reranker()
+        pre_k = getattr(reranker, "pre_k", 5)
+        initial = self._vstore.query_embeddings(kb_id, q_vec, top_k=pre_k)
+
+        # 构造内容加载器（批量读取避免重复 IO）
+        pairs_spec = [{"fileId": r["file_id"], "chunkIndex": r["chunk_index"]} for r in initial]
+        full_chunks = self.readFileChunks(kb_id, pairs_spec)
+        content_map: Dict[tuple[int, int], str] = {}
+        for ch in full_chunks:
+            fid = int(ch.get("file_id"))
+            idx = int(ch.get("chunk_index"))
+            content_map[(fid, idx)] = ch.get("content", "")
+
+        def _load_content(fid: int, idx: int) -> str:
+            return content_map.get((fid, idx), "")
+
+        return reranker.rerank(q, initial, _load_content, top_k=5)
 
     def getFilesMeta(self, kb_id: int, file_ids: List[int]) -> List[Dict]:
         """根据文件ID数组返回对应的元信息"""
