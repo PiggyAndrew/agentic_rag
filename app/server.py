@@ -1,23 +1,25 @@
 """Demo"""
 
 import os
+import sys
+sys.path.append("D:\\GitHub\\agentic_rag")
 from dotenv import load_dotenv
 load_dotenv() # pylint: disable=wrong-import-position
 
 from fastapi import FastAPI
 import uvicorn
 from copilotkit.integrations.fastapi import add_fastapi_endpoint
-from copilotkit import CopilotKitRemoteEndpoint, LangGraphAgent
+from copilotkit import CopilotKitRemoteEndpoint, LangGraphAGUIAgent
 from app.agent import agent
-from app.dummy_agent import agent as dummy_agent
+from app.agent_graph import graph
 
 app = FastAPI()
 sdk = CopilotKitRemoteEndpoint(
         agents=[
-            LangGraphAgent(
-                name="email_agent",
+            LangGraphAGUIAgent(
+                name="agentic_rag", 
                 description="This agent sends emails",
-                graph=agent,
+                graph=graph,
             )
         ],
     )

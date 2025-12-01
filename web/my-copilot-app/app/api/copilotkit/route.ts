@@ -7,7 +7,7 @@ import {
 import OpenAI from "openai";
 import { NextRequest } from "next/server";
 
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+const openai = new OpenAI();
 const serviceAdapter = new OpenAIAdapter({ openai } as any);
 
 // const runtime = new CopilotRuntime({
