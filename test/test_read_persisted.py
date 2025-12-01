@@ -30,7 +30,7 @@ def read_chunks(kb_id: int, file_id: int) -> List[Dict]:
 
 
 def print_summary(file_info: Dict, chunks: List[Dict]) -> None:
-    """打印文件摘要与片段示例信息，若存在层级元数据则展示路径"""
+    """打印文件摘要与片段示例信息"""
     print("文件信息:")
     print(json.dumps(file_info, ensure_ascii=False, indent=2))
     print(f"片段总数: {len(chunks)}")
@@ -40,12 +40,7 @@ def print_summary(file_info: Dict, chunks: List[Dict]) -> None:
         c = chunks[i]
         content = c.get("content", "")
         short = (content[:200] + "...") if len(content) > 200 else content
-        meta = c.get("metadata")
-        if meta and meta.get("path"):
-            path_str = " > ".join([f"{p['number']} {p['title']}" for p in meta.get("path", [])])
-            print(f"- [{c['chunk_index']}] ({path_str}) {short}")
-        else:
-            print(f"- [{c['chunk_index']}] {short}")
+        print(f"- [{c['chunk_index']}] {short}")
 
 
 def show_gui(chunks: List[Dict]) -> None:
@@ -125,3 +120,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
