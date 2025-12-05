@@ -1,7 +1,6 @@
 <script setup lang="ts">
 // import type { InputGroupButtonVariants } from '@/components/ui/input-group'
-// import type { ChatStatus } from 'ai'
-type ChatStatus = string;
+import type { ChatStatus } from 'ai'
 import type { HTMLAttributes } from 'vue'
 import { InputGroupButton } from '@/components/ui/input-group'
 import { cn } from '@/lib/utils'

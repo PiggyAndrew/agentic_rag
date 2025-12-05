@@ -1,6 +1,5 @@
 <script setup lang="ts">
-// import type { FileUIPart } from 'ai'
-type FileUIPart = any;
+import type { FileUIPart } from 'ai'
 import type { HTMLAttributes } from 'vue'
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'

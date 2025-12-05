@@ -47,45 +47,13 @@ def convert_messages(messages: List[Message]):
             lc_messages.append(SystemMessage(content=msg.content))
     return lc_messages
 
-async def stream_generator(messages):
-    """生成符合 Vercel AI SDK 协议的流式响应"""
-    print(f"Start streaming for messages: {len(messages)}")
-    if not rag_agent:
-        yield "Error: Agent not initialized"
-        return
-
-    inputs = {"messages": convert_messages(messages)}
-    print(f"Inputs prepared: {inputs}")
-    
-    try:
-        # 使用 astream_events 获取详细的流式事件
-        print("Calling rag_agent.astream_events...")
-        async for event in rag_agent.astream_events(inputs, version="v1"):
-            kind = event["event"]
-            # print(f"Event received: {kind}")
-            
-            # 监听 LLM 生成的 token
-            if kind == "on_chat_model_stream":
-                content = event["data"]["chunk"].content
-                if content:
-                    # 直接输出文本内容，符合 text/plain 流式格式（简单模式）
-                    # 或者也可以封装为 data: ... 格式，取决于前端处理
-                    # 这里我们使用简单的文本流，配合前端 fetch reader 处理
-                    print(f"Yielding content: {content}")
-                    yield content
-
-            # 也可以监听工具调用等其他事件进行处理
-            # elif kind == "on_tool_start": ...
-            
-    except Exception as e:
-        print(f"Error in stream_generator: {e}")
-        yield f"\n[Error: {str(e)}]"
+from app.protocol import stream_generator as protocol_stream_generator
 
 @app.post("/api/chat")
 async def chat_endpoint(request: ChatRequest):
     return StreamingResponse(
-        stream_generator(request.messages),
-        media_type="text/plain"
+        protocol_stream_generator(request.messages),
+        media_type="text/plain; charset=utf-8"
     )
 
 def main():
