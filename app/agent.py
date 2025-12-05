@@ -52,6 +52,8 @@ def create_agentic_rag_system(kb_id: int):
         ],
         response_format=RAGAnswer
     )
+    
+ 
     return agent
 
 # 为 LangGraph CLI 暴露一个可直接使用的 graph 符号
