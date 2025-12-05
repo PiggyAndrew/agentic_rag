@@ -27,8 +27,7 @@ def create_agentic_rag_system(kb_id: int):
 
     load_dotenv()
     if not os.getenv("DEEPSEEK_API_KEY"):
-        # raise ValueError("请设置 DEEPSEEK_API_KEY 环境变量")
-        pass
+        raise ValueError("请设置 DEEPSEEK_API_KEY 环境变量")
 
     llm = ChatOpenAI(
         temperature=0,
@@ -62,7 +61,7 @@ def create_agentic_rag_system(kb_id: int):
 try:
     _DEFAULT_KB_ID = 1
     agent = create_agentic_rag_system(_DEFAULT_KB_ID)
-except Exception as e:
+except Exception:
     # 如果初始化失败（例如缺少环境变量），保留模块可导入性
-    print(f"Agent init failed: {e}")
     agent = None
+
