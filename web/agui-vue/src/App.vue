@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import ChatInterface from './components/ChatInterface.vue'
+import KnowledgeBaseChat from '@/components/KnowledgeBaseChat.vue';
 </script>
 
 <template>
-  <ChatInterface />
+  <KnowledgeBaseChat />
 </template>
