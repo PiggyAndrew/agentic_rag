@@ -3,17 +3,30 @@ from app.agent import agent as rag_agent
 from langchain_core.messages import HumanMessage, AIMessage, SystemMessage
 
 def convert_messages(messages):
-    """将前端消息转换为 LangChain 消息对象用于 Agent 输入"""
+    """
+    将前端消息转换为 LangChain 消息对象用于 Agent 输入
+    支持两种输入：
+    1) Pydantic BaseModel（fastapi 请求体解析出的对象）
+    2) 原始 dict（直接从 JSON 转换而来）
+    """
     lc_messages = []
     for msg in messages:
-        role = getattr(msg, 'role', None) or msg.get('role')
-        content = getattr(msg, 'content', None) or msg.get('content')
+        role = None
+        content = None
+        if isinstance(msg, dict):
+            role = msg.get('role')
+            content = msg.get('content')
+        else:
+            # Pydantic/BaseModel 或具备属性访问的对象
+            role = getattr(msg, 'role', None)
+            content = getattr(msg, 'content', None)
+
         if role == "user":
-            lc_messages.append(HumanMessage(content=content))
+            lc_messages.append(HumanMessage(content=content or ""))
         elif role == "assistant":
-            lc_messages.append(AIMessage(content=content))
+            lc_messages.append(AIMessage(content=content or ""))
         elif role == "system":
-            lc_messages.append(SystemMessage(content=content))
+            lc_messages.append(SystemMessage(content=content or ""))
     return lc_messages
 
 async def stream_generator(messages):
@@ -50,32 +63,141 @@ async def stream_generator(messages):
 
             # 2. 处理工具调用开始 (on_tool_start)
             elif kind == "on_tool_start":
-                # 可以在这里发送工具调用的元数据，例如 "正在搜索知识库..."
-                # 9: stream data (自定义数据)
-                tool_name = event["name"]
-                tool_inputs = event["data"].get("input")
-                # 仅展示关键工具，避免展示内部实现细节
+                tool_name = event.get("name") or event.get("data", {}).get("name")
+                tool_inputs = event.get("data", {}).get("input")
                 if tool_name not in ["LangGraph", "__pregel_pull", "model"]:
-                     data = {"type": "tool_start", "tool": tool_name, "input": tool_inputs}
-                     yield f'8:{json.dumps([data])}\n' # 8: data message (draft) or 2: data
+                     data = {"type": "tool_start", "tool": tool_name, "input": _to_jsonable(tool_inputs)}
+                     yield f'8:{json.dumps([data])}\n'
 
             # 3. 处理工具调用结束 (on_tool_end)
             elif kind == "on_tool_end":
-                 tool_name = event["name"]
-                 tool_output = event["data"].get("output")
-                 # 同样仅处理关键工具
+                 tool_name = event.get("name") or event.get("data", {}).get("name")
+                 tool_output = event.get("data", {}).get("output")
                  if tool_name not in ["LangGraph", "__pregel_pull", "model"]:
-                     # 尝试解析 JSON 输出以便前端更好展示
-                     try:
-                         if isinstance(tool_output, str):
-                             tool_output = json.loads(tool_output)
-                     except:
-                         pass
-                     
-                     data = {"type": "tool_end", "tool": tool_name, "output": tool_output}
-                     # 发送工具结果数据
+                     data = {"type": "tool_end", "tool": tool_name, "output": _to_jsonable(tool_output)}
                      yield f'8:{json.dumps([data])}\n'
+                     # 如果这是最终答案工具，尝试直接输出文本
+                     txt = _extract_text(tool_output)
+                     if txt:
+                         yield f'0:{json.dumps(txt)}\n'
+
+            # 4. 模型结束（可能包含整段文本）
+            elif kind == "on_chat_model_end":
+                out = event.get("data", {}).get("output")
+                txt = _extract_text(out)
+                if txt:
+                    yield f'0:{json.dumps(txt)}\n'
+
+            # 5. 整体链路结束（LangGraph/Agent 产出的最终结构化答案）
+            elif kind == "on_chain_end":
+                data = event.get("data", {})
+                sr = data.get("structured_response")
+                # 优先提取结构化响应中的 answer 字段
+                if sr is not None:
+                    ans = None
+                    # pydantic / dataclass / dict 兼容提取
+                    ans = getattr(sr, "answer", None)
+                    if ans is None and hasattr(sr, "model_dump"):
+                        try:
+                            ans = sr.model_dump().get("answer")
+                        except Exception:
+                            pass
+                    if ans is None and hasattr(sr, "dict"):
+                        try:
+                            ans = sr.dict().get("answer")
+                        except Exception:
+                            pass
+                    if ans is None and isinstance(sr, dict):
+                        ans = sr.get("answer")
+                    if ans:
+                        yield f'0:{json.dumps(ans)}\n'
+                else:
+                    # 退化：尝试从 output.messages 中取最后一条内容
+                    out = data.get("output")
+                    txt = _extract_text(out)
+                    if txt:
+                        yield f'0:{json.dumps(txt)}\n'
 
     except Exception as e:
         # 3: error part
         yield f'3:{json.dumps(str(e))}\n'
+
+def _to_jsonable(obj):
+    """将任意 Python/SDK 对象转为可 JSON 序列化的数据结构"""
+    if obj is None:
+        return None
+    if isinstance(obj, (str, int, float, bool)):
+        return obj
+    if isinstance(obj, dict):
+        return {str(k): _to_jsonable(v) for k, v in obj.items()}
+    if isinstance(obj, (list, tuple, set)):
+        return [_to_jsonable(v) for v in obj]
+    # Pydantic BaseModel
+    if hasattr(obj, "model_dump") and callable(getattr(obj, "model_dump")):
+        try:
+            return _to_jsonable(obj.model_dump())
+        except Exception:
+            pass
+    if hasattr(obj, "dict") and callable(getattr(obj, "dict")):
+        try:
+            return _to_jsonable(obj.dict())
+        except Exception:
+            pass
+    # LangChain Message 或通用对象，优先提取 content
+    if hasattr(obj, "content"):
+        try:
+            return _to_jsonable(getattr(obj, "content"))
+        except Exception:
+            pass
+    # 通用对象：展开 __dict__
+    if hasattr(obj, "__dict__"):
+        try:
+            return {k: _to_jsonable(v) for k, v in obj.__dict__.items() if not str(k).startswith("_")}
+        except Exception:
+            pass
+    return str(obj)
+
+def _extract_text(obj):
+    """尽可能从对象中提取可展示的文本内容"""
+    if obj is None:
+        return None
+    # 直接字符串
+    if isinstance(obj, str):
+        return obj
+    # LangChain Message 类：尝试 .content
+    if hasattr(obj, "content"):
+        try:
+            c = getattr(obj, "content")
+            return c if isinstance(c, str) else json.dumps(_to_jsonable(c))
+        except Exception:
+            pass
+    # dict: 可能有 answer 或 content
+    if isinstance(obj, dict):
+        for key in ("answer", "content"):
+            if key in obj and isinstance(obj[key], str):
+                return obj[key]
+        # 如果 output 是包含 messages 的结构
+        msgs = obj.get("messages") or obj.get("message")
+        if isinstance(msgs, list) and msgs:
+            last = msgs[-1]
+            if isinstance(last, dict) and isinstance(last.get("content"), str):
+                return last.get("content")
+        # 兜底：序列化为字符串
+        try:
+            return json.dumps(_to_jsonable(obj))
+        except Exception:
+            return str(obj)
+    # pydantic / dataclass：尝试字典化
+    if hasattr(obj, "model_dump") and callable(getattr(obj, "model_dump")):
+        try:
+            d = obj.model_dump()
+            return _extract_text(d)
+        except Exception:
+            pass
+    if hasattr(obj, "dict") and callable(getattr(obj, "dict")):
+        try:
+            d = obj.dict()
+            return _extract_text(d)
+        except Exception:
+            pass
+    return None
