@@ -1,11 +1,29 @@
 {
   "files": [
     {
-      "id": 2,
+      "id": 1,
       "filename": "CPX_NTC_BEP_r5.pdf",
       "chunk_count": 80,
       "status": "done"
+    },
+    {
+      "id": 9,
+      "filename": "BIM Guide for Architectural Design Ver3.1_Dec23.pdf",
+      "chunk_count": 55,
+      "status": "done"
+    },
+    {
+      "id": 11,
+      "filename": "BIM Guide for Structural Engineering Ver3.1_Dec23.pdf",
+      "chunk_count": 58,
+      "status": "done"
+    },
+    {
+      "id": 12,
+      "filename": "BIM Guide for Structural Engineering Ver3.1_Dec23.pdf",
+      "chunk_count": 58,
+      "status": "done"
     }
   ],
-  "next_id": 3
+  "next_id": 13
 }

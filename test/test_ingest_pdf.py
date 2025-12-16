@@ -11,8 +11,6 @@ if ROOT_DIR not in sys.path:
 
 from kb.knowledge_base import PersistentKnowledgeBaseController
 from kb.ingestion import ingest_pdf
-
-
 def run_ingest(pdf_path: str, kb_id: int, chunk_size: int, overlap: int) -> Tuple[Dict, List[Dict]]:
     """执行PDF导入流程并返回文件信息与片段列表
 
@@ -54,45 +52,30 @@ def print_summary(info: Dict, chunks: List[Dict]) -> None:
 
 
 def show_gui(chunks: List[Dict]) -> None:
-    """使用与标准 UI 相同的布局与预览格式展示片段列表与内容"""
+    """使用简单窗口展示片段列表与内容查看"""
     import tkinter as tk
     from tkinter import ttk
 
-    def format_chunk_preview(c: Dict) -> str:
-        """与 app/ui.py 同步的预览：包含层级路径（如有）"""
-        content = c.get("content", "")
-        preview = (content[:80] + "...") if len(content) > 80 else content
-        meta = c.get("metadata")
-        if meta and meta.get("path"):
-            path_str = " > ".join([f"{p['number']} {p['title']}" for p in meta.get("path", [])])
-            return f"[{c['chunk_index']}] {path_str} | {preview}"
-        return f"[{c['chunk_index']}] {preview}"
-
     root = tk.Tk()
     root.title("PDF分割结果查看")
-    root.geometry("1200x760")
+    root.geometry("900x600")
 
-    # 主框架
-    main_frame = ttk.Frame(root)
-    main_frame.pack(fill=tk.BOTH, expand=True)
+    left = ttk.Frame(root)
+    left.pack(side=tk.LEFT, fill=tk.Y)
 
-    # 片段列表区域（与标准 UI 一致的标签与宽度）
-    chunks_frame = ttk.Frame(main_frame)
-    chunks_frame.pack(side=tk.LEFT, fill=tk.Y)
-    ttk.Label(chunks_frame, text="片段列表").pack(anchor=tk.W)
-    lst = tk.Listbox(chunks_frame, width=60)
+    right = ttk.Frame(root)
+    right.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True)
+
+    lst = tk.Listbox(left, width=40)
     lst.pack(fill=tk.Y, expand=True)
 
-    # 内容展示区域
-    content_frame = ttk.Frame(main_frame)
-    content_frame.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True)
-    ttk.Label(content_frame, text="片段内容").pack(anchor=tk.W)
-    txt = tk.Text(content_frame, wrap=tk.WORD)
+    txt = tk.Text(right, wrap=tk.WORD)
     txt.pack(fill=tk.BOTH, expand=True)
 
-    # 填充列表
     for c in chunks:
-        lst.insert(tk.END, format_chunk_preview(c))
+        content = c.get("content", "")
+        preview = (content[:80] + "...") if len(content) > 80 else content
+        lst.insert(tk.END, f"[{c['chunk_index']}] {preview}")
 
     def on_select(evt):
         idx = lst.curselection()
@@ -111,7 +94,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--pdf",
-        default=r"test/testfiles/CPX_NTC_BEP_r5.pdf",
+        default=r"test/testfiles/BIM Guide for Structural Engineering Ver3.1_Dec23.pdf",
         help="PDF文件路径",
     )
     parser.add_argument("--kb", type=int, default=1, help="知识库ID")
@@ -121,7 +104,7 @@ def main():
     args = parser.parse_args()
 
     info, chunks = run_ingest(args.pdf, args.kb, args.chunk_size, args.overlap)
-    #print_summary(info, chunks)
+    print_summary(info, chunks)
     if args.gui:
         show_gui(chunks)
 

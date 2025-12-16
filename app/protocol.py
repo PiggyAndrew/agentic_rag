@@ -1,6 +1,6 @@
 import json
 from app.agent import agent as rag_agent
-from langchain_core.messages import HumanMessage, AIMessage, SystemMessage
+from langchain_core.messages import HumanMessage, AIMessage, SystemMessage, ToolMessage, AIMessageChunk
 
 def convert_messages(messages):
     """
@@ -32,7 +32,8 @@ def convert_messages(messages):
 async def stream_generator(messages):
     """
     生成符合 Vercel AI SDK Data Stream Protocol 的流式响应
-    协议文档: https://sdk.vercel.ai/docs/ai-sdk-ui/stream-protocol#data-stream-protocol
+    使用 agent.astream (stream_mode=["messages", "updates"])
+    参考: https://python.langchain.com/docs/how_to/streaming/
     """
     if not rag_agent:
         # 0: text part
@@ -42,81 +43,65 @@ async def stream_generator(messages):
     inputs = {"messages": convert_messages(messages)}
     
     try:
-        async for event in rag_agent.astream_events(inputs, version="v1"):
-            kind = event["event"]
+        # 使用 messages 模式流式传输 token，使用 updates 模式获取工具调用状态
+        async for mode, chunk in rag_agent.astream(inputs, stream_mode=["messages", "updates"]):
             
-            # 1. 处理文本生成流 (on_chat_model_stream)
-            if kind == "on_chat_model_stream":
-                chunk = event["data"]["chunk"]
-                # 如果是普通文本内容
-                if chunk.content:
-                    # 0: text part - 直接输出文本片段
-                    # 格式: 0:"text_content"\n
-                    yield f'0:{json.dumps(chunk.content)}\n'
-                
-                # 如果是工具调用片段 (tool_call_chunks)
-                if hasattr(chunk, "tool_call_chunks") and chunk.tool_call_chunks:
-                     for tc_chunk in chunk.tool_call_chunks:
-                         # 这里可以处理流式的工具调用参数，但 Vercel AI SDK 通常期望完整的工具调用
-                         # 或者使用 9: stream data 自定义协议
-                         pass
+            # 1. 消息流 (Token Streaming)
+            # 用于实时显示 LLM 生成的文本 (CoT 或普通回复)
+            if mode == "messages":
+                # chunk 是 (message_chunk, metadata)
+                msg, metadata = chunk
+                if isinstance(msg, AIMessageChunk) and msg.content:
+                    # 只有当 content 不为空时才输出
+                    # 注意：如果正在生成工具调用 (tool_call_chunks)，content 通常为空
+                    yield f'0:{json.dumps(msg.content)}\n'
 
-            # 2. 处理工具调用开始 (on_tool_start)
-            elif kind == "on_tool_start":
-                tool_name = event.get("name") or event.get("data", {}).get("name")
-                tool_inputs = event.get("data", {}).get("input")
-                if tool_name not in ["LangGraph", "__pregel_pull", "model"]:
-                     data = {"type": "tool_start", "tool": tool_name, "input": _to_jsonable(tool_inputs)}
-                     yield f'8:{json.dumps([data])}\n'
-
-            # 3. 处理工具调用结束 (on_tool_end)
-            elif kind == "on_tool_end":
-                 tool_name = event.get("name") or event.get("data", {}).get("name")
-                 tool_output = event.get("data", {}).get("output")
-                 if tool_name not in ["LangGraph", "__pregel_pull", "model"]:
-                     data = {"type": "tool_end", "tool": tool_name, "output": _to_jsonable(tool_output)}
-                     yield f'8:{json.dumps([data])}\n'
-                     # 如果这是最终答案工具，尝试直接输出文本
-                     txt = _extract_text(tool_output)
-                     if txt:
-                         yield f'0:{json.dumps(txt)}\n'
-
-            # 4. 模型结束（可能包含整段文本）
-            elif kind == "on_chat_model_end":
-                out = event.get("data", {}).get("output")
-                txt = _extract_text(out)
-                if txt:
-                    yield f'0:{json.dumps(txt)}\n'
-
-            # 5. 整体链路结束（LangGraph/Agent 产出的最终结构化答案）
-            elif kind == "on_chain_end":
-                data = event.get("data", {})
-                sr = data.get("structured_response")
-                # 优先提取结构化响应中的 answer 字段
-                if sr is not None:
-                    ans = None
-                    # pydantic / dataclass / dict 兼容提取
-                    ans = getattr(sr, "answer", None)
-                    if ans is None and hasattr(sr, "model_dump"):
-                        try:
-                            ans = sr.model_dump().get("answer")
-                        except Exception:
-                            pass
-                    if ans is None and hasattr(sr, "dict"):
-                        try:
-                            ans = sr.dict().get("answer")
-                        except Exception:
-                            pass
-                    if ans is None and isinstance(sr, dict):
-                        ans = sr.get("answer")
-                    if ans:
-                        yield f'0:{json.dumps(ans)}\n'
-                else:
-                    # 退化：尝试从 output.messages 中取最后一条内容
-                    out = data.get("output")
-                    txt = _extract_text(out)
-                    if txt:
-                        yield f'0:{json.dumps(txt)}\n'
+            # 2. 状态更新流 (Tool Calls & Results)
+            # 用于捕获完整的工具调用请求和工具执行结果
+            elif mode == "updates":
+                # chunk 是包含节点更新的字典，例如 {"agent": {"messages": [...]}}
+                for node_name, node_content in chunk.items():
+                    # 提取消息列表
+                    msgs = []
+                    if isinstance(node_content, dict):
+                        msgs = node_content.get("messages", [])
+                        # 处理直接返回 structured_response 的情况
+                        sr = node_content.get("structured_response")
+                        if sr:
+                             ans = getattr(sr, "answer", None) or sr.get("answer")
+                             if ans:
+                                 yield f'0:{json.dumps(ans)}\n'
+                    elif isinstance(node_content, list):
+                        msgs = node_content
+                    
+                    # 遍历消息处理工具事件
+                    for msg in msgs:
+                        # A. 处理 AI 消息中的工具调用 (Tool Start)
+                        if isinstance(msg, AIMessage) and msg.tool_calls:
+                            for tc in msg.tool_calls:
+                                # 检查是否是结构化输出的 "答案" 工具
+                                # 如果是 RAGAnswer，直接提取 answer 字段作为文本输出
+                                if "answer" in tc["args"]:
+                                     yield f'0:{json.dumps(tc["args"]["answer"])}\n'
+                                else:
+                                     # 普通工具调用 -> tool_start (channel 8)
+                                     data = {
+                                         "type": "tool_start",
+                                         "tool": tc["name"],
+                                         "input": _to_jsonable(tc["args"]),
+                                         "id": tc["id"]
+                                     }
+                                     yield f'8:{json.dumps([data])}\n'
+                        
+                        # B. 处理工具执行结果 (Tool End)
+                        if isinstance(msg, ToolMessage):
+                             data = {
+                                 "type": "tool_end",
+                                 "tool": msg.name,
+                                 "output": _to_jsonable(msg.content),
+                                 "id": msg.tool_call_id
+                             }
+                             yield f'8:{json.dumps([data])}\n'
 
     except Exception as e:
         # 3: error part
@@ -182,11 +167,9 @@ def _extract_text(obj):
             last = msgs[-1]
             if isinstance(last, dict) and isinstance(last.get("content"), str):
                 return last.get("content")
-        # 兜底：序列化为字符串
-        try:
-            return json.dumps(_to_jsonable(obj))
-        except Exception:
-            return str(obj)
+        # 兜底：如果是未知结构的字典/对象，不要盲目序列化，否则会泄漏内部状态 JSON
+        # 除非明确知道这是一个需要展示的对象
+        return None
     # pydantic / dataclass：尝试字典化
     if hasattr(obj, "model_dump") and callable(getattr(obj, "model_dump")):
         try:

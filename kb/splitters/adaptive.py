@@ -1,10 +1,15 @@
 from typing import List, Dict, Any, Optional
 import os
 import re
+from dotenv import load_dotenv
 from langchain_openai import ChatOpenAI
 from .base import Splitter
 from .utils import parse_json_array, normalize_title
 from .headings import HeadingsSplitter
+
+# 加载 .env 环境变量，确保在独立调用拆分器时也能读取到密钥
+load_dotenv()
+
 
 class AdaptiveSplitter(Splitter):
     """自适应拆分器：识别目录块并按编号标题拆分正文，可选使用LLM解析目录。"""
@@ -12,7 +17,7 @@ class AdaptiveSplitter(Splitter):
     name = "adaptive"
 
     def __init__(self, use_llm: bool = False):
-        self.use_llm = bool(use_llm)
+        self.use_llm = bool(True)
 
     def _is_toc_line(self, line: str) -> bool:
         s = (line or "").strip()
@@ -66,7 +71,7 @@ class AdaptiveSplitter(Splitter):
         llm = ChatOpenAI(
             temperature=0,
             max_retries=2,
-            base_url="https://api.deepseek.com/v1",
+            base_url="https://api.deepseek.com",
             model="deepseek-chat",
             api_key=api_key,
         )
@@ -74,6 +79,7 @@ class AdaptiveSplitter(Splitter):
             "你是目录解析器。仅根据下面的目录文本，提取真正的章节条目并输出 JSON 数组。\n"
             "- 每项结构：{number: '1.2.3', title: '章节标题'}\n"
             "- 保持顺序，不要包含页码或点线，不要返回除 JSON 外的任何文本。"
+            "- 如果有附录，需要包含附录，附录编号可能是A、B、C等。"
         )
         user_prompt = (
             "目录：\n" + sample + "\n\n请仅输出 JSON 数组，字段为 number 与 title。"
@@ -106,11 +112,14 @@ class AdaptiveSplitter(Splitter):
         if not bounds:
             return HeadingsSplitter().split(text)
         s, e, title = bounds
-        toc_text = "\n".join(lines[s:e]).strip()
+        toc_text = "\n".join(lines[s:e]).replace(".....", "").strip()
         rest = "\n".join(lines[:s] + lines[e:])
+        print(toc_text)
         allowed: Optional[List[Dict[str, str]]] = None
         if self.use_llm:
             allowed = self._llm_extract_toc_headings(toc_text)
+            print(allowed)
+
         chunks_rest = HeadingsSplitter(allowed_headings=allowed).split(rest)
         out: List[Dict[str, Any]] = []
         out.append({
