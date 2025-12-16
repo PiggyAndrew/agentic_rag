@@ -1,5 +1,4 @@
-// import type { FileUIPart } from 'ai'
-export type FileUIPart = any;
+import type { FileUIPart } from 'ai'
 import type { Ref } from 'vue'
 
 export interface PromptInputMessage {
@@ -7,13 +6,9 @@ export interface PromptInputMessage {
   files: FileUIPart[]
 }
 
-export interface AttachmentFile {
+export interface AttachmentFile extends FileUIPart {
   id: string
   file?: File
-  url?: string
-  filename?: string
-  mediaType?: string
-  [key: string]: any
 }
 
 export interface PromptInputContext {
