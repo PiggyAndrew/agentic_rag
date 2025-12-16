@@ -2,7 +2,7 @@ export async function streamChat(
   messages: Array<{ role: string; content: string }>,
   apiUrl?: string
 ) {
-  const url = apiUrl || (import.meta as any).env?.VITE_API_URL || '/api/chat';
+  const url = apiUrl || (import.meta as any).env?.VITE_API_URL || 'http://localhost:8000/api/chat';
   const res = await fetch(url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
