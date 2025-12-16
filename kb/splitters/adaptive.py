@@ -2,9 +2,24 @@ from typing import List, Dict, Any, Optional
 import os
 import re
 from langchain_openai import ChatOpenAI
+from app.prompts import get_toc_parser_system_prompt, get_toc_parser_user_prompt
 from .base import Splitter
 from .utils import parse_json_array, normalize_title
 from .headings import HeadingsSplitter
+
+
+def get_toc_parsing_llm() -> Optional[ChatOpenAI]:
+    """获取用于解析目录的专用LLM对象"""
+    api_key = os.getenv("DEEPSEEK_API_KEY")
+    if not api_key:
+        return None
+    return ChatOpenAI(
+        temperature=0,
+        max_retries=2,
+        base_url="https://api.deepseek.com/v1",
+        model="deepseek-chat",
+        api_key=api_key,
+    )
 
 class AdaptiveSplitter(Splitter):
     """自适应拆分器：识别目录块并按编号标题拆分正文，可选使用LLM解析目录。"""
@@ -60,24 +75,14 @@ class AdaptiveSplitter(Splitter):
         sample = (toc_text or "").strip()
         if not sample:
             return []
-        api_key = os.getenv("DEEPSEEK_API_KEY")
-        if not api_key:
+        
+        llm = get_toc_parsing_llm()
+        if not llm:
             return []
-        llm = ChatOpenAI(
-            temperature=0,
-            max_retries=2,
-            base_url="https://api.deepseek.com/v1",
-            model="deepseek-chat",
-            api_key=api_key,
-        )
-        sys_prompt = (
-            "你是目录解析器。仅根据下面的目录文本，提取真正的章节条目并输出 JSON 数组。\n"
-            "- 每项结构：{number: '1.2.3', title: '章节标题'}\n"
-            "- 保持顺序，不要包含页码或点线，不要返回除 JSON 外的任何文本。"
-        )
-        user_prompt = (
-            "目录：\n" + sample + "\n\n请仅输出 JSON 数组，字段为 number 与 title。"
-        )
+
+        sys_prompt = get_toc_parser_system_prompt()
+        user_prompt = get_toc_parser_user_prompt(sample)
+        
         try:
             msg = llm.invoke([
                 ("system", sys_prompt),

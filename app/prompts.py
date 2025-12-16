@@ -12,3 +12,19 @@ def get_system_prompt() -> str:
         "- 严格限制工具调用次数，避免无止境重试；当无法找到答案时直接收敛为结论\n"
     )
 
+
+def get_toc_parser_system_prompt() -> str:
+    """返回目录解析器的系统提示词"""
+    return (
+        "你是目录解析器。仅根据下面的目录文本，提取真正的章节条目并输出 JSON 数组。\n"
+        "- 每项结构：{number: '1.2.3', title: '章节标题'}\n"
+        "- 保持顺序，不要包含页码或点线，不要返回除 JSON 外的任何文本。"
+    )
+
+
+def get_toc_parser_user_prompt(toc_text: str) -> str:
+    """返回目录解析器的用户提示词"""
+    return (
+        "目录：\n" + toc_text + "\n\n请仅输出 JSON 数组，字段为 number 与 title。"
+    )
+
