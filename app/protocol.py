@@ -41,7 +41,9 @@ async def stream_generator(messages):
         return
 
     inputs = {"messages": convert_messages(messages)}
-    
+    tool_call_names = {}
+    tool_call_args = {}
+    answer_emitted = {}
     try:
         # 使用 messages 模式流式传输 token，使用 updates 模式获取工具调用状态
         async for mode, chunk in rag_agent.astream(inputs, stream_mode=["messages", "updates"]):
