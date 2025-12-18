@@ -1,7 +1,8 @@
 
 import sys
-sys.path.append("D:\\Gitspace\\agentic_rag")
 import os
+# Add project root to sys.path
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import json
 from typing import List, Dict, Any, Optional
 from fastapi import FastAPI, HTTPException

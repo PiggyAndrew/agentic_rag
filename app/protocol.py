@@ -51,10 +51,30 @@ async def stream_generator(messages):
             if mode == "messages":
                 # chunk 是 (message_chunk, metadata)
                 msg, metadata = chunk
-                if isinstance(msg, AIMessageChunk) and msg.content:
-                    # 只有当 content 不为空时才输出
-                    # 注意：如果正在生成工具调用 (tool_call_chunks)，content 通常为空
-                    yield f'0:{json.dumps(msg.content)}\n'
+                if isinstance(chunk, AIMessageChunk) and chunk.content:
+                    saw_text = True
+                    yield f'0:{json.dumps(_as_text(chunk.content))}\n'
+                if isinstance(chunk, AIMessageChunk):
+                    tccs = getattr(chunk, "tool_call_chunks", None) or []
+                    for tcc in tccs:
+                        idx = tcc.get("index")
+                        if idx is None:
+                            continue
+                        name = tcc.get("name")
+                        if name:
+                            tool_call_names[idx] = name
+                        args_piece = tcc.get("args") or ""
+                        if not args_piece:
+                            continue
+                        tool_call_args[idx] = tool_call_args.get(idx, "") + args_piece
+                        if tool_call_names.get(idx) == "RAGAnswer":
+                            current = _extract_partial_json_string_field(tool_call_args[idx], "answer")
+                            prev = answer_emitted.get(idx, 0)
+                            if len(current) > prev:
+                                delta = current[prev:]
+                                answer_emitted[idx] = len(current)
+                                saw_text = True
+                                yield f'0:{json.dumps(delta)}\n'
 
             # 2. 状态更新流 (Tool Calls & Results)
             # 用于捕获完整的工具调用请求和工具执行结果
