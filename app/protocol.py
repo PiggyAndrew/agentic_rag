@@ -2,32 +2,6 @@ import json
 from app.agent import agent as rag_agent
 from langchain_core.messages import HumanMessage, AIMessage, SystemMessage, ToolMessage, AIMessageChunk
 
-def _coerce_ai_message_chunk(obj):
-    if obj is None:
-        return None
-    if isinstance(obj, AIMessageChunk):
-        return obj
-    msg = getattr(obj, "message", None)
-    if isinstance(msg, AIMessageChunk):
-        return msg
-    content = getattr(obj, "content", None)
-    if isinstance(content, str) and content:
-        return AIMessageChunk(content=content)
-    text = getattr(obj, "text", None)
-    if isinstance(text, str) and text:
-        return AIMessageChunk(content=text)
-    if isinstance(obj, dict):
-        inner = obj.get("message")
-        if isinstance(inner, AIMessageChunk):
-            return inner
-        inner_content = obj.get("content")
-        if isinstance(inner_content, str) and inner_content:
-            return AIMessageChunk(content=inner_content)
-        inner_text = obj.get("text")
-        if isinstance(inner_text, str) and inner_text:
-            return AIMessageChunk(content=inner_text)
-    return None
-
 def convert_messages(messages):
     """
     将前端消息转换为 LangChain 消息对象用于 Agent 输入
@@ -77,9 +51,9 @@ async def stream_generator(messages):
                 run_id = event.get("run_id")
                 data = event.get("data") or {}
 
-                if event_type in {"on_chat_model_stream", "on_llm_stream"}:
-                    chunk = _coerce_ai_message_chunk(data.get("chunk"))
-                    if chunk and chunk.content:
+                if event_type == "on_chat_model_stream":
+                    chunk = data.get("chunk")
+                    if isinstance(chunk, AIMessageChunk) and chunk.content:
                         emitted_text = True
                         yield f'0:{json.dumps(chunk.content)}\n'
 
@@ -117,10 +91,7 @@ async def stream_generator(messages):
             async for mode, chunk in rag_agent.astream(inputs, stream_mode=["messages", "updates"]):
                 if mode == "messages":
                     msg, _metadata = chunk
-                    msg_chunk = _coerce_ai_message_chunk(msg)
-                    if msg_chunk and msg_chunk.content:
-                        yield f'0:{json.dumps(msg_chunk.content)}\n'
-                    elif isinstance(msg, AIMessage) and msg.content:
+                    if isinstance(msg, AIMessageChunk) and msg.content:
                         yield f'0:{json.dumps(msg.content)}\n'
 
     except Exception as e:

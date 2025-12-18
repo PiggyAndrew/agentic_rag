@@ -35,7 +35,6 @@ def create_agentic_rag_system(kb_id: int):
         base_url="https://api.deepseek.com/v1",
         model="deepseek-chat",
         api_key=os.getenv("DEEPSEEK_API_KEY"),
-        streaming=True,
     )
 
     agent = create_agent(
