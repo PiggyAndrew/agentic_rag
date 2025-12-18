@@ -2,6 +2,32 @@ import json
 from app.agent import agent as rag_agent
 from langchain_core.messages import HumanMessage, AIMessage, SystemMessage, ToolMessage, AIMessageChunk
 
+def _coerce_ai_message_chunk(obj):
+    if obj is None:
+        return None
+    if isinstance(obj, AIMessageChunk):
+        return obj
+    msg = getattr(obj, "message", None)
+    if isinstance(msg, AIMessageChunk):
+        return msg
+    content = getattr(obj, "content", None)
+    if isinstance(content, str) and content:
+        return AIMessageChunk(content=content)
+    text = getattr(obj, "text", None)
+    if isinstance(text, str) and text:
+        return AIMessageChunk(content=text)
+    if isinstance(obj, dict):
+        inner = obj.get("message")
+        if isinstance(inner, AIMessageChunk):
+            return inner
+        inner_content = obj.get("content")
+        if isinstance(inner_content, str) and inner_content:
+            return AIMessageChunk(content=inner_content)
+        inner_text = obj.get("text")
+        if isinstance(inner_text, str) and inner_text:
+            return AIMessageChunk(content=inner_text)
+    return None
+
 def convert_messages(messages):
     """
     将前端消息转换为 LangChain 消息对象用于 Agent 输入
@@ -32,7 +58,7 @@ def convert_messages(messages):
 async def stream_generator(messages):
     """
     生成符合 Vercel AI SDK Data Stream Protocol 的流式响应
-    使用 agent.astream (stream_mode=["messages", "updates"])
+    使用 agent.astream_events 以同时获取 token 增量与中间步骤事件
     参考: https://python.langchain.com/docs/how_to/streaming/
     """
     if not rag_agent:
@@ -43,65 +69,59 @@ async def stream_generator(messages):
     inputs = {"messages": convert_messages(messages)}
     
     try:
-        # 使用 messages 模式流式传输 token，使用 updates 模式获取工具调用状态
-        async for mode, chunk in rag_agent.astream(inputs, stream_mode=["messages", "updates"]):
-            
-            # 1. 消息流 (Token Streaming)
-            # 用于实时显示 LLM 生成的文本 (CoT 或普通回复)
-            if mode == "messages":
-                # chunk 是 (message_chunk, metadata)
-                msg, metadata = chunk
-                if isinstance(msg, AIMessageChunk) and msg.content:
-                    # 只有当 content 不为空时才输出
-                    # 注意：如果正在生成工具调用 (tool_call_chunks)，content 通常为空
-                    yield f'0:{json.dumps(msg.content)}\n'
+        if hasattr(rag_agent, "astream_events"):
+            emitted_text = False
+            async for event in rag_agent.astream_events(inputs, version="v2"):
+                event_type = event.get("event")
+                name = event.get("name")
+                run_id = event.get("run_id")
+                data = event.get("data") or {}
 
-            # 2. 状态更新流 (Tool Calls & Results)
-            # 用于捕获完整的工具调用请求和工具执行结果
-            elif mode == "updates":
-                # chunk 是包含节点更新的字典，例如 {"agent": {"messages": [...]}}
-                for node_name, node_content in chunk.items():
-                    # 提取消息列表
-                    msgs = []
-                    if isinstance(node_content, dict):
-                        msgs = node_content.get("messages", [])
-                        # 处理直接返回 structured_response 的情况
-                        sr = node_content.get("structured_response")
-                        if sr:
-                             ans = getattr(sr, "answer", None) or sr.get("answer")
-                             if ans:
-                                 yield f'0:{json.dumps(ans)}\n'
-                    elif isinstance(node_content, list):
-                        msgs = node_content
-                    
-                    # 遍历消息处理工具事件
-                    for msg in msgs:
-                        # A. 处理 AI 消息中的工具调用 (Tool Start)
-                        if isinstance(msg, AIMessage) and msg.tool_calls:
-                            for tc in msg.tool_calls:
-                                # 检查是否是结构化输出的 "答案" 工具
-                                # 如果是 RAGAnswer，直接提取 answer 字段作为文本输出
-                                if "answer" in tc["args"]:
-                                     yield f'0:{json.dumps(tc["args"]["answer"])}\n'
-                                else:
-                                     # 普通工具调用 -> tool_start (channel 8)
-                                     data = {
-                                         "type": "tool_start",
-                                         "tool": tc["name"],
-                                         "input": _to_jsonable(tc["args"]),
-                                         "id": tc["id"]
-                                     }
-                                     yield f'8:{json.dumps([data])}\n'
-                        
-                        # B. 处理工具执行结果 (Tool End)
-                        if isinstance(msg, ToolMessage):
-                             data = {
-                                 "type": "tool_end",
-                                 "tool": msg.name,
-                                 "output": _to_jsonable(msg.content),
-                                 "id": msg.tool_call_id
-                             }
-                             yield f'8:{json.dumps([data])}\n'
+                if event_type in {"on_chat_model_stream", "on_llm_stream"}:
+                    chunk = _coerce_ai_message_chunk(data.get("chunk"))
+                    if chunk and chunk.content:
+                        emitted_text = True
+                        yield f'0:{json.dumps(chunk.content)}\n'
+
+                elif event_type == "on_chat_model_end":
+                    if not emitted_text:
+                        text = _extract_text(data.get("output"))
+                        if text:
+                            emitted_text = True
+                            yield f'0:{json.dumps(text)}\n'
+
+                elif event_type == "on_tool_start":
+                    tool_input = data.get("input")
+                    payload = {
+                        "type": "tool_start",
+                        "tool": name,
+                        "input": _to_jsonable(tool_input),
+                        "id": str(run_id),
+                    }
+                    yield f'8:{json.dumps([payload])}\n'
+
+                elif event_type == "on_tool_end":
+                    tool_output = data.get("output")
+                    payload = {
+                        "type": "tool_end",
+                        "tool": name,
+                        "output": _to_jsonable(tool_output),
+                        "id": str(run_id),
+                    }
+                    yield f'8:{json.dumps([payload])}\n'
+
+                elif event_type in {"on_tool_error", "on_chain_error", "on_chat_model_error"}:
+                    err = data.get("error")
+                    yield f'3:{json.dumps(str(err))}\n'
+        else:
+            async for mode, chunk in rag_agent.astream(inputs, stream_mode=["messages", "updates"]):
+                if mode == "messages":
+                    msg, _metadata = chunk
+                    msg_chunk = _coerce_ai_message_chunk(msg)
+                    if msg_chunk and msg_chunk.content:
+                        yield f'0:{json.dumps(msg_chunk.content)}\n'
+                    elif isinstance(msg, AIMessage) and msg.content:
+                        yield f'0:{json.dumps(msg.content)}\n'
 
     except Exception as e:
         # 3: error part
