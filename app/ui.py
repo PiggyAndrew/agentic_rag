@@ -10,8 +10,7 @@ if ROOT_DIR not in sys.path:
     sys.path.insert(0, ROOT_DIR)
 
 from kb.knowledge_base import PersistentKnowledgeBaseController
-from kb.ingestion import ingest_pdf
-
+from kb.ingestion import ingest_pdf, ingest_excel
 
 def list_kb_ids(base_dir: str) -> List[int]:
     """列出所有存在的知识库ID（基于目录名解析）"""
@@ -27,7 +26,6 @@ def list_kb_ids(base_dir: str) -> List[int]:
                 pass
     return sorted(ids)
 
-
 def format_chunk_preview(c: Dict) -> str:
     """格式化片段预览文本，带层级路径信息（如存在）"""
     content = c.get("content", "")
@@ -37,7 +35,6 @@ def format_chunk_preview(c: Dict) -> str:
         path_str = " > ".join([f"{p['number']} {p['title']}" for p in meta.get("path", [])])
         return f"[{c['chunk_index']}] {path_str} | {preview}"
     return f"[{c['chunk_index']}] {preview}"
-
 
 def launch_kb_viewer():
     """启动知识库浏览器GUI，支持导入PDF、删除文件、新建/删除知识库"""
@@ -102,6 +99,22 @@ def launch_kb_viewer():
         messagebox.showinfo("成功", f"已导入: {info.filename} ({info.chunk_count} 片段)")
         do_refresh_files()
 
+    def do_ingest_excel():
+        """导入 Excel 文件到知识库（按 Sheet 拆分并可生成表格摘要）"""
+        path = filedialog.askopenfilename(
+            title="选择Excel文件",
+            filetypes=[("Excel files", "*.xlsx *.xlsm"), ("All files", "*.*")],
+        )
+        if not path:
+            return
+        try:
+            info = ingest_excel(kb, get_current_kb_id(), path)
+        except Exception as e:
+            messagebox.showerror("错误", f"导入失败: {e}")
+            return
+        messagebox.showinfo("成功", f"已导入: {info.filename} ({info.chunk_count} 片段)")
+        do_refresh_files()
+
     def do_delete_file():
         sel = files_list.curselection()
         if not sel:
@@ -124,6 +137,8 @@ def launch_kb_viewer():
     delete_kb_btn.pack(side=tk.LEFT, padx=5)
     ingest_btn = ttk.Button(top, text="导入PDF", command=do_ingest_pdf)
     ingest_btn.pack(side=tk.LEFT, padx=5)
+    ingest_excel_btn = ttk.Button(top, text="导入Excel", command=do_ingest_excel)
+    ingest_excel_btn.pack(side=tk.LEFT, padx=5)
 
     main_frame = ttk.Frame(root)
     main_frame.pack(fill=tk.BOTH, expand=True)
@@ -178,7 +193,5 @@ def launch_kb_viewer():
     do_refresh_files()
     root.mainloop()
 
-
 if __name__ == "__main__":
     launch_kb_viewer()
-

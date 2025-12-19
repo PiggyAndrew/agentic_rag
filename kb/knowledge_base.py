@@ -6,6 +6,8 @@ from .rerank import get_default_reranker, Reranker
 from .vector_store import LocalVectorStore
 import json
 import os
+import re
+import heapq
 import shutil
 
 
@@ -222,8 +224,105 @@ class PersistentKnowledgeBaseController:
             ))
         return out
 
+    def _tokenize_query_for_keyword_search(self, query: str) -> List[str]:
+        """将查询拆解为用于机械关键词检索的 token 列表。"""
+        q = (query or "").strip()
+        if not q:
+            return []
+        out: List[str] = []
+        seen = set()
+        for m in re.finditer(r"[A-Za-z0-9_]+|[\u4e00-\u9fff]+", q):
+            t = (m.group(0) or "").strip()
+            if not t:
+                continue
+            if re.fullmatch(r"[A-Za-z0-9_]+", t) and len(t) < 2:
+                continue
+            if t in seen:
+                continue
+            seen.add(t)
+            out.append(t)
+        return out
+
+    def _keyword_search(self, kb_id: int, query: str, top_k: int = 5, exclude: Optional[set[Tuple[int, int]]] = None) -> List[Dict]:
+        """基于片段内容做机械关键词检索，返回与向量检索同结构的候选列表。"""
+        q = (query or "").strip()
+        if not q:
+            return []
+        tokens = self._tokenize_query_for_keyword_search(q)
+        if not tokens:
+            return []
+
+        meta = self._load_files(kb_id)
+        name_map = {int(f["id"]): f["filename"] for f in meta.get("files", [])}
+        chunks_dir = self._chunks_dir(kb_id)
+        if not os.path.exists(chunks_dir):
+            return []
+
+        exclude_set: set[Tuple[int, int]] = exclude or set()
+        heap: List[Tuple[float, int, int, Dict[str, Any]]] = []
+        counter = 0
+
+        q_lower = q.lower()
+        token_lowers = [t.lower() for t in tokens]
+        is_ascii = [bool(re.fullmatch(r"[A-Za-z0-9_]+", t)) for t in tokens]
+
+        for fname in os.listdir(chunks_dir):
+            if not fname.endswith(".json"):
+                continue
+            fpath = os.path.join(chunks_dir, fname)
+            try:
+                with open(fpath, "r", encoding="utf-8") as f:
+                    raw = json.load(f) or []
+            except Exception:
+                continue
+            for r in raw:
+                try:
+                    fid = int(r.get("file_id"))
+                    idx = int(r.get("chunk_index"))
+                except Exception:
+                    continue
+                if (fid, idx) in exclude_set:
+                    continue
+                content = str(r.get("content", "") or "")
+                if not content.strip():
+                    continue
+                content_lower = content.lower()
+
+                score = 0.0
+                for i, t in enumerate(tokens):
+                    if is_ascii[i]:
+                        c = content_lower.count(token_lowers[i])
+                    else:
+                        c = content.count(t)
+                    score += float(min(c, 3))
+                if q_lower and q_lower in content_lower:
+                    score += 5.0
+                if score <= 0:
+                    continue
+
+                preview = (content[:200] + "...") if len(content) > 200 else content
+                item = {
+                    "file_id": fid,
+                    "chunk_index": idx,
+                    "filename": name_map.get(fid, "unknown"),
+                    "score": score,
+                    "preview": preview,
+                    "metadata": r.get("metadata"),
+                }
+
+                counter += 1
+                key = (score, -len(content), counter, item)
+                if len(heap) < int(top_k):
+                    heapq.heappush(heap, key)
+                else:
+                    if key > heap[0]:
+                        heapq.heapreplace(heap, key)
+
+        heap.sort(reverse=True)
+        return [it for _, __, ___, it in heap]
+
     def search(self, kb_id: int, query: str) -> List[Dict]:
-        """基于向量嵌入的语义检索，并可选通过 Reranker 进行二次排序。
+        """混合召回：语义检索 5 条 + 关键词检索 5 条，合并后 rerank 输出 8 条。
 
         - Reranker 通过 `get_default_reranker()` 选择：Noop 或 CrossEncoder。
         - 使用 provider 模式统一封装，便于扩展与替换实现。
@@ -233,13 +332,19 @@ class PersistentKnowledgeBaseController:
             return []
         q_vec = self._embedder.embed_text(q)
 
-        # 选取 Reranker provider 并确定预候选数量
         reranker: Reranker = get_default_reranker()
-        pre_k = getattr(reranker, "pre_k", 5)
-        initial = self._vstore.query_embeddings(kb_id, q_vec, top_k=pre_k)
+        semantic = self._vstore.query_embeddings(kb_id, q_vec, top_k=5)
+        seen_pairs = {(int(r["file_id"]), int(r["chunk_index"])) for r in semantic}
+        keyword = self._keyword_search(kb_id, q, top_k=5, exclude=seen_pairs)
+
+        combined: List[Dict[str, Any]] = []
+        combined.extend(semantic)
+        combined.extend(keyword)
+        if not combined:
+            return []
 
         # 构造内容加载器（批量读取避免重复 IO）
-        pairs_spec = [{"fileId": r["file_id"], "chunkIndex": r["chunk_index"]} for r in initial]
+        pairs_spec = [{"fileId": r["file_id"], "chunkIndex": r["chunk_index"]} for r in combined]
         full_chunks = self.readFileChunks(kb_id, pairs_spec)
         content_map: Dict[tuple[int, int], str] = {}
         for ch in full_chunks:
@@ -250,7 +355,7 @@ class PersistentKnowledgeBaseController:
         def _load_content(fid: int, idx: int) -> str:
             return content_map.get((fid, idx), "")
 
-        return reranker.rerank(q, initial, _load_content, top_k=5)
+        return reranker.rerank(q, combined, _load_content, top_k=8)
 
     def getFilesMeta(self, kb_id: int, file_ids: List[int]) -> List[Dict]:
         """根据文件ID数组返回对应的元信息"""

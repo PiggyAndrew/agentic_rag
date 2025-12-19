@@ -47,7 +47,7 @@ const formattedOutput = computed(() => {
         )
       "
     >
-      <div v-if="errorText" class="p-3">
+      <div v-if="errorText" class="p-3 whitespace-pre-wrap">
         {{ props.errorText }}
       </div>
 
@@ -61,7 +61,7 @@ const formattedOutput = computed(() => {
         :code="formattedOutput"
         language="json"
       />
-      <div v-else class="p-3">
+      <div v-else class="p-3 whitespace-pre-wrap">
         {{ props.output }}
       </div>
     </div>

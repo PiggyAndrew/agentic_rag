@@ -52,6 +52,21 @@ import {
   ReasoningTrigger,
 } from "@/components/ai-elements/reasoning";
 import {
+  InlineCitation,
+  InlineCitationCard,
+  InlineCitationCardBody,
+  InlineCitationCardTrigger,
+  InlineCitationCarousel,
+  InlineCitationCarouselContent,
+  InlineCitationCarouselHeader,
+  InlineCitationCarouselIndex,
+  InlineCitationCarouselItem,
+  InlineCitationCarouselNext,
+  InlineCitationCarouselPrev,
+  InlineCitationSource,
+  InlineCitationText,
+} from "@/components/ai-elements/inline-citation";
+import {
   Source,
   Sources,
   SourcesContent,
@@ -79,6 +94,13 @@ interface MessageSource {
   title: string;
 }
 
+interface MessageCitation {
+  file_id: number;
+  chunk_index: number;
+  filename: string;
+  content: string;
+}
+
 interface MessageReasoning {
   content: string;
   duration: number;
@@ -99,6 +121,7 @@ interface MessageType {
   key: string;
   from: "user" | "assistant";
   sources?: MessageSource[];
+  citations?: MessageCitation[];
   versions: MessageVersion[];
   reasoning?: MessageReasoning;
   tools?: MessageTool[];
@@ -111,7 +134,6 @@ interface Model {
   chefSlug: string;
   providers: string[];
 }
-
 
 const models: Model[] = [
   {
@@ -136,7 +158,6 @@ const selectedModelData = computed(() =>
   models.find((m) => m.id === modelId.value)
 );
 
-
 function updateStreamingContent(versionId: string, content: string) {
   const target = messages.value.find((msg) =>
     msg.versions.some((version) => version.id === versionId)
@@ -148,7 +169,24 @@ function updateStreamingContent(versionId: string, content: string) {
   messages.value = [...messages.value];
 }
 
+function normalizeToolOutput(value: any): any {
+  if (value == null) return value;
+  if (typeof value === "string") return value;
+  if (Array.isArray(value)) return value;
+  if (typeof value === "object") {
+    const content = (value as any).content;
+    if (typeof content === "string") return content;
+    const output = (value as any).output;
+    if (typeof output === "string") return output;
+    return value;
+  }
+  return String(value);
+}
+
 function updateStreamingTool(versionId: string, toolEvent: any) {
+  /**
+   * 将后端工具事件映射到前端工具列表，仅更新工具面板，不将工具结果注入消息文本
+   */
   const target = messages.value.find((msg) =>
     msg.versions.some((version) => version.id === versionId)
   );
@@ -156,7 +194,7 @@ function updateStreamingTool(versionId: string, toolEvent: any) {
 
   if (!target.tools) target.tools = [];
 
-  const { type, tool, input, output, id } = toolEvent;
+  const { type, tool, input, output, id, error } = toolEvent;
 
   if (type === "tool_start") {
     target.tools = [
@@ -179,10 +217,40 @@ function updateStreamingTool(versionId: string, toolEvent: any) {
         .find((t) => t.name === tool && t.state === "call");
     if (t) {
       t.state = "output-available";
-      t.output = typeof output === "string" ? output : JSON.stringify(output);
+      const normalized = normalizeToolOutput(output);
+      t.output =
+        typeof normalized === "string"
+          ? normalized
+          : JSON.stringify(normalized, null, 2);
+      if (error) {
+        t.state = "output-error";
+        t.error = String(error);
+      }
       target.tools = [...target.tools];
     }
   }
+  messages.value = [...messages.value];
+}
+
+function updateStreamingCitations(versionId: string, payload: any) {
+  const target = messages.value.find((msg) =>
+    msg.versions.some((version) => version.id === versionId)
+  );
+  if (!target) return;
+
+  const citations = Array.isArray(payload?.citations) ? payload.citations : [];
+  target.citations = citations.map((c: any) => ({
+    file_id: Number(c?.file_id ?? 0),
+    chunk_index: Number(c?.chunk_index ?? 0),
+    filename: String(c?.filename ?? ""),
+    content: String(c?.content ?? ""),
+  }));
+
+  target.sources = target.citations.map((c) => ({
+    href: `kb://file/${c.file_id}#chunk=${c.chunk_index}`,
+    title: `${c.filename || "unknown"} #${c.chunk_index}`,
+  }));
+
   messages.value = [...messages.value];
 }
 
@@ -206,7 +274,13 @@ async function streamResponse(versionId: string) {
         updateStreamingContent(versionId, acc);
       } else if (ev.type === "data") {
         if (Array.isArray(ev.data)) {
-          for (const item of ev.data) updateStreamingTool(versionId, item);
+          for (const item of ev.data) {
+            if (item?.type === "tool_start" || item?.type === "tool_end") {
+              updateStreamingTool(versionId, item);
+            } else if (item?.type === "citations") {
+              updateStreamingCitations(versionId, item);
+            }
+          }
         }
       }
     }
@@ -223,15 +297,20 @@ async function streamResponse(versionId: string) {
  * - 其余情况回退为字符串化
  */
 function normalizeTextChunk(value: unknown): string {
-  // 字符串：尝试解析为 JSON
   if (typeof value === "string") {
     const trimmed = value.trim();
-    try {
-      const obj = JSON.parse(trimmed);
-      return extractText(obj);
-    } catch {
-      return trimmed;
+    const looksLikeJson =
+      (trimmed.startsWith("{") && trimmed.endsWith("}")) ||
+      (trimmed.startsWith("[") && trimmed.endsWith("]"));
+    if (looksLikeJson) {
+      try {
+        const obj = JSON.parse(trimmed);
+        return extractText(obj);
+      } catch {
+        return value;
+      }
     }
+    return value;
   }
   // 对象或数组：提取可读内容
   if (value && typeof value === "object") {
@@ -357,72 +436,137 @@ function toggleWebSearch() {
             :key="message.key"
             :default-branch="0"
           >
-          <MessageBranchContent>
-            <Message
-              v-if="message.versions.length > 0"
-              :key="`${message.key}-${message.versions[message.versions.length-1].id}`"
-              :from="message.from"
-            >
-              <div>
-                <Sources v-if="message.sources?.length">
-                  <SourcesTrigger :count="message.sources.length" />
-                  <SourcesContent>
-                    <Source
-                      v-for="source in message.sources"
-                      :key="source.href"
-                      :href="source.href"
-                      :title="source.title"
-                    />
-                  </SourcesContent>
-                </Sources>
-
-                <Reasoning
-                  v-if="message.reasoning"
-                  :duration="message.reasoning.duration"
-                >
-                  <ReasoningTrigger />
-                  <ReasoningContent :content="message.reasoning.content" />
-                </Reasoning>
-
-                <div
-                  v-if="message.tools && message.tools.length"
-                  class="flex flex-col gap-2 pb-2"
-                >
-                  <Tool v-for="tool in message.tools" :key="tool.toolCallId">
-                    <ToolHeader
-                      :state="tool.state"
-                      :title="tool.name"
-                      :type="tool.type"
-                    />
-
-                    <ToolContent>
-                      <ToolInput :input="tool.input" />
-                      <ToolOutput
-                        :output="tool.output"
-                        :error-text="tool.errorText"
+            <MessageBranchContent>
+              <Message
+                v-if="message.versions.length > 0"
+                :key="`${message.key}-${
+                  message.versions[message.versions.length - 1].id
+                }`"
+                :from="message.from"
+              >
+                <div>
+                  <Sources v-if="message.sources?.length">
+                    <SourcesTrigger :count="message.sources.length" />
+                    <SourcesContent>
+                      <Source
+                        v-for="source in message.sources"
+                        :key="source.href"
+                        :href="source.href"
+                        :title="source.title"
                       />
-                    </ToolContent>
-                  </Tool>
+                    </SourcesContent>
+                  </Sources>
+
+                  <Reasoning
+                    v-if="message.reasoning"
+                    :duration="message.reasoning.duration"
+                  >
+                    <ReasoningTrigger />
+                    <ReasoningContent :content="message.reasoning.content" />
+                  </Reasoning>
+
+                  <div
+                    v-if="message.tools && message.tools.length"
+                    class="flex flex-col gap-2 pb-2"
+                  >
+                    <Tool v-for="tool in message.tools" :key="tool.toolCallId">
+                      <ToolHeader
+                        :state="tool.state"
+                        :title="tool.name"
+                        :type="tool.type"
+                      />
+
+                      <ToolContent>
+                        <ToolInput :input="tool.input" />
+                        <ToolOutput
+                          :output="tool.output"
+                          :error-text="tool.error"
+                        />
+                      </ToolContent>
+                    </Tool>
+                  </div>
+
+                  <MessageContent>
+                    <MessageResponse
+                      :content="
+                        message.versions[message.versions.length - 1].content
+                      "
+                    />
+                    <div
+                      v-if="message.citations && message.citations.length"
+                      class="mt-3 text-sm leading-relaxed"
+                    >
+                      <InlineCitation>
+                        <InlineCitationText>
+                          已引用 {{ message.citations.length }} 个证据片段
+                        </InlineCitationText>
+                        <InlineCitationCard>
+                          <InlineCitationCardTrigger
+                            :sources="
+                              message.citations.map(
+                                (c) =>
+                                  `kb://file/${c.file_id}#chunk=${c.chunk_index}`
+                              )
+                            "
+                          />
+                          <InlineCitationCardBody>
+                            <InlineCitationCarousel>
+                              <InlineCitationCarouselHeader>
+                                <InlineCitationCarouselPrev />
+                                <InlineCitationCarouselNext />
+                                <InlineCitationCarouselIndex />
+                              </InlineCitationCarouselHeader>
+                              <InlineCitationCarouselContent>
+                                <InlineCitationCarouselItem
+                                  v-for="c in message.citations"
+                                  :key="`${c.file_id}-${c.chunk_index}`"
+                                >
+                                  <InlineCitationSource
+                                    :description="c.content"
+                                    :title="`${c.filename || 'unknown'} #${
+                                      c.chunk_index
+                                    }`"
+                                    :url="`kb://file/${c.file_id}#chunk=${c.chunk_index}`"
+                                  />
+                                </InlineCitationCarouselItem>
+                              </InlineCitationCarouselContent>
+                            </InlineCitationCarousel>
+                          </InlineCitationCardBody>
+                        </InlineCitationCard>
+                      </InlineCitation>
+                    </div>
+                  </MessageContent>
                 </div>
+              </Message>
+            </MessageBranchContent>
+            <MessageToolbar v-if="message.from === 'assistant'">
+              <MessageBranchSelector :from="message.from">
+                <MessageBranchPrevious />
+                <MessageBranchPage />
+                <MessageBranchNext />
+              </MessageBranchSelector>
 
-                <MessageContent>
-                  <MessageResponse :content="message.versions[message.versions.length-1].content" />
-                </MessageContent>
-              </div>
-            </Message>
-          </MessageBranchContent>
+              <MessageActions>
+                <MessageAction label="Retry" tooltip="Regenerate response">
+                  <RefreshCcwIcon class="size-4" />
+                </MessageAction>
 
-          <MessageBranchSelector
-            v-if="message.versions.length > 1"
-            :from="message.from"
-          >
-            <MessageBranchPrevious />
-            <MessageBranchPage />
-            <MessageBranchNext />
-          </MessageBranchSelector>
-        </MessageBranch>
-      </ConversationContent>
-      <ConversationScrollButton />
+                <MessageAction label="Like" tooltip="Like this response">
+                  <ThumbsUpIcon class="size-4" />
+                </MessageAction>
+
+                <MessageAction label="Dislike" tooltip="Dislike this response">
+                  <ThumbsDownIcon class="size-4" />
+                </MessageAction>
+
+                <MessageAction label="Copy" tooltip="Copy to clipboard">
+                  <CopyIcon class="size-4" />
+                </MessageAction>
+              </MessageActions>
+            </MessageToolbar>
+          </MessageBranch>
+        </ConversationContent>
+        <ConversationScrollButton />
       </Conversation>
     </div>
 
