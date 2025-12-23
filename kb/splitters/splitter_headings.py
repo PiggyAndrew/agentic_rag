@@ -1,7 +1,7 @@
 from typing import List, Dict, Any, Optional
 import re
-from .base import Splitter
-from .utils import normalize_title
+from .splitter_base import Splitter
+from .splitter_utils import normalize_title
 
 
 class HeadingsSplitter(Splitter):

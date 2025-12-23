@@ -4,6 +4,7 @@ import numpy as np
 from .embeddings import get_default_embedder
 from .rerank import get_default_reranker, Reranker
 from .vector_store import LocalVectorStore
+from kb.types import FileMeta
 import json
 import os
 import re
@@ -97,12 +98,7 @@ class PersistentKnowledgeBaseController:
         meta = self._load_files(kb_id)
         file_id = meta.get("next_id", 1)
         info = FileInfo(id=file_id, filename=filename, chunk_count=chunk_count, status=status)
-        meta["files"].append({
-            "id": info.id,
-            "filename": info.filename,
-            "chunk_count": info.chunk_count,
-            "status": info.status,
-        })
+        meta["files"].append(FileMeta(id=info.id, filename=info.filename, chunk_count=info.chunk_count, status=info.status).to_dict())
         meta["next_id"] = file_id + 1
         self._save_files(kb_id, meta)
         return info
@@ -364,12 +360,7 @@ class PersistentKnowledgeBaseController:
         res = []
         for f in meta.get("files", []):
             if int(f["id"]) in idset:
-                res.append({
-                    "id": int(f["id"]),
-                    "filename": f["filename"],
-                    "chunk_count": int(f["chunk_count"]),
-                    "status": f.get("status", "done"),
-                })
+                res.append(FileMeta(id=int(f["id"]), filename=f["filename"], chunk_count=int(f["chunk_count"]), status=f.get("status", "done")).to_dict())
         return res
 
     def readFileChunks(self, kb_id: int, chunks: List[Dict[str, int]]) -> List[Dict]:
@@ -420,9 +411,4 @@ class PersistentKnowledgeBaseController:
         files = meta.get("files", [])
         start = page * page_size
         end = start + page_size
-        return [{
-            "id": int(f["id"]),
-            "filename": f["filename"],
-            "chunk_count": int(f["chunk_count"]),
-            "status": f.get("status", "done"),
-        } for f in files[start:end]]
+        return [FileMeta(id=int(f["id"]), filename=f["filename"], chunk_count=int(f["chunk_count"]), status=f.get("status", "done")).to_dict() for f in files[start:end]]

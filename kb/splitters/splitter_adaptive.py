@@ -4,9 +4,9 @@ import re
 from dotenv import load_dotenv
 from langchain_openai import ChatOpenAI
 from app.prompts import get_toc_parser_system_prompt, get_toc_parser_user_prompt
-from .base import Splitter
-from .utils import parse_json_array, normalize_title, is_toc_line, detect_toc_bounds
-from .headings import HeadingsSplitter
+from .splitter_base import Splitter
+from .splitter_utils import parse_json_array, normalize_title, is_toc_line, detect_toc_bounds
+from .splitter_headings import HeadingsSplitter
 
 
 def get_toc_parsing_llm() -> Optional[ChatOpenAI]:

@@ -1,5 +1,5 @@
 from typing import List, Dict, Any
-from .base import Splitter
+from .splitter_base import Splitter
 
 
 class NormalSplitter(Splitter):

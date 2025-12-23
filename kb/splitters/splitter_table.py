@@ -6,7 +6,7 @@ import re
 
 from langchain_openai import ChatOpenAI
 
-from .base import Splitter
+from .splitter_base import Splitter
 from app.prompts import (
     get_table_summary_system_prompt,
     get_table_summary_user_prompt,

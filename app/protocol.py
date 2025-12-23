@@ -1,9 +1,7 @@
 import json
-import os
 from app.agent import agent as rag_agent
 from langchain_core.messages import HumanMessage, AIMessage, SystemMessage, ToolMessage, AIMessageChunk
-from langchain_core.runnables import RunnableConfig
- 
+
 def convert_messages(messages):
     """
     将前端消息转换为 LangChain 消息对象用于 Agent 输入
@@ -31,42 +29,26 @@ def convert_messages(messages):
             lc_messages.append(SystemMessage(content=content or ""))
     return lc_messages
 
-
-
-def _truncate_text(text: str, max_len: int = 800) -> str:
-    """
-    截断文本到指定长度，避免将超长内容塞进流式事件导致前端渲染卡顿
-    """
-    if not text:
-        return ""
-    t = str(text)
-    if max_len <= 0 or len(t) <= max_len:
-        return t
-    return t[:max_len] + "..."
-
-
-def _try_parse_json(value):
-    """
-    尝试将字符串解析为 JSON；失败则返回 None
-    """
+def _as_text(value):
     if value is None:
-        return None
-    if not isinstance(value, str):
-        return None
-    s = value.strip()
-    if not s:
-        return None
-    try:
-        return json.loads(s)
-    except Exception:
-        return None
-
+        return ""
+    if isinstance(value, str):
+        return value
+    if isinstance(value, list):
+        parts = []
+        for item in value:
+            if isinstance(item, str):
+                parts.append(item)
+            elif isinstance(item, dict):
+                t = item.get("text")
+                if isinstance(t, str):
+                    parts.append(t)
+            else:
+                parts.append(str(item))
+        return "".join(parts)
+    return str(value)
 
 def _extract_partial_json_string_field(s: str, field: str) -> str:
-    """
-    从不完整的 JSON 片段字符串中提取指定字段的字符串值（不支持嵌套对象）
-    处理常见的转义序列，其中 \\n 会被还原为实际换行符
-    """
     key = f"\"{field}\""
     start = s.find(key)
     if start == -1:
@@ -147,7 +129,6 @@ async def stream_generator(messages):
     生成符合 Vercel AI SDK Data Stream Protocol 的流式响应
     使用 agent.astream_events (v2)
     参考: https://python.langchain.com/docs/how_to/streaming/
-    变更：严格区分模型文本与工具输出，工具输出只通过 data 事件返回，不注入文本消息
     """
     if not rag_agent:
         yield '0:"Error: Agent not initialized"\n'
@@ -161,10 +142,7 @@ async def stream_generator(messages):
         tool_call_names = {}
         tool_call_args = {}
         answer_emitted = {}
-        citations_map = {}
-        recursion_limit = int(os.getenv("AGENT_RECURSION_LIMIT", "80"))
-        cfg = RunnableConfig(recursion_limit=recursion_limit)
-        async for event in rag_agent.astream_events(inputs, version="v2", config=cfg):
+        async for event in rag_agent.astream_events(inputs, version="v2"):
             kind = event["event"]
             
             # 1. 文本流 (Chat Model Streaming)
@@ -189,35 +167,65 @@ async def stream_generator(messages):
                             if len(current) > prev:
                                 delta = current[prev:]
                                 answer_emitted[idx] = len(current)
+                                saw_text = True
                                 yield f'0:{json.dumps(delta)}\n'
             elif kind == "on_llm_new_token":
                 token = event.get("data", {}).get("token")
                 if token:
-                    yield f'0:{json.dumps(token)}\n'
+                    saw_text = True
+                    yield f'0:{json.dumps(_as_text(token))}\n'
             elif kind in ("on_chat_model_end", "on_llm_end"):
                 output = event.get("data", {}).get("output")
                 content = getattr(output, "content", None)
                 if content:
-                    yield f'0:{json.dumps(content)}\n'
+                    saw_text = True
+                    yield f'0:{json.dumps(_as_text(content))}\n'
+            elif kind in ("on_chain_end", "on_agent_finish"):
+                if emitted_final:
+                    continue
+                if saw_text:
+                    continue
+                data = event.get("data", {}) or {}
+                candidate = data.get("output") or data.get("return_values") or data
+                if kind == "on_chain_end" and isinstance(candidate, dict) and "structured_response" not in candidate:
+                    continue
+                text = _extract_text(candidate)
+                if text:
+                    emitted_final = True
+                    saw_text = True
+                    yield f'0:{json.dumps(text)}\n'
+            
             # 2. 工具调用开始 (Tool Start)
             elif kind == "on_tool_start":
                 # 过滤掉不需要展示的内部工具
                 if event["name"].startswith("_"):
                     continue
                 
+                # 特殊处理：如果是最终答案的结构化输出（通常包含 answer 字段）
+                # 我们将其作为文本直接输出，而不是显示为工具调用
                 inputs_data = event["data"].get("input") or {}
-                data = {
-                    "type": "tool_start",
-                    "tool": event["name"],
-                    "input": inputs_data,
-                    "id": event["run_id"]
-                }
-                yield f'8:{json.dumps([data])}\n'
+                if "answer" in inputs_data:
+                    yield f'0:{json.dumps(inputs_data["answer"])}\n'
+                else:
+                    data = {
+                        "type": "tool_start",
+                        "tool": event["name"],
+                        "input": inputs_data,
+                        "id": event["run_id"]
+                    }
+                    yield f'8:{json.dumps([data])}\n'
+
             # 3. 工具执行结束 (Tool End)
             elif kind == "on_tool_end":
                 if event["name"].startswith("_"):
                     continue
+                print(event)
                 output_jsonable = _to_jsonable(event["data"].get("output"))
+                if isinstance(output_jsonable, dict):
+                    answer = output_jsonable.get("content")
+                    if isinstance(answer, str) and answer:
+                        saw_text = True
+                        yield f'0:{json.dumps(answer)}\n'
 
                 data = {
                     "type": "tool_end",
@@ -226,32 +234,6 @@ async def stream_generator(messages):
                     "id": event["run_id"]
                 }
                 yield f'8:{json.dumps([data])}\n'
-
-                if event["name"] == "read_file_chunks":
-                    parsed = _try_parse_json(output_jsonable)
-                    if isinstance(parsed, list):
-                        for item in parsed:
-                            if not isinstance(item, dict):
-                                continue
-                            fid = item.get("file_id")
-                            cidx = item.get("chunk_index")
-                            try:
-                                fid_int = int(fid)
-                                cidx_int = int(cidx)
-                            except Exception:
-                                continue
-                            key = (fid_int, cidx_int)
-                            citations_map[key] = {
-                                "file_id": fid_int,
-                                "chunk_index": cidx_int,
-                                "filename": str(item.get("filename") or ""),
-                                "content": _truncate_text(item.get("content") or ""),
-                            }
-                        citations_payload = {
-                            "type": "citations",
-                            "citations": [citations_map[k] for k in sorted(citations_map.keys())],
-                        }
-                        yield f'8:{json.dumps([citations_payload], ensure_ascii=False)}\n'
             elif kind == "on_tool_error":
                 if event["name"].startswith("_"):
                     continue
@@ -261,7 +243,7 @@ async def stream_generator(messages):
                     "tool": event["name"],
                     "output": None,
                     "id": event["run_id"],
-                    "error": err,
+                    "error": _as_text(err),
                 }
                 yield f'8:{json.dumps([data])}\n'
 
@@ -303,3 +285,57 @@ def _to_jsonable(obj):
             pass
     return str(obj)
 
+def _extract_text(obj):
+    """尽可能从对象中提取可展示的文本内容"""
+    if obj is None:
+        return None
+    # 直接字符串
+    if isinstance(obj, str):
+        return obj
+    # LangChain Message 类：尝试 .content
+    if hasattr(obj, "content"):
+        try:
+            c = getattr(obj, "content")
+            return c if isinstance(c, str) else json.dumps(_to_jsonable(c))
+        except Exception:
+            pass
+    # dict: 可能有 answer 或 content
+    if isinstance(obj, dict):
+        if "structured_response" in obj:
+            text = _extract_text(obj.get("structured_response"))
+            if text:
+                return text
+        for key in ("answer", "content"):
+            if key in obj and isinstance(obj[key], str):
+                return obj[key]
+        # 如果 output 是包含 messages 的结构
+        msgs = obj.get("messages") or obj.get("message")
+        if isinstance(msgs, list) and msgs:
+            last = msgs[-1]
+            if isinstance(last, dict) and isinstance(last.get("content"), str):
+                return last.get("content")
+            if hasattr(last, "content"):
+                try:
+                    if isinstance(last, ToolMessage):
+                        return None
+                    c = getattr(last, "content")
+                    return c if isinstance(c, str) else json.dumps(_to_jsonable(c))
+                except Exception:
+                    pass
+        # 兜底：如果是未知结构的字典/对象，不要盲目序列化，否则会泄漏内部状态 JSON
+        # 除非明确知道这是一个需要展示的对象
+        return None
+    # pydantic / dataclass：尝试字典化
+    if hasattr(obj, "model_dump") and callable(getattr(obj, "model_dump")):
+        try:
+            d = obj.model_dump()
+            return _extract_text(d)
+        except Exception:
+            pass
+    if hasattr(obj, "dict") and callable(getattr(obj, "dict")):
+        try:
+            d = obj.dict()
+            return _extract_text(d)
+        except Exception:
+            pass
+    return None
