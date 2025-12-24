@@ -12,7 +12,7 @@ const { state } = useConfirmationContext()
 
 <template>
   <div
-    v-if="state === 'approval-requested'"
+    v-if="state === 'input-available'"
     :class="
       cn('flex items-center justify-end gap-2 self-end', props.class)
     "

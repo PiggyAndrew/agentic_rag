@@ -52,21 +52,6 @@ import {
   ReasoningTrigger,
 } from "@/components/ai-elements/reasoning";
 import {
-  InlineCitation,
-  InlineCitationCard,
-  InlineCitationCardBody,
-  InlineCitationCardTrigger,
-  InlineCitationCarousel,
-  InlineCitationCarouselContent,
-  InlineCitationCarouselHeader,
-  InlineCitationCarouselIndex,
-  InlineCitationCarouselItem,
-  InlineCitationCarouselNext,
-  InlineCitationCarouselPrev,
-  InlineCitationSource,
-  InlineCitationText,
-} from "@/components/ai-elements/inline-citation";
-import {
   Source,
   Sources,
   SourcesContent,
@@ -75,8 +60,9 @@ import {
 import { Suggestion, Suggestions } from "@/components/ai-elements/suggestion";
 import { CheckIcon, GlobeIcon, MicIcon } from "lucide-vue-next";
 import { streamChat } from "@/api/chat";
-import { nanoid } from "nanoid";
-import { computed, ref } from "vue";
+import { computed, ref, onMounted, watch } from "vue";
+import { useKbStore } from "@/stores/kb";
+import { ElRadioGroup, ElRadio, ElDialog, ElButton } from "element-plus";
 import {
   Tool,
   ToolContent,
@@ -84,6 +70,123 @@ import {
   ToolInput,
   ToolOutput,
 } from "@/components/ai-elements/tool";
+/**
+ * 事件类型：LangChain 原始事件的类封装
+ */
+/**
+ * 从 LangChain 的 `AIMessageChunk` 中提取 tool call 的 args 流式片段
+ */
+function extractToolCallArgsFromChunk(chunk: any): string {
+  const toolCallChunks = Array.isArray(chunk?.tool_call_chunks)
+    ? chunk.tool_call_chunks
+    : [];
+  const invalidToolCalls = Array.isArray(chunk?.invalid_tool_calls)
+    ? chunk.invalid_tool_calls
+    : [];
+
+  const fromToolCallChunks = toolCallChunks
+    .map((c: any) => (typeof c?.args === "string" ? c.args : ""))
+    .filter(Boolean);
+  if (fromToolCallChunks.length > 0) return fromToolCallChunks.join("");
+
+  const fromInvalidToolCalls = invalidToolCalls
+    .map((c: any) => (typeof c?.args === "string" ? c.args : ""))
+    .filter(Boolean);
+  return fromInvalidToolCalls.join("");
+}
+
+class ChatModelStreamEvent {
+  readonly kind = "on_chat_model_stream";
+  constructor(public text: string) {}
+  static fromRaw(ev: any): ChatModelStreamEvent | null {
+    const chunk = ev?.data?.chunk;
+    const c = chunk?.content;
+    if (typeof c === "string" && c.length > 0) return new ChatModelStreamEvent(c);
+    const args = extractToolCallArgsFromChunk(chunk);
+    if (args) return new ChatModelStreamEvent(args);
+    return null;
+  }
+}
+class LLMNewTokenEvent {
+  readonly kind = "on_llm_new_token";
+  constructor(public token: string) {}
+  static fromRaw(ev: any): LLMNewTokenEvent | null {
+    const t = ev?.data?.token;
+    if (typeof t === "string") return new LLMNewTokenEvent(t);
+    return null;
+  }
+}
+class ChatModelEndEvent {
+  readonly kind = "on_chat_model_end";
+  constructor(public content: unknown) {}
+  static fromRaw(ev: any): ChatModelEndEvent | null {
+    const c = ev?.data?.output?.content;
+    if (c != null) return new ChatModelEndEvent(c);
+    return null;
+  }
+}
+class LLMEndEvent {
+  readonly kind = "on_llm_end";
+  constructor(public content: unknown) {}
+  static fromRaw(ev: any): LLMEndEvent | null {
+    const c = ev?.data?.output?.content;
+    if (c != null) return new LLMEndEvent(c);
+    return null;
+  }
+}
+class ToolStartEvent {
+  readonly kind = "on_tool_start";
+  constructor(public tool: string, public input: any, public id: string) {}
+  static fromRaw(ev: any): ToolStartEvent | null {
+    const name = String(ev?.name ?? "");
+    const id = String(ev?.run_id ?? "");
+    const input = ev?.data?.input ?? {};
+    if (name) return new ToolStartEvent(name, input, id);
+    return null;
+  }
+}
+class ToolEndEvent {
+  readonly kind = "on_tool_end";
+  constructor(public tool: string, public output: any, public id: string) {}
+  static fromRaw(ev: any): ToolEndEvent | null {
+    const name = String(ev?.name ?? "");
+    const id = String(ev?.run_id ?? "");
+    const output = ev?.data?.output;
+    if (name) return new ToolEndEvent(name, output, id);
+    return null;
+  }
+}
+class ToolErrorEvent {
+  readonly kind = "on_tool_error";
+  constructor(public tool: string, public id: string, public error: string) {}
+  static fromRaw(ev: any): ToolErrorEvent | null {
+    const name = String(ev?.name ?? "");
+    const id = String(ev?.run_id ?? "");
+    const err = ev?.data?.error;
+    const msg = typeof err === "string" ? err : String(err ?? "");
+    if (name) return new ToolErrorEvent(name, id, msg);
+    return null;
+  }
+}
+class StreamErrorEvent {
+  readonly kind = "error";
+  constructor(public error: string) {}
+  static fromRaw(ev: any): StreamErrorEvent | null {
+    const err = ev?.data?.error;
+    const msg = typeof err === "string" ? err : String(err ?? "");
+    if (msg) return new StreamErrorEvent(msg);
+    return null;
+  }
+}
+type LangChainEvent =
+  | ChatModelStreamEvent
+  | LLMNewTokenEvent
+  | ChatModelEndEvent
+  | LLMEndEvent
+  | ToolStartEvent
+  | ToolEndEvent
+  | ToolErrorEvent
+  | StreamErrorEvent;
 interface MessageVersion {
   id: string;
   content: string;
@@ -108,10 +211,10 @@ interface MessageReasoning {
 
 interface MessageTool {
   toolCallId: string;
-  type: string;
+  type: ToolUIPart["type"];
   name: string;
   description: string;
-  state: string;
+  state: ToolUIPart["state"];
   input: Record<string, unknown>;
   output?: string;
   error?: string;
@@ -145,18 +248,50 @@ const models: Model[] = [
   },
 ];
 
-const suggestions = [];
+const suggestions: string[] = [];
 
-const modelId = ref<string>(models[0].id);
+const defaultModelId = models[0]?.id || "";
+const modelId = ref<string>(defaultModelId);
 const modelSelectorOpen = ref(false);
 const useWebSearch = ref(false);
 const useMicrophone = ref(false);
 const status = ref<ChatStatus>("ready");
 const messages = ref<MessageType[]>([]);
+const kbStore = useKbStore();
+const kbSelectorOpen = ref(false);
+const selectedKbId = ref<string>("");
 
 const selectedModelData = computed(() =>
   models.find((m) => m.id === modelId.value)
 );
+
+/**
+ * 解析后端原始事件为类实例
+ */
+function parseEvent(raw: any): LangChainEvent | null {
+  const kind = raw?.event;
+  if (!kind) return null;
+  switch (kind) {
+    case "on_chat_model_stream":
+      return ChatModelStreamEvent.fromRaw(raw);
+    case "on_llm_new_token":
+      return LLMNewTokenEvent.fromRaw(raw);
+    case "on_chat_model_end":
+      return ChatModelEndEvent.fromRaw(raw);
+    case "on_llm_end":
+      return LLMEndEvent.fromRaw(raw);
+    case "on_tool_start":
+      return ToolStartEvent.fromRaw(raw);
+    case "on_tool_end":
+      return ToolEndEvent.fromRaw(raw);
+    case "on_tool_error":
+      return ToolErrorEvent.fromRaw(raw);
+    case "error":
+      return StreamErrorEvent.fromRaw(raw);
+    default:
+      return null;
+  }
+}
 
 function updateStreamingContent(versionId: string, content: string) {
   const target = messages.value.find((msg) =>
@@ -201,7 +336,7 @@ function updateStreamingTool(versionId: string, toolEvent: any) {
       ...target.tools,
       {
         toolCallId: id,
-        type: `${tool}`,
+        type: `tool-${tool}`,
         name: tool,
         description: `Calling ${tool}...`,
         state: "input-available",
@@ -214,7 +349,7 @@ function updateStreamingTool(versionId: string, toolEvent: any) {
       target.tools
         .slice()
         .reverse()
-        .find((t) => t.name === tool && t.state === "call");
+        .find((t) => t.name === tool && t.state === "input-available");
     if (t) {
       t.state = "output-available";
       const normalized = normalizeToolOutput(output);
@@ -246,7 +381,8 @@ function updateStreamingCitations(versionId: string, payload: any) {
     content: String(c?.content ?? ""),
   }));
 
-  target.sources = target.citations.map((c) => ({
+  const citationsArr = target.citations || [];
+  target.sources = citationsArr.map((c) => ({
     href: `kb://file/${c.file_id}#chunk=${c.chunk_index}`,
     title: `${c.filename || "unknown"} #${c.chunk_index}`,
   }));
@@ -254,34 +390,60 @@ function updateStreamingCitations(versionId: string, payload: any) {
   messages.value = [...messages.value];
 }
 
+/**
+ * 消费后端原始事件流（JSONL）并更新 UI：
+ * - 文本：on_chat_model_stream / on_llm_new_token / on_*_end 的 content
+ * - 工具：on_tool_start / on_tool_end / on_tool_error
+ */
 async function streamResponse(versionId: string) {
   status.value = "streaming";
-  // 构造历史消息（仅取每条消息的最新版本）
   const history = messages.value.map((m) => ({
     role: m.from,
     content: m.versions[m.versions.length - 1]?.content || "",
   }));
   try {
-    const iter = await streamChat(history);
+    const iter = await streamChat(history, selectedKbId.value ? selectedKbId.value : undefined);
     let acc = "";
-    for await (const ev of iter) {
-      if (ev.type === "text") {
-        const chunk = normalizeTextChunk(ev.data);
-        acc += chunk;
+    for await (const raw of iter) {
+      const ev = parseEvent(raw);
+      if (!ev) continue;
+      if (ev instanceof ChatModelStreamEvent) {
+        acc += normalizeTextChunk(ev.text);
         updateStreamingContent(versionId, acc);
-      } else if (ev.type === "error") {
-        acc += `\n[Error] ${ev.data}`;
+      } else if (ev instanceof LLMNewTokenEvent) {
+        acc += String(ev.token);
         updateStreamingContent(versionId, acc);
-      } else if (ev.type === "data") {
-        if (Array.isArray(ev.data)) {
-          for (const item of ev.data) {
-            if (item?.type === "tool_start" || item?.type === "tool_end") {
-              updateStreamingTool(versionId, item);
-            } else if (item?.type === "citations") {
-              updateStreamingCitations(versionId, item);
-            }
-          }
-        }
+      } else if (ev instanceof ChatModelEndEvent) {
+        acc += normalizeTextChunk(ev.content);
+        updateStreamingContent(versionId, acc);
+      } else if (ev instanceof LLMEndEvent) {
+        acc += normalizeTextChunk(ev.content);
+        updateStreamingContent(versionId, acc);
+      } else if (ev instanceof ToolStartEvent) {
+        updateStreamingTool(versionId, {
+          type: "tool_start",
+          tool: ev.tool,
+          input: ev.input || {},
+          id: ev.id,
+        });
+      } else if (ev instanceof ToolEndEvent) {
+        updateStreamingTool(versionId, {
+          type: "tool_end",
+          tool: ev.tool,
+          output: ev.output,
+          id: ev.id,
+        });
+      } else if (ev instanceof ToolErrorEvent) {
+        updateStreamingTool(versionId, {
+          type: "tool_end",
+          tool: ev.tool,
+          output: null,
+          id: ev.id,
+          error: String(ev.error || "Tool error"),
+        });
+      } else if (ev instanceof StreamErrorEvent) {
+        acc += `\n[Error] ${ev.error}`;
+        updateStreamingContent(versionId, acc);
       }
     }
   } catch (e: any) {
@@ -424,6 +586,26 @@ function toggleMicrophone() {
 function toggleWebSearch() {
   useWebSearch.value = !useWebSearch.value;
 }
+
+onMounted(() => {
+  kbStore.fetchKnowledgeBases();
+});
+
+/**
+ * 默认选中第一个知识库：
+ * - 在知识库列表加载完成时，如果当前未选择，则选中第一个
+ * - 优先使用 Pinia 中的 selectedKbId 回填
+ */
+watch(
+  () => kbStore.knowledgeBases,
+  (list) => {
+    if (Array.isArray(list) && list.length > 0 && !selectedKbId.value) {
+      const defaultId = kbStore.selectedKbId || list[0]?.id;
+      if (defaultId) selectedKbId.value = defaultId;
+    }
+  },
+  { immediate: true },
+)
 </script>
 
 <template>
@@ -439,9 +621,7 @@ function toggleWebSearch() {
             <MessageBranchContent>
               <Message
                 v-if="message.versions.length > 0"
-                :key="`${message.key}-${
-                  message.versions[message.versions.length - 1].id
-                }`"
+                :key="`${message.key}-${message.versions[message.versions.length - 1]?.id || ''}`"
                 :from="message.from"
               >
                 <div>
@@ -485,56 +665,11 @@ function toggleWebSearch() {
                       </ToolContent>
                     </Tool>
                   </div>
-
+                  
                   <MessageContent>
                     <MessageResponse
-                      :content="
-                        message.versions[message.versions.length - 1].content
-                      "
+                      :content="message.versions[message.versions.length - 1]?.content || ''"
                     />
-                    <div
-                      v-if="message.citations && message.citations.length"
-                      class="mt-3 text-sm leading-relaxed"
-                    >
-                      <InlineCitation>
-                        <InlineCitationText>
-                          已引用 {{ message.citations.length }} 个证据片段
-                        </InlineCitationText>
-                        <InlineCitationCard>
-                          <InlineCitationCardTrigger
-                            :sources="
-                              message.citations.map(
-                                (c) =>
-                                  `kb://file/${c.file_id}#chunk=${c.chunk_index}`
-                              )
-                            "
-                          />
-                          <InlineCitationCardBody>
-                            <InlineCitationCarousel>
-                              <InlineCitationCarouselHeader>
-                                <InlineCitationCarouselPrev />
-                                <InlineCitationCarouselNext />
-                                <InlineCitationCarouselIndex />
-                              </InlineCitationCarouselHeader>
-                              <InlineCitationCarouselContent>
-                                <InlineCitationCarouselItem
-                                  v-for="c in message.citations"
-                                  :key="`${c.file_id}-${c.chunk_index}`"
-                                >
-                                  <InlineCitationSource
-                                    :description="c.content"
-                                    :title="`${c.filename || 'unknown'} #${
-                                      c.chunk_index
-                                    }`"
-                                    :url="`kb://file/${c.file_id}#chunk=${c.chunk_index}`"
-                                  />
-                                </InlineCitationCarouselItem>
-                              </InlineCitationCarouselContent>
-                            </InlineCitationCarousel>
-                          </InlineCitationCardBody>
-                        </InlineCitationCard>
-                      </InlineCitation>
-                    </div>
                   </MessageContent>
                 </div>
               </Message>
@@ -603,21 +738,21 @@ function toggleWebSearch() {
                 </PromptInputActionMenuContent>
               </PromptInputActionMenu>
 
-              <PromptInputButton
+              <!-- <PromptInputButton
                 :variant="useMicrophone ? 'default' : 'ghost'"
                 @click="toggleMicrophone"
               >
                 <MicIcon :size="16" />
                 <span class="sr-only">Microphone</span>
-              </PromptInputButton>
+              </PromptInputButton> -->
 
-              <PromptInputButton
+              <!-- <PromptInputButton
                 :variant="useWebSearch ? 'default' : 'ghost'"
                 @click="toggleWebSearch"
               >
                 <GlobeIcon :size="16" />
                 <span>Search</span>
-              </PromptInputButton>
+              </PromptInputButton> -->
 
               <ModelSelector v-model:open="modelSelectorOpen">
                 <ModelSelectorTrigger as-child>
@@ -669,6 +804,11 @@ function toggleWebSearch() {
                   </ModelSelectorList>
                 </ModelSelectorContent>
               </ModelSelector>
+
+              <PromptInputButton @click="kbSelectorOpen = true">
+              <GlobeIcon :size="16" />
+                <span>Select Knowledge Base</span>
+              </PromptInputButton>
             </PromptInputTools>
 
             <PromptInputSubmit
@@ -677,6 +817,27 @@ function toggleWebSearch() {
             />
           </PromptInputFooter>
         </PromptInput>
+        <ElDialog v-model="kbSelectorOpen" title="选择知识库" width="520px">
+          <div class="px-2 py-2">
+            <ElRadioGroup v-model="selectedKbId">
+              <div class="grid grid-cols-2 gap-2">
+                <ElRadio
+                  v-for="kb in kbStore.knowledgeBases"
+                  :key="kb.id"
+                  :label="kb.id"
+                >
+                  {{ kb.name }}
+                </ElRadio>
+              </div>
+            </ElRadioGroup>
+          </div>
+          <template #footer>
+            <div class="flex justify-end gap-2">
+              <ElButton @click="kbSelectorOpen = false">取消</ElButton>
+              <ElButton type="primary" @click="kbSelectorOpen = false">确定</ElButton>
+            </div>
+          </template>
+        </ElDialog>
       </div>
     </div>
   </div>

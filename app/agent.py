@@ -3,7 +3,7 @@ from dotenv import load_dotenv
 from langchain_openai import ChatOpenAI
 from langchain.agents import create_agent
 from langchain.agents.structured_output import ToolStrategy
-from app.tools import build_tools
+from app.tools import build_tools, build_tools_multi
 from app.prompts import get_system_prompt
 from kb.knowledge_base import PersistentKnowledgeBaseController
 from app.schemas import RAGAnswer
@@ -18,7 +18,7 @@ from langchain.agents.middleware import (
 
 
 def create_agentic_rag_system(kb_id: int):
-    """创建 Agentic RAG 系统：绑定工具、加载模型并返回Agent实例"""
+    """创建基于单个知识库的 Agent：绑定工具并返回实例"""
     _kb_controller_default = PersistentKnowledgeBaseController()
     
     tools = build_tools(_kb_controller_default, kb_id)
@@ -36,7 +36,7 @@ def create_agentic_rag_system(kb_id: int):
         model="deepseek-chat",
         api_key=os.getenv("DEEPSEEK_API_KEY"),
     )
-
+    
     agent = create_agent(
         llm,
         tools,
@@ -50,10 +50,40 @@ def create_agentic_rag_system(kb_id: int):
             backoff_factor=2.0,
             initial_delay=1.0,),
         ],
-        response_format=RAGAnswer
+        #response_format=RAGAnswer
     )
     
  
+    return agent
+
+def create_agentic_rag_system_for_kbs(kb_ids: list[int]):
+    """创建基于多个知识库的 Agent：绑定多KB工具并返回实例"""
+    _kb_controller_default = PersistentKnowledgeBaseController()
+    tools = build_tools_multi(_kb_controller_default, [int(k) for k in kb_ids or []])
+    SYSTEM_PROMPT = get_system_prompt()
+    load_dotenv()
+    if not os.getenv("DEEPSEEK_API_KEY"):
+        raise ValueError("请设置 DEEPSEEK_API_KEY 环境变量")
+    llm = ChatOpenAI(
+        temperature=0,
+        max_retries=3,
+        base_url="https://api.deepseek.com/v1",
+        model="deepseek-chat",
+        api_key=os.getenv("DEEPSEEK_API_KEY"),
+    )
+    agent = create_agent(
+        llm,
+        tools,
+        system_prompt=SYSTEM_PROMPT,
+        middleware=[
+            ContextEditingMiddleware(),
+            ToolCallLimitMiddleware(thread_limit=20,run_limit=10),
+            ToolRetryMiddleware( max_retries=3,
+            backoff_factor=2.0,
+            initial_delay=1.0,),
+        ],
+        response_format=RAGAnswer
+    )
     return agent
 
 # 为 LangGraph CLI 暴露一个可直接使用的 graph 符号

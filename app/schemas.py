@@ -11,4 +11,4 @@ class Citation(BaseModel):
 
 class RAGAnswer(BaseModel):
     answer: str = Field(description="最终回答文本")
-    citations: List[Citation] = Field(default_factory=list, description="用于回答的证据片段列表")
+    #citations: List[Citation] = Field(default_factory=list, description="用于回答的证据片段列表")

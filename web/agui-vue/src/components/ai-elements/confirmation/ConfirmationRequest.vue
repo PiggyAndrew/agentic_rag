@@ -5,7 +5,7 @@ const { state } = useConfirmationContext()
 </script>
 
 <template>
-  <template v-if="state === 'approval-requested'">
+  <template v-if="state === 'input-available'">
     <slot />
   </template>
 </template>

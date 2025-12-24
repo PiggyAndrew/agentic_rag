@@ -6,12 +6,7 @@ const { approval, state } = useConfirmationContext()
 
 <template>
   <template
-    v-if="
-      approval?.approved === false
-        && (state === 'approval-responded'
-          || state === 'output-denied'
-          || state === 'output-available')
-    "
+    v-if="approval?.approved === false && state === 'output-error'"
   >
     <slot />
   </template>

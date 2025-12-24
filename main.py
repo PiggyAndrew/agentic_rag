@@ -6,7 +6,7 @@ Agentic RAG MVP 示例
 import os
 
 from kb.knowledge_base import PersistentKnowledgeBaseController
-from app.agent import create_agentic_rag_system
+from api.agent import create_agentic_rag_system
 
 # 初始化持久化的知识库控制器
 kb_controller = PersistentKnowledgeBaseController()

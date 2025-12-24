@@ -11,7 +11,7 @@ if ROOT_DIR not in sys.path:
 
 from langchain_core.messages import ToolMessage
 
-from app.sql_agent import create_sql_agent
+from api.sql_agent import create_sql_agent
 
 
 def extract_sql_query_tool_payload(messages):

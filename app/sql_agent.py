@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 from langchain_openai import ChatOpenAI
 from langchain.agents import create_agent
 
-from app.sql_tools import build_sql_tools
+from api.sql_tools import build_sql_tools
 
 
 def _system_prompt() -> str:

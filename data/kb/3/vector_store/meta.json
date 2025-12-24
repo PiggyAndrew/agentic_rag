@@ -1,0 +1,1110 @@
+[
+  {
+    "file_id": 2,
+    "chunk_index": 0,
+    "filename": "BIM Guide for Architectural Design Ver3.1_Dec23.pdf",
+    "metadata": {
+      "number": "",
+      "title": "Table of Contents",
+      "path": [],
+      "type": "toc"
+    },
+    "preview": "Table of Contents \n1 Introduction  1 \n1.1 Overview . 1 \n1.2 Reference BIM Standards and Guidelines  1 \n1.3 Terminology . 2 \n2 Data Management Requirements . 3 \n2.1 General ... 3 \n2.2 Project Folder St..."
+  },
+  {
+    "file_id": 2,
+    "chunk_index": 1,
+    "filename": "BIM Guide for Architectural Design Ver3.1_Dec23.pdf",
+    "metadata": {
+      "number": "1",
+      "title": "Introduction",
+      "path": [
+        {
+          "number": "1",
+          "title": "Introduction"
+        }
+      ]
+    },
+    "preview": "1 Introduction"
+  },
+  {
+    "file_id": 2,
+    "chunk_index": 2,
+    "filename": "BIM Guide for Architectural Design Ver3.1_Dec23.pdf",
+    "metadata": {
+      "number": "1.1",
+      "title": "Overview",
+      "path": [
+        {
+          "number": "1",
+          "title": "Introduction"
+        },
+        {
+          "number": "1.1",
+          "title": "Overview"
+        }
+      ]
+    },
+    "preview": "1.1 Overview \nThis Building Information Modelling (BIM) Guide for Architectural Design documents the general \nrequirements of the management and production of BIM models for building projects managed ..."
+  },
+  {
+    "file_id": 2,
+    "chunk_index": 3,
+    "filename": "BIM Guide for Architectural Design Ver3.1_Dec23.pdf",
+    "metadata": {
+      "number": "1.2",
+      "title": "Reference BIM Standards and Guidelines",
+      "path": [
+        {
+          "number": "1",
+          "title": "Introduction"
+        },
+        {
+          "number": "1.2",
+          "title": "Reference BIM Standards and Guidelines"
+        }
+      ]
+    },
+    "preview": "1.2 Reference BIM Standards and Guidelines \nThis Guide has made referenced to the following international and local standards and guidelines: \n(a) Development Bureau Technical Circular (Works) No. 02/..."
+  },
+  {
+    "file_id": 2,
+    "chunk_index": 4,
+    "filename": "BIM Guide for Architectural Design Ver3.1_Dec23.pdf",
+    "metadata": {
+      "number": "1.3",
+      "title": "Terminology",
+      "path": [
+        {
+          "number": "1",
+          "title": "Introduction"
+        },
+        {
+          "number": "1.3",
+          "title": "Terminology"
+        }
+      ]
+    },
+    "preview": "1.3 Terminology \nThe abbreviations and terminology/glossary shall refer the CIC BIM Dictionary (2021). \n  \nBIM Guide for Architectural Design \n \nArchitectural Branch, ArchSD  Page 3 First Issue Date: ..."
+  },
+  {
+    "file_id": 2,
+    "chunk_index": 5,
+    "filename": "BIM Guide for Architectural Design Ver3.1_Dec23.pdf",
+    "metadata": {
+      "number": "2",
+      "title": "Data Management Requirements",
+      "path": [
+        {
+          "number": "2",
+          "title": "Data Management Requirements"
+        }
+      ]
+    },
+    "preview": "2 Data Management Requirements"
+  },
+  {
+    "file_id": 2,
+    "chunk_index": 6,
+    "filename": "BIM Guide for Architectural Design Ver3.1_Dec23.pdf",
+    "metadata": {
+      "number": "2.1",
+      "title": "General",
+      "path": [
+        {
+          "number": "2",
+          "title": "Data Management Requirements"
+        },
+        {
+          "number": "2.1",
+          "title": "General"
+        }
+      ]
+    },
+    "preview": "2.1 General \nPrior to BIM model production, a unified data management structure must be established for collaboration \nand information exchange efficiently. The project setup framework should make ref..."
+  },
+  {
+    "file_id": 2,
+    "chunk_index": 7,
+    "filename": "BIM Guide for Architectural Design Ver3.1_Dec23.pdf",
+    "metadata": {
+      "number": "2.2",
+      "title": "Project Folder Structure",
+      "path": [
+        {
+          "number": "2",
+          "title": "Data Management Requirements"
+        },
+        {
+          "number": "2.2",
+          "title": "Project Folder Structure"
+        }
+      ]
+    },
+    "preview": "2.2 Project Folder Structure \nThe project folder structures for BIM adopted projects are recommended as: \n(a) Main Folder Structure \nAll project data shall be stored under corresponding Workstage fold..."
+  },
+  {
+    "file_id": 2,
+    "chunk_index": 8,
+    "filename": "BIM Guide for Architectural Design Ver3.1_Dec23.pdf",
+    "metadata": {
+      "number": "2.3",
+      "title": "Model Division",
+      "path": [
+        {
+          "number": "2",
+          "title": "Data Management Requirements"
+        },
+        {
+          "number": "2.3",
+          "title": "Model Division"
+        }
+      ]
+    },
+    "preview": "2.3 Model Division \nA project BIM model shoul d be divided into separate categories and/or building blocks depending on the \nnature and complexity of the project. For projects with large site footprin..."
+  },
+  {
+    "file_id": 2,
+    "chunk_index": 9,
+    "filename": "BIM Guide for Architectural Design Ver3.1_Dec23.pdf",
+    "metadata": {
+      "number": "2.4",
+      "title": "Information Exchange Formats",
+      "path": [
+        {
+          "number": "2",
+          "title": "Data Management Requirements"
+        },
+        {
+          "number": "2.4",
+          "title": "Information Exchange Formats"
+        }
+      ]
+    },
+    "preview": "2.4 Information Exchange Formats \nTo enable interoperability, exchange formats such as IFC(v4) shall  be adopted to facilitate geospatial and \nnon-geospatial information exchange. The information exch..."
+  },
+  {
+    "file_id": 2,
+    "chunk_index": 10,
+    "filename": "BIM Guide for Architectural Design Ver3.1_Dec23.pdf",
+    "metadata": {
+      "number": "2.5",
+      "title": "General Naming Conventions",
+      "path": [
+        {
+          "number": "2",
+          "title": "Data Management Requirements"
+        },
+        {
+          "number": "2.5",
+          "title": "General Naming Conventions"
+        }
+      ]
+    },
+    "preview": "2.5 General Naming Conventions \n(a) Use only letters A-Z, hyphen, underscore and numbers 0-9 for all fields;  \n(b) All fields shall be separated by a hyphen character “-”. DO NOT use spaces;  \n(c) Wit..."
+  },
+  {
+    "file_id": 2,
+    "chunk_index": 11,
+    "filename": "BIM Guide for Architectural Design Ver3.1_Dec23.pdf",
+    "metadata": {
+      "number": "2.5.1",
+      "title": "Model File Naming",
+      "path": [
+        {
+          "number": "2",
+          "title": "Data Management Requirements"
+        },
+        {
+          "number": "2.5",
+          "title": "General Naming Conventions"
+        },
+        {
+          "number": "2.5.1",
+          "title": "Model File Naming"
+        }
+      ]
+    },
+    "preview": "2.5.1 Model File Naming  \n \nFor model file naming, the following format shall be adopted which aligned with the Hong Kong ‘Local Annex’ \nof ISO 19650-2:2018 in Annex 1 of the CIC BIM Standards General..."
+  },
+  {
+    "file_id": 2,
+    "chunk_index": 12,
+    "filename": "BIM Guide for Architectural Design Ver3.1_Dec23.pdf",
+    "metadata": {
+      "number": "2.5.2",
+      "title": "View Naming",
+      "path": [
+        {
+          "number": "2",
+          "title": "Data Management Requirements"
+        },
+        {
+          "number": "2.5",
+          "title": "General Naming Conventions"
+        },
+        {
+          "number": "2.5.2",
+          "title": "View Naming"
+        }
+      ]
+    },
+    "preview": "2.5.2 View Naming  \n \nSince each view can  only be placed on one sheet only, creating duplicate views is required to add a \nparticular view  to multiple sheets.  Implementing a view naming system can ..."
+  },
+  {
+    "file_id": 2,
+    "chunk_index": 13,
+    "filename": "BIM Guide for Architectural Design Ver3.1_Dec23.pdf",
+    "metadata": {
+      "number": "2.5.3",
+      "title": "Drawing Number Naming",
+      "path": [
+        {
+          "number": "2",
+          "title": "Data Management Requirements"
+        },
+        {
+          "number": "2.5",
+          "title": "General Naming Conventions"
+        },
+        {
+          "number": "2.5.3",
+          "title": "Drawing Number Naming"
+        }
+      ]
+    },
+    "preview": "2.5.3 Drawing Number Naming \n \nDrawing number naming refers to the naming of the drawings. The naming system aligned with Section \n4.1 of the CAD manual for ArchSD Projects.  \n \n(Optional Field): Supp..."
+  },
+  {
+    "file_id": 2,
+    "chunk_index": 14,
+    "filename": "BIM Guide for Architectural Design Ver3.1_Dec23.pdf",
+    "metadata": {
+      "number": "3",
+      "title": "BIM Uses",
+      "path": [
+        {
+          "number": "3",
+          "title": "BIM Uses"
+        }
+      ]
+    },
+    "preview": "3 BIM Uses"
+  },
+  {
+    "file_id": 2,
+    "chunk_index": 15,
+    "filename": "BIM Guide for Architectural Design Ver3.1_Dec23.pdf",
+    "metadata": {
+      "number": "3.1",
+      "title": "General",
+      "path": [
+        {
+          "number": "3",
+          "title": "BIM Uses"
+        },
+        {
+          "number": "3.1",
+          "title": "General"
+        }
+      ]
+    },
+    "preview": "3.1 General \nThe scope of BIM Uses in public works projects shall be according to the latest version of the Development \nBureau (DEVB) Technical Circular (Works). The following sections describe the g..."
+  },
+  {
+    "file_id": 2,
+    "chunk_index": 16,
+    "filename": "BIM Guide for Architectural Design Ver3.1_Dec23.pdf",
+    "metadata": {
+      "number": "3.2",
+      "title": "Design Authoring",
+      "path": [
+        {
+          "number": "3",
+          "title": "BIM Uses"
+        },
+        {
+          "number": "3.2",
+          "title": "Design Authoring"
+        }
+      ]
+    },
+    "preview": "3.2 Design Authoring \nA process of using BIM software to create and develop a Building Information Model of a project which \nincludes a database of properties, quantities, means and methods, costs and..."
+  },
+  {
+    "file_id": 2,
+    "chunk_index": 17,
+    "filename": "BIM Guide for Architectural Design Ver3.1_Dec23.pdf",
+    "metadata": {
+      "number": "3.3",
+      "title": "Design Reviews",
+      "path": [
+        {
+          "number": "3",
+          "title": "BIM Uses"
+        },
+        {
+          "number": "3.3",
+          "title": "Design Reviews"
+        }
+      ]
+    },
+    "preview": "3.3 Design Reviews  \nA process for stakeholders to view a model, images from the models or animated walk-throughs of a project, \nprovide feedback and validate numerous design aspects such as meeting c..."
+  },
+  {
+    "file_id": 2,
+    "chunk_index": 18,
+    "filename": "BIM Guide for Architectural Design Ver3.1_Dec23.pdf",
+    "metadata": {
+      "number": "3.4",
+      "title": "Existing Conditions Modelling",
+      "path": [
+        {
+          "number": "3",
+          "title": "BIM Uses"
+        },
+        {
+          "number": "3.4",
+          "title": "Existing Conditions Modelling"
+        }
+      ]
+    },
+    "preview": "3.4 Existing Conditions Modelling \nA process of 3D digital survey and production of BIM model for an existing site to facilitate design planning. \nThe digital survey may be carried out by photogrammet..."
+  },
+  {
+    "file_id": 2,
+    "chunk_index": 19,
+    "filename": "BIM Guide for Architectural Design Ver3.1_Dec23.pdf",
+    "metadata": {
+      "number": "3.5",
+      "title": "Site Analysis",
+      "path": [
+        {
+          "number": "3",
+          "title": "BIM Uses"
+        },
+        {
+          "number": "3.5",
+          "title": "Site Analysis"
+        }
+      ]
+    },
+    "preview": "3.5 Site Analysis \nA process in which BIM and GIS tools are used to evaluate a site to determine the most optimal location, \nposition and orientation for a future project. The analysis may include mas..."
+  },
+  {
+    "file_id": 2,
+    "chunk_index": 20,
+    "filename": "BIM Guide for Architectural Design Ver3.1_Dec23.pdf",
+    "metadata": {
+      "number": "3.6",
+      "title": "3D Coordination",
+      "path": [
+        {
+          "number": "3",
+          "title": "BIM Uses"
+        },
+        {
+          "number": "3.6",
+          "title": "3D Coordination"
+        }
+      ]
+    },
+    "preview": "3.6 3D Coordination \nA process of using Clash Detection software tools to identify conflicts by analysing 3D models of the \ndifferent building systems. The goal of the coordination process is to elimi..."
+  },
+  {
+    "file_id": 2,
+    "chunk_index": 21,
+    "filename": "BIM Guide for Architectural Design Ver3.1_Dec23.pdf",
+    "metadata": {
+      "number": "3.7",
+      "title": "Cost Estimation",
+      "path": [
+        {
+          "number": "3",
+          "title": "BIM Uses"
+        },
+        {
+          "number": "3.7",
+          "title": "Cost Estimation"
+        }
+      ]
+    },
+    "preview": "3.7 Cost Estimation \nAccurate quantity take-offs may be extracted from models and used by quantity surveyors to develop cost \nestimates for a project. The quantity surveyor s shall extract the data fr..."
+  },
+  {
+    "file_id": 2,
+    "chunk_index": 22,
+    "filename": "BIM Guide for Architectural Design Ver3.1_Dec23.pdf",
+    "metadata": {
+      "number": "3.8",
+      "title": "Engineering Analysis",
+      "path": [
+        {
+          "number": "3",
+          "title": "BIM Uses"
+        },
+        {
+          "number": "3.8",
+          "title": "Engineering Analysis"
+        }
+      ]
+    },
+    "preview": "3.8 Engineering Analysis \nA process which uses the BIM model to analysis and assess design options to facilitate the provision of \neffective engineering solution. Engineering analysis may be related t..."
+  },
+  {
+    "file_id": 2,
+    "chunk_index": 23,
+    "filename": "BIM Guide for Architectural Design Ver3.1_Dec23.pdf",
+    "metadata": {
+      "number": "3.9",
+      "title": "Facility Energy Analysis",
+      "path": [
+        {
+          "number": "3",
+          "title": "BIM Uses"
+        },
+        {
+          "number": "3.9",
+          "title": "Facility Energy Analysis"
+        }
+      ]
+    },
+    "preview": "3.9 Facility Energy Analysis \nA process of using a building energy simulation programme with a model to conduct energy assessments \nof a project design."
+  },
+  {
+    "file_id": 2,
+    "chunk_index": 24,
+    "filename": "BIM Guide for Architectural Design Ver3.1_Dec23.pdf",
+    "metadata": {
+      "number": "3.10",
+      "title": "Sustainability Evaluation",
+      "path": [
+        {
+          "number": "3",
+          "title": "BIM Uses"
+        },
+        {
+          "number": "3.10",
+          "title": "Sustainability Evaluation"
+        }
+      ]
+    },
+    "preview": "3.10 Sustainability Evaluation \nA process in which a project model is evaluated based on BEAM Plus, LEED or other sustainable criteria."
+  },
+  {
+    "file_id": 2,
+    "chunk_index": 25,
+    "filename": "BIM Guide for Architectural Design Ver3.1_Dec23.pdf",
+    "metadata": {
+      "number": "3.11",
+      "title": "Space Programming",
+      "path": [
+        {
+          "number": "3",
+          "title": "BIM Uses"
+        },
+        {
+          "number": "3.11",
+          "title": "Space Programming"
+        }
+      ]
+    },
+    "preview": "3.11 Space Programming \nA process in which the design layout model is used to efficiently and accurately assess the compliance of \nclient’s spatial requirements, such as approved schedule of accommoda..."
+  },
+  {
+    "file_id": 2,
+    "chunk_index": 26,
+    "filename": "BIM Guide for Architectural Design Ver3.1_Dec23.pdf",
+    "metadata": {
+      "number": "3.12",
+      "title": "Phase Planning (4D Modelling)",
+      "path": [
+        {
+          "number": "3",
+          "title": "BIM Uses"
+        },
+        {
+          "number": "3.12",
+          "title": "Phase Planning (4D Modelling)"
+        }
+      ]
+    },
+    "preview": "3.12 Phase Planning (4D Modelling) \nA process of linking a programme to the model which is used to plan the phased occupancy in a renovation \nor to show the construction sequence and space requirement..."
+  },
+  {
+    "file_id": 2,
+    "chunk_index": 27,
+    "filename": "BIM Guide for Architectural Design Ver3.1_Dec23.pdf",
+    "metadata": {
+      "number": "3.13",
+      "title": "Digital Fabrication",
+      "path": [
+        {
+          "number": "3",
+          "title": "BIM Uses"
+        },
+        {
+          "number": "3.13",
+          "title": "Digital Fabrication"
+        }
+      ]
+    },
+    "preview": "3.13 Digital Fabrication \nThe use of models to facilitate the fabrication of modular construction units including those for MiC, DfMA, \nprefabrication of BS/MEP installations; and other construction m..."
+  },
+  {
+    "file_id": 2,
+    "chunk_index": 28,
+    "filename": "BIM Guide for Architectural Design Ver3.1_Dec23.pdf",
+    "metadata": {
+      "number": "3.14",
+      "title": "Site Utilization Planning",
+      "path": [
+        {
+          "number": "3",
+          "title": "BIM Uses"
+        },
+        {
+          "number": "3.14",
+          "title": "Site Utilization Planning"
+        }
+      ]
+    },
+    "preview": "3.14 Site Utilization Planning \nA process to use BIM models to perform site space planning, site logistics, sequencing requirements, \ntemporary works and safety. If specified, the construct ion phase ..."
+  },
+  {
+    "file_id": 2,
+    "chunk_index": 29,
+    "filename": "BIM Guide for Architectural Design Ver3.1_Dec23.pdf",
+    "metadata": {
+      "number": "3.15",
+      "title": "3D Control and Planning",
+      "path": [
+        {
+          "number": "3",
+          "title": "BIM Uses"
+        },
+        {
+          "number": "3.15",
+          "title": "3D Control and Planning"
+        }
+      ]
+    },
+    "preview": "3.15 3D Control and Planning \nIt is applicable for project requiring the adoption of Digital Works Supervision System in according to DEVB \nTechnical Circular (Works) No.2/2023 that digital setting-ou..."
+  },
+  {
+    "file_id": 2,
+    "chunk_index": 30,
+    "filename": "BIM Guide for Architectural Design Ver3.1_Dec23.pdf",
+    "metadata": {
+      "number": "3.16",
+      "title": "As-built Modelling",
+      "path": [
+        {
+          "number": "3",
+          "title": "BIM Uses"
+        },
+        {
+          "number": "3.16",
+          "title": "As-built Modelling"
+        }
+      ]
+    },
+    "preview": "3.16 As-built Modelling \nThe process of preparing an accurate record of the physical conditions and assets of a project. The As -\nBuilt model should contain information relating to the architect ural ..."
+  },
+  {
+    "file_id": 2,
+    "chunk_index": 31,
+    "filename": "BIM Guide for Architectural Design Ver3.1_Dec23.pdf",
+    "metadata": {
+      "number": "3.17",
+      "title": "Drawing Generation (Drawing Production)",
+      "path": [
+        {
+          "number": "3",
+          "title": "BIM Uses"
+        },
+        {
+          "number": "3.17",
+          "title": "Drawing Generation (Drawing Production)"
+        }
+      ]
+    },
+    "preview": "3.17 Drawing Generation (Drawing Production) \nA process of producing drawing sheets from the BIM model source. By setting various drawing views (layout \nor section) in the BIM software tools, drawing ..."
+  },
+  {
+    "file_id": 2,
+    "chunk_index": 32,
+    "filename": "BIM Guide for Architectural Design Ver3.1_Dec23.pdf",
+    "metadata": {
+      "number": "4",
+      "title": "Modelling Requirements",
+      "path": [
+        {
+          "number": "4",
+          "title": "Modelling Requirements"
+        }
+      ]
+    },
+    "preview": "4 Modelling Requirements"
+  },
+  {
+    "file_id": 2,
+    "chunk_index": 33,
+    "filename": "BIM Guide for Architectural Design Ver3.1_Dec23.pdf",
+    "metadata": {
+      "number": "4.1",
+      "title": "Coordinate System",
+      "path": [
+        {
+          "number": "4",
+          "title": "Modelling Requirements"
+        },
+        {
+          "number": "4.1",
+          "title": "Coordinate System"
+        }
+      ]
+    },
+    "preview": "4.1 Coordinate System  \nThe orientation of a BIM model shall be defined and coordinated with all disciplines as follows  when the \nproject is located in Hong Kong: \n(a) Easting and Northing shall refe..."
+  },
+  {
+    "file_id": 2,
+    "chunk_index": 34,
+    "filename": "BIM Guide for Architectural Design Ver3.1_Dec23.pdf",
+    "metadata": {
+      "number": "4.2",
+      "title": "Linking to Structural, Building Services and Landscape Models",
+      "path": [
+        {
+          "number": "4",
+          "title": "Modelling Requirements"
+        },
+        {
+          "number": "4.2",
+          "title": "Linking to Structural, Building Services and Landscape Models"
+        }
+      ]
+    },
+    "preview": "4.2 Linking to Structural, Building Services and Landscape Models \nThe general rules for model linking are as follows: \n(a) The coordinates of the structural and/or building services models should be ..."
+  },
+  {
+    "file_id": 2,
+    "chunk_index": 35,
+    "filename": "BIM Guide for Architectural Design Ver3.1_Dec23.pdf",
+    "metadata": {
+      "number": "4.3",
+      "title": "Language",
+      "path": [
+        {
+          "number": "4",
+          "title": "Modelling Requirements"
+        },
+        {
+          "number": "4.3",
+          "title": "Language"
+        }
+      ]
+    },
+    "preview": "4.3 Language \nUnless specifically required by the BEP, all project infor mation and attributes should be in the English \nlanguage."
+  },
+  {
+    "file_id": 2,
+    "chunk_index": 36,
+    "filename": "BIM Guide for Architectural Design Ver3.1_Dec23.pdf",
+    "metadata": {
+      "number": "4.4",
+      "title": "Unit of Measurement",
+      "path": [
+        {
+          "number": "4",
+          "title": "Modelling Requirements"
+        },
+        {
+          "number": "4.4",
+          "title": "Unit of Measurement"
+        }
+      ]
+    },
+    "preview": "4.4 Unit of Measurement \nBIM model should be modelled in metric system (International System of Units). Project units should be set \nas below: \nMeasurement Units \nLength mm  \nArea m2 in 3 decimal plac..."
+  },
+  {
+    "file_id": 2,
+    "chunk_index": 37,
+    "filename": "BIM Guide for Architectural Design Ver3.1_Dec23.pdf",
+    "metadata": {
+      "number": "4.5",
+      "title": "Date Format",
+      "path": [
+        {
+          "number": "4",
+          "title": "Modelling Requirements"
+        },
+        {
+          "number": "4.5",
+          "title": "Date Format"
+        }
+      ]
+    },
+    "preview": "4.5 Date Format \nDate format should follow ISO 8601 Data elements and interchange formats - Information interchange -  \nRepresentation of dates and times as follow: \nYear Month Date \nY Y Y Y M M D D"
+  },
+  {
+    "file_id": 2,
+    "chunk_index": 38,
+    "filename": "BIM Guide for Architectural Design Ver3.1_Dec23.pdf",
+    "metadata": {
+      "number": "4.6",
+      "title": "Scope of Modelling",
+      "path": [
+        {
+          "number": "4",
+          "title": "Modelling Requirements"
+        },
+        {
+          "number": "4.6",
+          "title": "Scope of Modelling"
+        }
+      ]
+    },
+    "preview": "4.6 Scope of Modelling \nModelling shall be carried out at each stage of the project and level of development of the elements \nproduced at each stage will be specified in the BEP.  \n \nThe building or f..."
+  },
+  {
+    "file_id": 2,
+    "chunk_index": 39,
+    "filename": "BIM Guide for Architectural Design Ver3.1_Dec23.pdf",
+    "metadata": {
+      "number": "4.7",
+      "title": "Level of Information Need (LOIN)",
+      "path": [
+        {
+          "number": "4",
+          "title": "Modelling Requirements"
+        },
+        {
+          "number": "4.7",
+          "title": "Level of Information Need (LOIN)"
+        }
+      ]
+    },
+    "preview": "4.7 Level of Information Need (LOIN) \nBuilding Information Models will be developed from preliminary design to final as-built models with a number \nof distinct phases and stages throughout the process..."
+  },
+  {
+    "file_id": 2,
+    "chunk_index": 40,
+    "filename": "BIM Guide for Architectural Design Ver3.1_Dec23.pdf",
+    "metadata": {
+      "number": "4.7.1",
+      "title": "Level of Graphics (LOD-G)",
+      "path": [
+        {
+          "number": "4",
+          "title": "Modelling Requirements"
+        },
+        {
+          "number": "4.7",
+          "title": "Level of Information Need (LOIN)"
+        },
+        {
+          "number": "4.7.1",
+          "title": "Level of Graphics (LOD-G)"
+        }
+      ]
+    },
+    "preview": "4.7.1 Level of Graphics (LOD-G)  \n \nLOD-G is the description of graphical information in a model element. The recommended LOD -G for Architectural \nModel is listed as follows: \nLOD-G  Minimum Acceptab..."
+  },
+  {
+    "file_id": 2,
+    "chunk_index": 41,
+    "filename": "BIM Guide for Architectural Design Ver3.1_Dec23.pdf",
+    "metadata": {
+      "number": "4.7.2",
+      "title": "Level of Information (LOD-I)",
+      "path": [
+        {
+          "number": "4",
+          "title": "Modelling Requirements"
+        },
+        {
+          "number": "4.7",
+          "title": "Level of Information Need (LOIN)"
+        },
+        {
+          "number": "4.7.2",
+          "title": "Level of Information (LOD-I)"
+        }
+      ]
+    },
+    "preview": "4.7.2 Level of Information (LOD-I)  \nLOD-I is the description of non- graphical information in a model element. The recommended LOD -I for \nArchitectural Model is listed as follows: \nBIM Object \nPrope..."
+  },
+  {
+    "file_id": 2,
+    "chunk_index": 42,
+    "filename": "BIM Guide for Architectural Design Ver3.1_Dec23.pdf",
+    "metadata": {
+      "number": "4.7.3",
+      "title": "Level of Documentation (DOC)",
+      "path": [
+        {
+          "number": "4",
+          "title": "Modelling Requirements"
+        },
+        {
+          "number": "4.7",
+          "title": "Level of Information Need (LOIN)"
+        },
+        {
+          "number": "4.7.3",
+          "title": "Level of Documentation (DOC)"
+        }
+      ]
+    },
+    "preview": "4.7.3 Level of Documentation (DOC)  \nDOC is the description of documentation to be associated with the uses to meet the identified requirements. \nThe recommended DOC l is listed as follows: \nBIM Objec..."
+  },
+  {
+    "file_id": 2,
+    "chunk_index": 43,
+    "filename": "BIM Guide for Architectural Design Ver3.1_Dec23.pdf",
+    "metadata": {
+      "number": "4.8",
+      "title": "Sheet/Layout/Drawing Management",
+      "path": [
+        {
+          "number": "4",
+          "title": "Modelling Requirements"
+        },
+        {
+          "number": "4.8",
+          "title": "Sheet/Layout/Drawing Management"
+        }
+      ]
+    },
+    "preview": "4.8 Sheet/Layout/Drawing Management  \nFor consistent drawing sheet management and searching convenience in the BIM authoring software, \nSheet Number/Layout ID/Drawing Name and Sheet Name should be inp..."
+  },
+  {
+    "file_id": 2,
+    "chunk_index": 44,
+    "filename": "BIM Guide for Architectural Design Ver3.1_Dec23.pdf",
+    "metadata": {
+      "number": "4.9",
+      "title": "Presentation Style",
+      "path": [
+        {
+          "number": "4",
+          "title": "Modelling Requirements"
+        },
+        {
+          "number": "4.9",
+          "title": "Presentation Style"
+        }
+      ]
+    },
+    "preview": "4.9 Presentation Style \nThe line weight and line pattern in 2D drawing presentation should be standardised  and follow the \nrecommendations in Annex A. Samples of drawings and drawing sheets are inclu..."
+  },
+  {
+    "file_id": 2,
+    "chunk_index": 45,
+    "filename": "BIM Guide for Architectural Design Ver3.1_Dec23.pdf",
+    "metadata": {
+      "number": "4.10",
+      "title": "BIM Object Files",
+      "path": [
+        {
+          "number": "4",
+          "title": "Modelling Requirements"
+        },
+        {
+          "number": "4.10",
+          "title": "BIM Object Files"
+        }
+      ]
+    },
+    "preview": "4.10 BIM Object Files \nObject file is a data file containing architectural, structural or building services element and should include \ngeometry and parameters to represent the element’s characteristi..."
+  },
+  {
+    "file_id": 2,
+    "chunk_index": 46,
+    "filename": "BIM Guide for Architectural Design Ver3.1_Dec23.pdf",
+    "metadata": {
+      "number": "4.10.1",
+      "title": "General Requirement for Object Creation",
+      "path": [
+        {
+          "number": "4",
+          "title": "Modelling Requirements"
+        },
+        {
+          "number": "4.10",
+          "title": "BIM Object Files"
+        },
+        {
+          "number": "4.10.1",
+          "title": "General Requirement for Object Creation"
+        }
+      ]
+    },
+    "preview": "4.10.1 General Requirement for Object Creation \n \nThe following general requirements should be followed in creation of object: \n(a) The object file should include information of physical dimension for..."
+  },
+  {
+    "file_id": 2,
+    "chunk_index": 47,
+    "filename": "BIM Guide for Architectural Design Ver3.1_Dec23.pdf",
+    "metadata": {
+      "number": "4.10.2",
+      "title": "Object File Naming Convention",
+      "path": [
+        {
+          "number": "4",
+          "title": "Modelling Requirements"
+        },
+        {
+          "number": "4.10",
+          "title": "BIM Object Files"
+        },
+        {
+          "number": "4.10.2",
+          "title": "Object File Naming Convention"
+        }
+      ]
+    },
+    "preview": "4.10.2 Object File Naming Convention \n \nObject File naming conventions ensure that objects created can be easily identified. The naming \nconventions include short forms of the object category and desc..."
+  },
+  {
+    "file_id": 2,
+    "chunk_index": 48,
+    "filename": "BIM Guide for Architectural Design Ver3.1_Dec23.pdf",
+    "metadata": {
+      "number": "4.10.3",
+      "title": "BIM Object Sheet",
+      "path": [
+        {
+          "number": "4",
+          "title": "Modelling Requirements"
+        },
+        {
+          "number": "4.10",
+          "title": "BIM Object Files"
+        },
+        {
+          "number": "4.10.3",
+          "title": "BIM Object Sheet"
+        }
+      ]
+    },
+    "preview": "4.10.3 BIM Object Sheet \n \nThe BIM object shall contain 3D component of geom etry, 2D component of symbol and \ntag/label/annotation. All of these contents are intended for drawing production of presen..."
+  },
+  {
+    "file_id": 2,
+    "chunk_index": 49,
+    "filename": "BIM Guide for Architectural Design Ver3.1_Dec23.pdf",
+    "metadata": {
+      "number": "4.11",
+      "title": "Overlapping Elements",
+      "path": [
+        {
+          "number": "4",
+          "title": "Modelling Requirements"
+        },
+        {
+          "number": "4.11",
+          "title": "Overlapping Elements"
+        }
+      ]
+    },
+    "preview": "4.11 Overlapping Elements \nOverlapping elements should be avoided and minimised. When overlapping elements cannot be eliminated, \nthe overlapping elements, reason for overlapping and associated parame..."
+  },
+  {
+    "file_id": 2,
+    "chunk_index": 50,
+    "filename": "BIM Guide for Architectural Design Ver3.1_Dec23.pdf",
+    "metadata": {
+      "number": "4.12",
+      "title": "Large Spanning Continuous Elements",
+      "path": [
+        {
+          "number": "4",
+          "title": "Modelling Requirements"
+        },
+        {
+          "number": "4.12",
+          "title": "Large Spanning Continuous Elements"
+        }
+      ]
+    },
+    "preview": "4.12 Large Spanning Continuous Elements \nModel elements spanning over one level (e.g. walls spanning over 1 story high) or across building (e.g. \nfloor plates spanning between buildings through connec..."
+  },
+  {
+    "file_id": 2,
+    "chunk_index": 51,
+    "filename": "BIM Guide for Architectural Design Ver3.1_Dec23.pdf",
+    "metadata": {
+      "number": "4.13",
+      "title": "Complex Geometry",
+      "path": [
+        {
+          "number": "4",
+          "title": "Modelling Requirements"
+        },
+        {
+          "number": "4.13",
+          "title": "Complex Geometry"
+        }
+      ]
+    },
+    "preview": "4.13 Complex Geometry \nModelling method of complex geometries, such as two -way curves and non- uniform rational basis spline \nsurfaces, should be documented in BEP."
+  },
+  {
+    "file_id": 2,
+    "chunk_index": 52,
+    "filename": "BIM Guide for Architectural Design Ver3.1_Dec23.pdf",
+    "metadata": {
+      "number": "5",
+      "title": "Data Requirement for Asset management",
+      "path": [
+        {
+          "number": "5",
+          "title": "Data Requirement for Asset management"
+        }
+      ]
+    },
+    "preview": "5 Data Requirement for Asset management"
+  },
+  {
+    "file_id": 2,
+    "chunk_index": 53,
+    "filename": "BIM Guide for Architectural Design Ver3.1_Dec23.pdf",
+    "metadata": {
+      "number": "5.1",
+      "title": "Data Format of As-built Information",
+      "path": [
+        {
+          "number": "5",
+          "title": "Data Requirement for Asset management"
+        },
+        {
+          "number": "5.1",
+          "title": "Data Format of As-built Information"
+        }
+      ]
+    },
+    "preview": "5.1 Data Format of As-built Information \nAs-built information relevant to asset management should be stored in a standardised  file folder structure \nas mentioned in Section 2.2 of this Guide. \nThe re..."
+  },
+  {
+    "file_id": 2,
+    "chunk_index": 54,
+    "filename": "BIM Guide for Architectural Design Ver3.1_Dec23.pdf",
+    "metadata": {
+      "number": "5.2",
+      "title": "Deliverables",
+      "path": [
+        {
+          "number": "5",
+          "title": "Data Requirement for Asset management"
+        },
+        {
+          "number": "5.2",
+          "title": "Deliverables"
+        }
+      ]
+    },
+    "preview": "5.2 Deliverables \nThe As-Built information shall be contained in a prescribed folder system including but not limited to the \nfollowing deliverables: \n(a) BIM Project Execution Plan indicating the ado..."
+  }
+]
