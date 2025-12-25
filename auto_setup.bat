@@ -35,6 +35,29 @@ popd
 REM Step 2: Build Python backend (cx_Freeze)
 echo [2/4] Building Python backend: %ROOT%\setup.py
 pushd "%ROOT%" || (echo Error: Cannot enter directory %ROOT% & pause & exit /b 1)
+rem Prefer using uv virtual environment if available
+where uv >nul 2>&1
+if not errorlevel 1 (
+  if exist ".venv\Scripts\activate.bat" (
+    call ".venv\Scripts\activate.bat"
+  ) else (
+    uv venv
+    if errorlevel 1 (
+      echo Error: Failed to create uv virtual environment
+      popd
+      pause
+      exit /b 1
+    )
+    if exist ".venv\Scripts\activate.bat" (
+      call ".venv\Scripts\activate.bat"
+    ) else (
+      echo Error: uv venv activation script not found
+      popd
+      pause
+      exit /b 1
+    )
+  )
+)
 where python >nul 2>&1
 if errorlevel 1 (
   where py >nul 2>&1
@@ -87,16 +110,16 @@ if exist "%PY_BUILD%" (
 
 REM Step 4: Compile Installer
 echo [4/4] Compiling Installer: %ISS_PATH%
-set "ISCC_X86=C:\Program Files (x86)\Inno Setup 6\ISCC.exe"
 set "ISCC_X64=C:\Program Files\Inno Setup 6\ISCC.exe"
-set "ISCC=%ISCC_X64%"
-if exist "%ISCC_X86%" set "ISCC=%ISCC_X86%"
-if exist "%ISCC_X64%" set "ISCC=%ISCC_X64%"
-
-if not exist "%ISCC%" (
+set "ISCC_X86=C:\Program Files (x86)\Inno Setup 6\ISCC.exe"
+if exist "%ISCC_X64%" (
+  set "ISCC=%ISCC_X64%"
+) else if exist "%ISCC_X86%" (
+  set "ISCC=%ISCC_X86%"
+) else (
   where ISCC.exe >nul 2>&1
   if errorlevel 1 (
-    echo Error: Inno Setup compiler ISCC.exe not found. Please install Inno Setup 6.
+    echo Error: Inno Setup compiler ISCC.exe not found. Please install Inno Setup 6 or add ISCC.exe to PATH.
     pause
     exit /b 1
   ) else (

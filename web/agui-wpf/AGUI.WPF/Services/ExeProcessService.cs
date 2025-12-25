@@ -18,7 +18,7 @@ namespace BUD_Sustainable_Building_Designer
         /// <summary>
         /// 启动 wind_path_api.exe 后台服务（无权限提示、安全启动）
         /// 说明：
-        /// - 仅在不存在同名进程时启动，避免重复与强制终止
+        /// - 若存在同名进程，先尝试终止后再启动，避免端口/资源冲突
         /// - 使用非提权方式启动（UseShellExecute=false，移除 Verb=runas）以消除 UAC 弹窗
         /// - 设置工作目录为可写的应用目录，避免权限问题（绑定高位端口、仅监听 127.0.0.1）建议在服务内部实现
         /// </summary>
@@ -31,17 +31,30 @@ namespace BUD_Sustainable_Building_Designer
 
                 if (!File.Exists(exePath))
                 {
-                    AppLogger.Warn($"StartWindPathApiProcess: wind_path_api.exe not found: {exePath}");
+                    AppLogger.Warn($"StartWindPathApiProcess: agent_api.exe not found: {exePath}");
                     return;
                 }
 
-                // 若已有同名进程在运行，则直接跳过启动
-                var existingProcesses = Process.GetProcessesByName("wind_path_api");
+                // 若已有同名进程在运行，则先尝试终止
+                var existingProcesses = Process.GetProcessesByName("agent_api");
                 if (existingProcesses != null && existingProcesses.Length > 0)
                 {
                     var pids = string.Join(",", existingProcesses.Select(p => p.Id));
-                    AppLogger.Info($"StartWindPathApiProcess: already running, skip (pids={pids})");
-                    return;
+                    AppLogger.Warn($"StartWindPathApiProcess: found existing processes, killing (pids={pids})");
+                    foreach (var proc in existingProcesses)
+                    {
+                        try
+                        {
+                            proc.Kill();
+                            proc.WaitForExit(3000);
+                            AppLogger.Info($"StartWindPathApiProcess: killed pid={proc.Id}");
+                        }
+                        catch (Exception killEx)
+                        {
+                            AppLogger.Error($"StartWindPathApiProcess: kill failed pid={proc.Id}", killEx);
+                        }
+                        try { proc.Dispose(); } catch { }
+                    }
                 }
 
                 _windPathApiProcess = new Process
@@ -66,11 +79,11 @@ namespace BUD_Sustainable_Building_Designer
                     try
                     {
                         var exitCode = _windPathApiProcess?.HasExited == true ? _windPathApiProcess.ExitCode : -1;
-                        AppLogger.Warn($"wind_path_api.exe exited (ExitCode={exitCode})");
+                        AppLogger.Warn($"agent_api.exe exited (ExitCode={exitCode})");
                     }
                     catch (Exception ex)
                     {
-                        AppLogger.Error("wind_path_api.exe exited handler exception", ex);
+                        AppLogger.Error("agent_api.exe exited handler exception", ex);
                     }
                 };
 
@@ -78,14 +91,14 @@ namespace BUD_Sustainable_Building_Designer
                 {
                     if (!string.IsNullOrWhiteSpace(args.Data))
                     {
-                        AppLogger.Info($"wind_path_api stdout: {args.Data}");
+                        AppLogger.Info($"agent_api stdout: {args.Data}");
                     }
                 };
                 _windPathApiProcess.ErrorDataReceived += (_, args) =>
                 {
                     if (!string.IsNullOrWhiteSpace(args.Data))
                     {
-                        AppLogger.Warn($"wind_path_api stderr: {args.Data}");
+                        AppLogger.Warn($"agent_api stderr: {args.Data}");
                     }
                 };
 

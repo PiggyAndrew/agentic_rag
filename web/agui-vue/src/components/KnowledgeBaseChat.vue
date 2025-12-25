@@ -58,7 +58,7 @@ import {
   SourcesTrigger,
 } from "@/components/ai-elements/sources";
 import { Suggestion, Suggestions } from "@/components/ai-elements/suggestion";
-import { CheckIcon, GlobeIcon, MicIcon } from "lucide-vue-next";
+import { CheckIcon, GlobeIcon } from "lucide-vue-next";
 import { streamChat } from "@/api/chat";
 import { computed, ref, onMounted, watch } from "vue";
 import { useKbStore } from "@/stores/kb";
@@ -95,89 +95,52 @@ function extractToolCallArgsFromChunk(chunk: any): string {
   return fromInvalidToolCalls.join("");
 }
 
-class ChatModelStreamEvent {
-  readonly kind = "on_chat_model_stream";
-  constructor(public text: string) {}
-  static fromRaw(ev: any): ChatModelStreamEvent | null {
-    const chunk = ev?.data?.chunk;
-    const c = chunk?.content;
-    if (typeof c === "string" && c.length > 0) return new ChatModelStreamEvent(c);
-    const args = extractToolCallArgsFromChunk(chunk);
-    if (args) return new ChatModelStreamEvent(args);
-    return null;
-  }
-}
-class LLMNewTokenEvent {
-  readonly kind = "on_llm_new_token";
-  constructor(public token: string) {}
-  static fromRaw(ev: any): LLMNewTokenEvent | null {
-    const t = ev?.data?.token;
-    if (typeof t === "string") return new LLMNewTokenEvent(t);
-    return null;
-  }
-}
-class ChatModelEndEvent {
-  readonly kind = "on_chat_model_end";
-  constructor(public content: unknown) {}
-  static fromRaw(ev: any): ChatModelEndEvent | null {
-    const c = ev?.data?.output?.content;
-    if (c != null) return new ChatModelEndEvent(c);
-    return null;
-  }
-}
-class LLMEndEvent {
-  readonly kind = "on_llm_end";
-  constructor(public content: unknown) {}
-  static fromRaw(ev: any): LLMEndEvent | null {
-    const c = ev?.data?.output?.content;
-    if (c != null) return new LLMEndEvent(c);
-    return null;
-  }
-}
-class ToolStartEvent {
-  readonly kind = "on_tool_start";
-  constructor(public tool: string, public input: any, public id: string) {}
-  static fromRaw(ev: any): ToolStartEvent | null {
-    const name = String(ev?.name ?? "");
-    const id = String(ev?.run_id ?? "");
-    const input = ev?.data?.input ?? {};
-    if (name) return new ToolStartEvent(name, input, id);
-    return null;
-  }
-}
-class ToolEndEvent {
-  readonly kind = "on_tool_end";
-  constructor(public tool: string, public output: any, public id: string) {}
-  static fromRaw(ev: any): ToolEndEvent | null {
-    const name = String(ev?.name ?? "");
-    const id = String(ev?.run_id ?? "");
-    const output = ev?.data?.output;
-    if (name) return new ToolEndEvent(name, output, id);
-    return null;
-  }
-}
-class ToolErrorEvent {
-  readonly kind = "on_tool_error";
-  constructor(public tool: string, public id: string, public error: string) {}
-  static fromRaw(ev: any): ToolErrorEvent | null {
-    const name = String(ev?.name ?? "");
-    const id = String(ev?.run_id ?? "");
-    const err = ev?.data?.error;
-    const msg = typeof err === "string" ? err : String(err ?? "");
-    if (name) return new ToolErrorEvent(name, id, msg);
-    return null;
-  }
-}
-class StreamErrorEvent {
-  readonly kind = "error";
-  constructor(public error: string) {}
-  static fromRaw(ev: any): StreamErrorEvent | null {
-    const err = ev?.data?.error;
-    const msg = typeof err === "string" ? err : String(err ?? "");
-    if (msg) return new StreamErrorEvent(msg);
-    return null;
-  }
-}
+type ChatModelStreamEvent = {
+  kind: "on_chat_model_stream";
+  text: string;
+};
+
+type LLMNewTokenEvent = {
+  kind: "on_llm_new_token";
+  token: string;
+};
+
+type ChatModelEndEvent = {
+  kind: "on_chat_model_end";
+  content: unknown;
+};
+
+type LLMEndEvent = {
+  kind: "on_llm_end";
+  content: unknown;
+};
+
+type ToolStartEvent = {
+  kind: "on_tool_start";
+  tool: string;
+  input: any;
+  id: string;
+};
+
+type ToolEndEvent = {
+  kind: "on_tool_end";
+  tool: string;
+  output: any;
+  id: string;
+};
+
+type ToolErrorEvent = {
+  kind: "on_tool_error";
+  tool: string;
+  id: string;
+  error: string;
+};
+
+type StreamErrorEvent = {
+  kind: "error";
+  error: string;
+};
+
 type LangChainEvent =
   | ChatModelStreamEvent
   | LLMNewTokenEvent
@@ -253,8 +216,6 @@ const suggestions: string[] = [];
 const defaultModelId = models[0]?.id || "";
 const modelId = ref<string>(defaultModelId);
 const modelSelectorOpen = ref(false);
-const useWebSearch = ref(false);
-const useMicrophone = ref(false);
 const status = ref<ChatStatus>("ready");
 const messages = ref<MessageType[]>([]);
 const kbStore = useKbStore();
@@ -266,31 +227,74 @@ const selectedModelData = computed(() =>
 );
 
 /**
- * 解析后端原始事件为类实例
+ * 解析后端原始事件为结构化对象
  */
 function parseEvent(raw: any): LangChainEvent | null {
   const kind = raw?.event;
   if (!kind) return null;
-  switch (kind) {
-    case "on_chat_model_stream":
-      return ChatModelStreamEvent.fromRaw(raw);
-    case "on_llm_new_token":
-      return LLMNewTokenEvent.fromRaw(raw);
-    case "on_chat_model_end":
-      return ChatModelEndEvent.fromRaw(raw);
-    case "on_llm_end":
-      return LLMEndEvent.fromRaw(raw);
-    case "on_tool_start":
-      return ToolStartEvent.fromRaw(raw);
-    case "on_tool_end":
-      return ToolEndEvent.fromRaw(raw);
-    case "on_tool_error":
-      return ToolErrorEvent.fromRaw(raw);
-    case "error":
-      return StreamErrorEvent.fromRaw(raw);
-    default:
-      return null;
+  if (kind === "on_chat_model_stream") {
+    const chunk = raw?.data?.chunk;
+    const c = chunk?.content;
+    if (typeof c === "string" && c.length > 0) {
+      return { kind, text: c };
+    }
+    const args = extractToolCallArgsFromChunk(chunk);
+    if (args) {
+      return { kind, text: args };
+    }
+    return null;
   }
+  if (kind === "on_llm_new_token") {
+    const t = raw?.data?.token;
+    if (typeof t === "string") {
+      return { kind, token: t };
+    }
+    return null;
+  }
+  if (kind === "on_chat_model_end" || kind === "on_llm_end") {
+    const c = raw?.data?.output?.content;
+    if (c != null) {
+      return { kind, content: c } as ChatModelEndEvent | LLMEndEvent;
+    }
+    return null;
+  }
+  if (kind === "on_tool_start") {
+    const name = String(raw?.name ?? "");
+    const id = String(raw?.run_id ?? "");
+    const input = raw?.data?.input ?? {};
+    if (name) {
+      return { kind, tool: name, input, id };
+    }
+    return null;
+  }
+  if (kind === "on_tool_end") {
+    const name = String(raw?.name ?? "");
+    const id = String(raw?.run_id ?? "");
+    const output = raw?.data?.output;
+    if (name) {
+      return { kind, tool: name, output, id };
+    }
+    return null;
+  }
+  if (kind === "on_tool_error") {
+    const name = String(raw?.name ?? "");
+    const id = String(raw?.run_id ?? "");
+    const err = raw?.data?.error;
+    const msg = typeof err === "string" ? err : String(err ?? "");
+    if (name) {
+      return { kind, tool: name, id, error: msg };
+    }
+    return null;
+  }
+  if (kind === "error") {
+    const err = raw?.data?.error;
+    const msg = typeof err === "string" ? err : String(err ?? "");
+    if (msg) {
+      return { kind, error: msg };
+    }
+    return null;
+  }
+  return null;
 }
 
 function updateStreamingContent(versionId: string, content: string) {
@@ -303,6 +307,18 @@ function updateStreamingContent(versionId: string, content: string) {
   version.content = content;
   messages.value = [...messages.value];
 }
+
+// function updateStreamingReasoning(versionId: string, content: string) {
+//   const target = messages.value.find((msg) =>
+//     msg.versions.some((version) => version.id === versionId)
+//   );
+//   if (!target) return;
+//   target.reasoning = {
+//     content,
+//     duration: 0,
+//   };
+//   messages.value = [...messages.value];
+// }
 
 function normalizeToolOutput(value: any): any {
   if (value == null) return value;
@@ -367,29 +383,6 @@ function updateStreamingTool(versionId: string, toolEvent: any) {
   messages.value = [...messages.value];
 }
 
-function updateStreamingCitations(versionId: string, payload: any) {
-  const target = messages.value.find((msg) =>
-    msg.versions.some((version) => version.id === versionId)
-  );
-  if (!target) return;
-
-  const citations = Array.isArray(payload?.citations) ? payload.citations : [];
-  target.citations = citations.map((c: any) => ({
-    file_id: Number(c?.file_id ?? 0),
-    chunk_index: Number(c?.chunk_index ?? 0),
-    filename: String(c?.filename ?? ""),
-    content: String(c?.content ?? ""),
-  }));
-
-  const citationsArr = target.citations || [];
-  target.sources = citationsArr.map((c) => ({
-    href: `kb://file/${c.file_id}#chunk=${c.chunk_index}`,
-    title: `${c.filename || "unknown"} #${c.chunk_index}`,
-  }));
-
-  messages.value = [...messages.value];
-}
-
 /**
  * 消费后端原始事件流（JSONL）并更新 UI：
  * - 文本：on_chat_model_stream / on_llm_new_token / on_*_end 的 content
@@ -402,38 +395,41 @@ async function streamResponse(versionId: string) {
     content: m.versions[m.versions.length - 1]?.content || "",
   }));
   try {
-    const iter = await streamChat(history, selectedKbId.value ? selectedKbId.value : undefined);
+    const iter = await streamChat(
+      history,
+      selectedKbId.value ? selectedKbId.value : undefined
+    );
     let acc = "";
     for await (const raw of iter) {
       const ev = parseEvent(raw);
       if (!ev) continue;
-      if (ev instanceof ChatModelStreamEvent) {
+      if (ev.kind === "on_chat_model_stream") {
         acc += normalizeTextChunk(ev.text);
         updateStreamingContent(versionId, acc);
-      } else if (ev instanceof LLMNewTokenEvent) {
-        acc += String(ev.token);
-        updateStreamingContent(versionId, acc);
-      } else if (ev instanceof ChatModelEndEvent) {
-        acc += normalizeTextChunk(ev.content);
-        updateStreamingContent(versionId, acc);
-      } else if (ev instanceof LLMEndEvent) {
-        acc += normalizeTextChunk(ev.content);
-        updateStreamingContent(versionId, acc);
-      } else if (ev instanceof ToolStartEvent) {
+      }
+      //  else if (ev.kind === "on_llm_new_token") {
+      //   acc += String(ev.token);
+      //   updateStreamingContent(versionId, acc);
+      // } else if (ev.kind === "on_chat_model_end" || ev.kind === "on_llm_end") {
+      //   acc += normalizeTextChunk(ev.content);
+      //   updateStreamingContent(versionId, acc);
+      //   updateStreamingReasoning(versionId, acc);
+      // } 
+      else if (ev.kind === "on_tool_start") {
         updateStreamingTool(versionId, {
           type: "tool_start",
           tool: ev.tool,
           input: ev.input || {},
           id: ev.id,
         });
-      } else if (ev instanceof ToolEndEvent) {
+      } else if (ev.kind === "on_tool_end") {
         updateStreamingTool(versionId, {
           type: "tool_end",
           tool: ev.tool,
           output: ev.output,
           id: ev.id,
         });
-      } else if (ev instanceof ToolErrorEvent) {
+      } else if (ev.kind === "on_tool_error") {
         updateStreamingTool(versionId, {
           type: "tool_end",
           tool: ev.tool,
@@ -441,7 +437,7 @@ async function streamResponse(versionId: string) {
           id: ev.id,
           error: String(ev.error || "Tool error"),
         });
-      } else if (ev instanceof StreamErrorEvent) {
+      } else if (ev.kind === "error") {
         acc += `\n[Error] ${ev.error}`;
         updateStreamingContent(versionId, acc);
       }
@@ -579,14 +575,6 @@ function handleModelSelect(id: string) {
   modelSelectorOpen.value = false;
 }
 
-function toggleMicrophone() {
-  useMicrophone.value = !useMicrophone.value;
-}
-
-function toggleWebSearch() {
-  useWebSearch.value = !useWebSearch.value;
-}
-
 onMounted(() => {
   kbStore.fetchKnowledgeBases();
 });
@@ -604,8 +592,8 @@ watch(
       if (defaultId) selectedKbId.value = defaultId;
     }
   },
-  { immediate: true },
-)
+  { immediate: true }
+);
 </script>
 
 <template>
@@ -621,7 +609,9 @@ watch(
             <MessageBranchContent>
               <Message
                 v-if="message.versions.length > 0"
-                :key="`${message.key}-${message.versions[message.versions.length - 1]?.id || ''}`"
+                :key="`${message.key}-${
+                  message.versions[message.versions.length - 1]?.id || ''
+                }`"
                 :from="message.from"
               >
                 <div>
@@ -645,30 +635,32 @@ watch(
                     <ReasoningContent :content="message.reasoning.content" />
                   </Reasoning>
 
-                  <div
+                  <Tool
+                    v-for="tool in message.tools"
+                    :key="tool.toolCallId"
                     v-if="message.tools && message.tools.length"
-                    class="flex flex-col gap-2 pb-2"
                   >
-                    <Tool v-for="tool in message.tools" :key="tool.toolCallId">
-                      <ToolHeader
-                        :state="tool.state"
-                        :title="tool.name"
-                        :type="tool.type"
-                      />
+                    <ToolHeader
+                      :state="tool.state"
+                      :title="tool.name"
+                      :type="tool.type"
+                    />
 
-                      <ToolContent>
-                        <ToolInput :input="tool.input" />
-                        <ToolOutput
-                          :output="tool.output"
-                          :error-text="tool.error"
-                        />
-                      </ToolContent>
-                    </Tool>
-                  </div>
-                  
+                    <ToolContent>
+                      <ToolInput :input="tool.input" />
+                      <ToolOutput
+                        :output="tool.output"
+                        :error-text="tool.error"
+                      />
+                    </ToolContent>
+                  </Tool>
+
                   <MessageContent>
                     <MessageResponse
-                      :content="message.versions[message.versions.length - 1]?.content || ''"
+                      :content="
+                        message.versions[message.versions.length - 1]
+                          ?.content || ''
+                      "
                     />
                   </MessageContent>
                 </div>
@@ -806,7 +798,7 @@ watch(
               </ModelSelector>
 
               <PromptInputButton @click="kbSelectorOpen = true">
-              <GlobeIcon :size="16" />
+                <GlobeIcon :size="16" />
                 <span>Select Knowledge Base</span>
               </PromptInputButton>
             </PromptInputTools>
@@ -834,7 +826,9 @@ watch(
           <template #footer>
             <div class="flex justify-end gap-2">
               <ElButton @click="kbSelectorOpen = false">取消</ElButton>
-              <ElButton type="primary" @click="kbSelectorOpen = false">确定</ElButton>
+              <ElButton type="primary" @click="kbSelectorOpen = false"
+                >确定</ElButton
+              >
             </div>
           </template>
         </ElDialog>

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { Plus, Delete, Edit, Upload as UploadIcon, Document, FolderOpened } from '@element-plus/icons-vue'
+import { Plus, Delete, Edit, Upload as UploadIcon, Document, FolderOpened} from '@element-plus/icons-vue'
 import { useKbStore } from '@/stores/kb'
 import ChunkViewerDialog from '@/components/ChunkViewerDialog.vue'
 
@@ -34,6 +34,7 @@ const newKbName = ref<string>('')
 const newKbDesc = ref<string>('')
 const showChunkModal = ref<boolean>(false)
 const chunks = ref<any[]>([])
+const parsingFileIds = ref<Set<string>>(new Set())
 
 /**
  * 加载知识库列表（后端）
@@ -138,17 +139,36 @@ async function viewChunks(fileId: string): Promise<void> {
 /**
  * 触发向量化（后端）
  */
-async function vectorizeFile(filename: string): Promise<void> {
+async function vectorizeFile(file: FileItem): Promise<void> {
   if (!selectedKbId.value) return
-  await kbStore.vectorizeFile(selectedKbId.value, filename)
-  ElMessage.success('向量化完成')
-  await kbStore.fetchFiles(selectedKbId.value)
+  parsingFileIds.value.add(file.id)
+  try {
+    await kbStore.vectorizeFile(selectedKbId.value, file.name)
+    ElMessage.success('向量化完成')
+    await kbStore.fetchFiles(selectedKbId.value)
+  } finally {
+    parsingFileIds.value.delete(file.id)
+  }
 }
 
 /**
  * 删除文件（后端）
  */
 async function removeFile(fileId: string): Promise<void> {
+  const file = files.value.find(f => f.id === fileId)
+  if (!file) return
+
+  await ElMessageBox.confirm(
+    `确定要删除文件「${file.name}」吗？\n删除后该文件及其所有片段将无法恢复。`, 
+    '删除确认', 
+    {
+      type: 'warning',
+      confirmButtonText: '确定删除',
+      cancelButtonText: '取消',
+      confirmButtonClass: 'el-button--danger'
+    }
+  )
+
   await kbStore.deleteFile(fileId, selectedKbId.value)
   ElMessage.success('文件已删除')
 }
@@ -175,43 +195,74 @@ function onUploadChange(file: any): void {
 </script>
 
 <template>
-  <el-container class="h-screen w-screen">
-    <el-aside width="280px" class="border-r">
-      <div class="p-3 flex items-center justify-between">
-        <div class="flex items-center gap-2 text-sm text-muted-foreground">
-          <el-icon><FolderOpened /></el-icon>
-          <span>知识库</span>
+  <el-container class="h-full w-full bg-background">
+    <!-- 侧边栏 -->
+    <el-aside width="280px" class="flex flex-col border-r bg-card">
+      <div class="h-14 px-4 flex items-center justify-between border-b shrink-0">
+        <div class="flex items-center gap-2 text-sm font-medium text-foreground">
+          <el-icon class="text-primary"><FolderOpened /></el-icon>
+          <span>知识库列表</span>
         </div>
-        <el-button type="primary" size="small" :icon="Plus" @click="isCreatingKb = true">
+        <el-button type="primary" link :icon="Plus" @click="isCreatingKb = true">
           新建
         </el-button>
       </div>
-      <el-scrollbar height="calc(100vh - 52px)">
-        <el-menu :default-active="selectedKbId" @select="selectKnowledgeBase" class="border-t">
-          <el-menu-item v-for="kb in knowledgeBases" :key="kb.id" :index="kb.id">
-            <div class="flex items-center justify-between w-full">
-              <div class="flex flex-col">
-                <span class="text-foreground font-medium">{{ kb.name }}</span>
-                <span class="text-xs text-muted-foreground">{{ kb.description }}</span>
+      
+      <div class="flex-1 overflow-hidden min-h-0">
+        <el-scrollbar height="100%">
+          <div class="p-2">
+            <template v-if="knowledgeBases.length > 0">
+              <div
+                v-for="kb in knowledgeBases"
+                :key="kb.id"
+                class="group flex items-center justify-between p-3 mb-1 rounded-md cursor-pointer transition-all duration-200 border-l-4"
+                :class="selectedKbId === kb.id 
+                  ? 'bg-primary/10 border-primary text-primary shadow-sm' 
+                  : 'border-transparent hover:bg-accent hover:text-accent-foreground text-foreground'"
+                @click="selectKnowledgeBase(kb.id)"
+              >
+                <div class="flex flex-col overflow-hidden">
+                  <span class="font-medium truncate">{{ kb.name }}</span>
+                  <span v-if="kb.description" class="text-xs text-muted-foreground truncate mt-0.5">{{ kb.description }}</span>
+                </div>
+                <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity" :class="{ 'opacity-100': selectedKbId === kb.id }">
+                  <el-button link size="small" :icon="Edit" @click.stop="renameKnowledgeBase(kb.id)" />
+                  <el-button link size="small" type="danger" :icon="Delete" @click.stop="deleteKnowledgeBase(kb.id)" />
+                </div>
               </div>
-              <div class="flex items-center gap-2">
-                <el-button text :icon="Edit" @click.stop="renameKnowledgeBase(kb.id)" />
-                <el-button text :icon="Delete" @click.stop="deleteKnowledgeBase(kb.id)" />
-              </div>
+            </template>
+            <div v-else class="text-center py-8 text-muted-foreground text-sm">
+              暂无知识库
             </div>
-          </el-menu-item>
-        </el-menu>
-      </el-scrollbar>
+          </div>
+        </el-scrollbar>
+      </div>
     </el-aside>
-
-    <el-container>
-      <el-header height="56px" class="border-b flex items-center justify-between px-4">
-        <div class="flex items-center gap-2">
-          <el-icon><Document /></el-icon>
-          <span class="font-medium">{{ currentKb?.name || '未选择知识库' }}</span>
+    <!-- 主内容区 -->
+    <el-container class="flex flex-col h-full overflow-hidden bg-background min-w-0">
+      <el-header height="64px" class="flex items-center justify-between px-6 border-b bg-card shrink-0 shadow-sm z-10">
+        <div class="flex items-center gap-3 overflow-hidden">
+          <div class="p-2 rounded-lg bg-primary/10 text-primary">
+            <el-icon size="20"><Document /></el-icon>
+          </div>
+          <div class="flex flex-col">
+            <span class="text-base font-semibold text-foreground truncate max-w-[200px]">{{ currentKb?.name || '未选择知识库' }}</span>
+            <span class="text-xs text-muted-foreground" v-if="currentKb">共 {{ filteredFiles.length }} 个文件</span>
+          </div>
         </div>
-        <div class="flex items-center gap-2">
-          <el-input v-model="fileSearch" placeholder="搜索文件..." size="small" class="w-64" />
+        
+        <div class="flex items-center gap-3" v-if="currentKb">
+          <el-input
+            v-model="fileSearch"
+            placeholder="搜索文件..."
+            size="default"
+            class="w-64"
+            clearable
+          >
+            <template #prefix>
+              <el-icon><Search /></el-icon>
+            </template>
+          </el-input>
           <el-upload
             multiple
             :show-file-list="false"
@@ -219,25 +270,75 @@ function onUploadChange(file: any): void {
             :on-change="onUploadChange"
             accept=".pdf,.xlsx"
           >
-            <el-button type="primary" size="small" :icon="UploadIcon">添加文件</el-button>
+            <el-button type="primary" :icon="UploadIcon">添加文件</el-button>
           </el-upload>
         </div>
       </el-header>
-      <el-main class="p-0">
-        <el-table :data="filteredFiles" table-layout="auto" height="calc(100vh - 56px)">
-          <el-table-column prop="name" label="文件名" min-width="240" />
-          <el-table-column prop="type" label="类型" width="180" />
-          <el-table-column prop="chunkCount" label="Chunk 数" width="120" />
-          <el-table-column prop="createdAt" label="上传时间" width="180">
+
+      <el-main class="flex-1 overflow-hidden p-0 relative">
+        <div v-if="!selectedKbId" class="absolute inset-0 flex flex-col items-center justify-center text-muted-foreground">
+          <el-icon size="48" class="mb-4 opacity-20"><FolderOpened /></el-icon>
+          <p>请选择或新建一个知识库</p>
+        </div>
+        
+        <el-table
+          v-else
+          :data="filteredFiles"
+          style="width: 100%; height: 100%"
+          :header-cell-style="{ background: 'transparent' }"
+        >
+          <template #empty>
+            <div class="py-8 flex flex-col items-center text-muted-foreground">
+              <el-icon size="40" class="mb-2 opacity-20"><Document /></el-icon>
+              <span>暂无文件，请上传 PDF 或 Excel</span>
+            </div>
+          </template>
+          
+          <el-table-column prop="name" label="文件名" min-width="200" show-overflow-tooltip>
             <template #default="{ row }">
-              {{ new Date(row.createdAt).toLocaleString() }}
+              <div class="flex items-center gap-2">
+                <el-icon :class="row.name.endsWith('.pdf') ? 'text-red-500' : 'text-green-600'">
+                  <Document />
+                </el-icon>
+                <span>{{ row.name }}</span>
+              </div>
             </template>
           </el-table-column>
-          <el-table-column label="操作" width="240">
+          
+          <el-table-column prop="type" label="类型" width="120">
             <template #default="{ row }">
-              <el-button size="small" @click="viewChunks(row.id)">查看片段</el-button>
-              <el-button type="primary" size="small" @click="vectorizeFile(row.name)">向量化</el-button>
-              <el-button type="danger" size="small" @click="removeFile(row.id)">删除</el-button>
+              <el-tag size="small" variant="plain" class="uppercase">
+                {{ row.name.split('.').pop() }}
+              </el-tag>
+            </template>
+          </el-table-column>
+          
+          <el-table-column prop="chunkCount" label="片段数" width="100" align="center">
+            <template #default="{ row }">
+              <span class="font-mono text-xs bg-muted px-2 py-0.5 rounded-full">{{ row.chunkCount }}</span>
+            </template>
+          </el-table-column>
+          
+          <el-table-column prop="createdAt" label="上传时间" width="180">
+            <template #default="{ row }">
+              <span class="text-xs text-muted-foreground">{{ new Date(row.createdAt).toLocaleString() }}</span>
+            </template>
+          </el-table-column>
+          
+          <el-table-column label="操作" width="260" fixed="right">
+            <template #default="{ row }">
+              <el-button size="small" plain @click="viewChunks(row.id)">查看</el-button>
+              <el-button 
+                type="primary" 
+                size="small" 
+                plain 
+                @click="vectorizeFile(row)"
+                :loading="parsingFileIds.has(row.id)"
+                :disabled="parsingFileIds.has(row.id)"
+              >
+                {{ parsingFileIds.has(row.id) ? '解析中...' : (row.chunkCount > 0 ? '重新解析' : '解析') }}
+              </el-button>
+              <el-button type="danger" size="small" plain text @click="removeFile(row.id)">删除</el-button>
             </template>
           </el-table-column>
         </el-table>

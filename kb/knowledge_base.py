@@ -190,6 +190,8 @@ class PersistentKnowledgeBaseController:
             # 仅追加有嵌入的条目，避免全部因嵌入失败而不写入向量库
             vitems_embedded = [vi for vi in vitems if "embedding" in vi]
             if vitems_embedded:
+                # 先删除旧的向量数据，支持重新解析
+                self._vstore.delete_items(kb_id, {"file_id": int(file_id)})
                 self._vstore.add_items(kb_id, vitems_embedded)
         except Exception:
             pass

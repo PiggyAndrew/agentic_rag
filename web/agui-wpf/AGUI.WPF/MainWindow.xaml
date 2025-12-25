@@ -7,7 +7,7 @@
     xmlns:local="clr-namespace:WPF_ArchiPlaning"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:webview2="clr-namespace:Microsoft.Web.WebView2.Wpf;assembly=Microsoft.Web.WebView2.Wpf"
-    Title="BUD Sustainable Building Designer"
+    Title="Agentic RAG"
     Width="1300"
     Height="900"
     WindowStartupLocation="CenterScreen"

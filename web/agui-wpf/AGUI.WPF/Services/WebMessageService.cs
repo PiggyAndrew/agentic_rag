@@ -9,11 +9,14 @@ using System.Threading.Tasks;
 using System.Windows.Threading;
 using System.Windows;
 using WPF_ArchiPlaning;
+using System.Net.Http;
+using System.Text.Json;
 
 namespace BUD_Sustainable_Building_Designer
 {
     class WebMessageService
     {
+        private const string DEFAULT_REPO = "PiggyAndrew/agentic_rag";
         private readonly string _ifcExportExeName= "ifc_exporter.exe";
         private readonly string exePath =  Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "ifc_exporter.exe");
         private readonly string _pythonCliExeName = "wind_path_cli.exe";
@@ -46,29 +49,23 @@ namespace BUD_Sustainable_Building_Designer
                     if (obj.TryGetProperty("type", out var typeElem))
                     {
                         var type = typeElem.GetString();
-                         AppLogger.Info($"CoreWebView2_WebMessageReceived: type={type}");
-                        if (type == "python_analyze_matrix")
+                        AppLogger.Info($"CoreWebView2_WebMessageReceived: type={type}");
+                        if (type == "app_update_install")
                         {
-                            AppLogger.Info("CoreWebView2_WebMessageReceived: dispatch python_analyze_matrix");
-                            HandleAnalyzeMatrix(sender as CoreWebView2, obj);
+                            AppLogger.Info("CoreWebView2_WebMessageReceived: dispatch app_update_install");
+                            HandleAppUpdateInstall(obj, sender as CoreWebView2);
                             return;
                         }
-                        else if (type == "ifc_export")
+                        else if (type == "app_update_execute")
                         {
-                            AppLogger.Info("CoreWebView2_WebMessageReceived: dispatch ifc_export");
-                            HandleExportIFC(jsonDocument);
-                            return;
-                        }
-                        else if (type == "export_project_state_result")
-                        {
-                            AppLogger.Info("CoreWebView2_WebMessageReceived: dispatch export_project_state_result");
-                            HandleExportProjectStateResult(obj, sender as CoreWebView2);
+                            AppLogger.Info("CoreWebView2_WebMessageReceived: dispatch app_update_execute");
+                            HandleAppUpdateExecute(obj, sender as CoreWebView2);
                             return;
                         }
                     }
                     // 默认处理：尝试 IFC 导出
                     AppLogger.Warn("CoreWebView2_WebMessageReceived: unknown type, fallback to ifc_export");
-                    HandleExportIFC(jsonDocument);
+                    HandleAppUpdateInstall(obj, sender as CoreWebView2);
                 }
 
             }
@@ -124,259 +121,6 @@ namespace BUD_Sustainable_Building_Designer
         //}
 
         /// <summary>
-        /// 处理IFC导出请求
-        /// </summary>
-        public void HandleExportIFC(System.Text.Json.JsonDocument jsonDoc)
-        {
-            try
-            {
-                // 在UI线程中显示文件保存对话框
-                string outputFile = null;
-                bool userCancelled = false;
-
-                // 创建保存文件对话框
-                Microsoft.Win32.SaveFileDialog saveFileDialog = new Microsoft.Win32.SaveFileDialog
-                {
-                    Title = "选择IFC文件保存位置",
-                    Filter = "IFC文件 (*.ifc)|*.ifc|所有文件 (*.*)|*.*",
-                    DefaultExt = ".ifc",
-                    FileName = $"ArchiPlaning_Export_{DateTime.Now:yyyyMMdd_HHmmss}.ifc",
-                    InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments)
-                };
-
-                // 显示对话框
-                if (saveFileDialog.ShowDialog() == true)
-                {
-                    outputFile = saveFileDialog.FileName;
-                }
-
-                // 如果用户取消了操作，直接返回
-                if (userCancelled || string.IsNullOrEmpty(outputFile))
-                {
-                    return;
-                }
-
-                // 在后台线程中执行导出操作
-                Task.Run(() =>
-                {
-                    try
-                    {
-
-                        var root = jsonDoc.RootElement;
-                        if (!root.TryGetProperty("buildings", out var _))
-                        {
-                            throw new Exception("数据格式错误：缺少buildings字段");
-                        }
-
-                        // 创建临时JSON文件
-                        string tempDir = Path.GetTempPath();
-                        string tempJsonFile = Path.Combine(tempDir, $"ifc_export_{Guid.NewGuid()}.json");
-
-                        // 将数据写入临时文件 - 使用不带BOM的UTF-8编码
-                        File.WriteAllText(tempJsonFile, root.GetString(), new UTF8Encoding(false));
-
-                      
-
-                        // 检查文件是否存在
-                        if (!File.Exists(exePath))
-                        {
-                            return;
-                        }
-
-                        // 创建进程启动信息
-                        ProcessStartInfo startInfo = new ProcessStartInfo
-                        {
-                            FileName = exePath,
-                            Arguments = $"--input \"{tempJsonFile}\" --output \"{outputFile}\"",
-                            UseShellExecute = false,
-                            RedirectStandardOutput = true,
-                            RedirectStandardError = true,
-                            CreateNoWindow = true,
-                            StandardOutputEncoding = Encoding.UTF8,
-                            StandardErrorEncoding = Encoding.UTF8
-                        };
-
-                        // 创建输出缓冲区
-                        StringBuilder outputBuilder = new StringBuilder();
-                        StringBuilder errorBuilder = new StringBuilder();
-
-                        // 启动进程
-                        using (Process process = new Process())
-                        {
-                            process.StartInfo = startInfo;
-
-                            // 设置输出处理
-                            process.OutputDataReceived += (sender, e) =>
-                            {
-                                if (!string.IsNullOrEmpty(e.Data))
-                                    outputBuilder.AppendLine(e.Data);
-                            };
-
-                            process.ErrorDataReceived += (sender, e) =>
-                            {
-                                if (!string.IsNullOrEmpty(e.Data))
-                                    errorBuilder.AppendLine(e.Data);
-                            };
-
-                            // 启动进程
-                            process.Start();
-
-                            // 开始异步读取
-                            process.BeginOutputReadLine();
-                            process.BeginErrorReadLine();
-
-                            // 等待进程结束
-                            process.WaitForExit();
-
-                            // 检查进程退出代码
-                            if (process.ExitCode != 0)
-                            {
-                                // 导出失败
-                                string errorMessage = errorBuilder.ToString();
-                                string outputMessage = outputBuilder.ToString();
-
-                                // 保存错误日志到文件
-                                string logFile = Path.Combine(
-                                    Environment.GetFolderPath(Environment.SpecialFolder.Desktop),
-                                    $"ArchiPlaning_Error_{DateTime.Now:yyyyMMdd_HHmmss}.log");
-
-                                File.WriteAllText(logFile,
-                                    $"=== 导出失败 ===\n时间: {DateTime.Now}\n" +
-                                    $"退出代码: {process.ExitCode}\n\n" +
-                                    $"错误信息:\n{errorMessage}\n\n" +
-                                    $"标准输出:\n{outputMessage}");
-
-                                if (string.IsNullOrEmpty(errorMessage))
-                                {
-                                    errorMessage = $"导出失败，退出代码: {process.ExitCode}";
-                                }
-
-                            }
-                        }
-
-                        // 清理临时文件
-                        try
-                        {
-                            if (File.Exists(tempJsonFile))
-                                File.Delete(tempJsonFile);
-                        }
-                        catch { 
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        MessageBox.Show($"导出过程中发生错误:\n{ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
-                    }
-                });
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"启动导出过程时发生错误:\n{ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-        }
-
-        /// <summary>
-        /// 处理风分析矩阵的桥接请求：写入临时JSON，调用打包的CLI或Python脚本，返回结果到前端
-        /// </summary>
-        private void HandleAnalyzeMatrix(CoreWebView2 core, System.Text.Json.JsonElement obj)
-        {
-            try
-            {
-                if (!obj.TryGetProperty("payload", out var payload))
-                {
-                    PostBridgeError(core, "Invalid payload: missing 'payload'");
-                    return;
-                }
-                var filename = payload.TryGetProperty("filename", out var f) ? f.GetString() ?? "uploaded_file" : "uploaded_file";
-                var zone = payload.TryGetProperty("zone", out var z) ? z.GetString() ?? "" : "";
-                if (string.IsNullOrWhiteSpace(zone))
-                {
-                    PostBridgeError(core, "Missing required field: zone");
-                    return;
-                }
-                if (!payload.TryGetProperty("matrix", out var matrixElem))
-                {
-                    PostBridgeError(core, "Missing required field: matrix");
-                    return;
-                }
-
-                // 将矩阵写入临时文件
-                var tmpDir = Path.GetTempPath();
-                var tmpFolder = Path.Combine(tmpDir, "wind-analysis", Guid.NewGuid().ToString());
-                Directory.CreateDirectory(tmpFolder);
-                var matrixPath = Path.Combine(tmpFolder, "matrix.json");
-                var outputPath = Path.Combine(tmpFolder, "result.json");
-                var matrixWrapper = new
-                {
-                    matrix = System.Text.Json.JsonSerializer.Deserialize<object>(matrixElem.GetRawText())
-                };
-                File.WriteAllText(matrixPath, System.Text.Json.JsonSerializer.Serialize(matrixWrapper), new UTF8Encoding(false));
-
-                // 选择调用方式：仅使用打包的 CLI exe（不回退到 python 解释器）
-                var cliExePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, _pythonCliExeName);
-                if (!File.Exists(cliExePath))
-                {
-                    PostBridgeError(core, $"CLI not found: {cliExePath}");
-                    return;
-                }
-                var startInfo = new ProcessStartInfo
-                {
-                    FileName = cliExePath,
-                    Arguments = $"--matrix \"{matrixPath}\" --json-key matrix --zone \"{zone}\" --filename \"{filename}\" --output \"{outputPath}\" --print-summary",
-                    UseShellExecute = false,
-                    RedirectStandardOutput = true,
-                    RedirectStandardError = true,
-                    CreateNoWindow = true,
-                    StandardOutputEncoding = Encoding.UTF8,
-                    StandardErrorEncoding = Encoding.UTF8
-                };
-
-                var outputBuilder = new StringBuilder();
-                var errorBuilder = new StringBuilder();
-
-                using (var process = new Process())
-                {
-                    process.StartInfo = startInfo;
-                    process.OutputDataReceived += (_, args) => { if (!string.IsNullOrWhiteSpace(args.Data)) outputBuilder.AppendLine(args.Data); };
-                    process.ErrorDataReceived += (_, args) => { if (!string.IsNullOrWhiteSpace(args.Data)) errorBuilder.AppendLine(args.Data); };
-                    process.Start();
-                    process.BeginOutputReadLine();
-                    process.BeginErrorReadLine();
-                    process.WaitForExit();
-
-                    if (process.ExitCode != 0)
-                    {
-                        var err = errorBuilder.ToString();
-                        PostBridgeError(core, string.IsNullOrWhiteSpace(err) ? $"CLI exited with {process.ExitCode}" : err);
-                        return;
-                    }
-                }
-
-                // 读取输出并返回给前端
-                if (!File.Exists(outputPath))
-                {
-                    PostBridgeError(core, "Output file not found");
-                    return;
-                }
-                var content = File.ReadAllText(outputPath, new UTF8Encoding(false));
-                var resp = new
-                {
-                    type = "python_analyze_matrix_result",
-                    success = true,
-                    data = System.Text.Json.JsonSerializer.Deserialize<object>(content)
-                };
-                core?.PostWebMessageAsJson(System.Text.Json.JsonSerializer.Serialize(resp));
-
-                // 清理临时文件夹
-                try { Directory.Delete(tmpFolder, true); } catch { }
-            }
-            catch (Exception ex)
-            {
-                PostBridgeError(core, ex.Message);
-            }
-        }
-
-        /// <summary>
         /// 将错误消息通过 WebView2 回发到前端
         /// </summary>
         private void PostBridgeError(CoreWebView2 core, string message)
@@ -386,105 +130,243 @@ namespace BUD_Sustainable_Building_Designer
         }
 
         /// <summary>
-        /// 触发前端导出项目状态并保存到本地文件
+        /// 处理应用更新安装请求：从 GitHub Releases 下载 .exe 并启动安装程序
         /// </summary>
-        public async Task<bool> RequestExportProjectStateAndSave(CoreWebView2 core)
-        {
-            try
-            {
-                if (core == null) return false;
-                AppLogger.Info("RequestExportProjectStateAndSave: start");
-                _exportStateTcs = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
-                var msg = new { type = "export_project_state" };
-                core.PostWebMessageAsJson(System.Text.Json.JsonSerializer.Serialize(msg));
-                var completed = await Task.WhenAny(_exportStateTcs.Task, Task.Delay(2000));
-                var ok = completed == _exportStateTcs.Task && _exportStateTcs.Task.Result;
-                AppLogger.Info($"RequestExportProjectStateAndSave: done ok={ok}");
-                return ok;
-            }
-            catch (Exception ex)
-            {
-                AppLogger.Error("RequestExportProjectStateAndSave: exception", ex);
-                return false;
-            }
-        }
-
-        /// <summary>
-        /// 处理导出状态结果消息并写入磁盘
-        /// </summary>
-        private void HandleExportProjectStateResult(System.Text.Json.JsonElement obj, CoreWebView2 core)
+        private async void HandleAppUpdateInstall(System.Text.Json.JsonElement obj, CoreWebView2 core)
         {
             try
             {
                 if (!obj.TryGetProperty("payload", out var payload))
                 {
-                    AppLogger.Warn("HandleExportProjectStateResult: missing payload");
-                    _exportStateTcs?.TrySetResult(false);
+                    PostUpdateResult(core, false, error: "missing payload");
                     return;
                 }
-                var path = GetStateFilePath();
-                var dir = Path.GetDirectoryName(path);
-                if (!string.IsNullOrEmpty(dir))
+                var repo = DEFAULT_REPO;
+                var assetMatch = payload.TryGetProperty("assetMatch", out var am) ? am.GetString() ?? ".exe" : ".exe";
+                var token = payload.TryGetProperty("token", out var t) ? t.GetString() ?? string.Empty : string.Empty;
+                if (string.IsNullOrWhiteSpace(token))
                 {
-                    Directory.CreateDirectory(dir);
+                    token = Environment.GetEnvironmentVariable("GITHUB_TOKEN")
+                        ?? Environment.GetEnvironmentVariable("AGUI_GH_TOKEN")
+                        ?? string.Empty;
                 }
-                var json = payload.GetRawText();
-                File.WriteAllText(path, json, new UTF8Encoding(false));
-                AppLogger.Info($"HandleExportProjectStateResult: saved {path} (bytes={json?.Length ?? 0})");
-                _exportStateTcs?.TrySetResult(true);
+                var args = payload.TryGetProperty("args", out var a) ? a.GetString() ?? string.Empty : string.Empty;
+                if (string.IsNullOrWhiteSpace(repo) || !repo.Contains('/'))
+                {
+                    PostUpdateResult(core, false, error: "invalid repo (expect owner/repo)");
+                    return;
+                }
+
+                PostUpdateProgress(core, $"开始检查更新: {repo}");
+
+                using var http = new HttpClient();
+                http.DefaultRequestHeaders.UserAgent.ParseAdd("AGUI.WPF/1.0.0");
+                http.DefaultRequestHeaders.Accept.ParseAdd("application/vnd.github+json");
+                if (!string.IsNullOrWhiteSpace(token))
+                {
+                    http.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+                }
+
+                var owner = repo.Split('/')[0];
+                var name = repo.Split('/')[1];
+                var apiUrl = $"https://api.github.com/repos/{owner}/{name}/releases/latest";
+
+                using var resp = await http.GetAsync(apiUrl);
+                string? downloadUrl = null;
+                if (resp.IsSuccessStatusCode)
+                {
+                    var json = await resp.Content.ReadAsStringAsync();
+                    using var doc = JsonDocument.Parse(json);
+                    if (doc.RootElement.TryGetProperty("assets", out var assets) && assets.ValueKind == JsonValueKind.Array)
+                    {
+                        foreach (var asset in assets.EnumerateArray())
+                        {
+                            var nameProp = asset.TryGetProperty("name", out var n) ? n.GetString() ?? string.Empty : string.Empty;
+                            var urlProp = asset.TryGetProperty("browser_download_url", out var u) ? u.GetString() ?? string.Empty : string.Empty;
+                            if (!string.IsNullOrEmpty(nameProp) && !string.IsNullOrEmpty(urlProp))
+                            {
+                                if (!string.IsNullOrEmpty(assetMatch))
+                                {
+                                    if (nameProp.IndexOf(assetMatch, StringComparison.OrdinalIgnoreCase) >= 0)
+                                    {
+                                        downloadUrl = urlProp;
+                                        break;
+                                    }
+                                }
+                                else if (nameProp.EndsWith(".exe", StringComparison.OrdinalIgnoreCase))
+                                {
+                                    downloadUrl = urlProp;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    var listUrl = $"https://api.github.com/repos/{owner}/{name}/releases";
+                    using var respList = await http.GetAsync(listUrl);
+                    if (!respList.IsSuccessStatusCode)
+                    {
+                        PostUpdateResult(core, false, error: $"GitHub API failed: latest={(int)resp.StatusCode}, list={(int)respList.StatusCode}");
+                        return;
+                    }
+                    var listJson = await respList.Content.ReadAsStringAsync();
+                    using var listDoc = JsonDocument.Parse(listJson);
+                    if (listDoc.RootElement.ValueKind != JsonValueKind.Array || listDoc.RootElement.GetArrayLength() == 0)
+                    {
+                        PostUpdateResult(core, false, error: "no releases available");
+                        return;
+                    }
+                    foreach (var rel in listDoc.RootElement.EnumerateArray())
+                    {
+                        var isDraft = rel.TryGetProperty("draft", out var d) && d.GetBoolean();
+                        var isPre = rel.TryGetProperty("prerelease", out var p) && p.GetBoolean();
+                        if (isDraft || isPre) continue;
+                        if (rel.TryGetProperty("assets", out var relAssets) && relAssets.ValueKind == JsonValueKind.Array)
+                        {
+                            foreach (var asset in relAssets.EnumerateArray())
+                            {
+                                var nameProp = asset.TryGetProperty("name", out var n) ? n.GetString() ?? string.Empty : string.Empty;
+                                var urlProp = asset.TryGetProperty("browser_download_url", out var u) ? u.GetString() ?? string.Empty : string.Empty;
+                                if (!string.IsNullOrEmpty(nameProp) && !string.IsNullOrEmpty(urlProp))
+                                {
+                                    if (!string.IsNullOrEmpty(assetMatch))
+                                    {
+                                        if (nameProp.IndexOf(assetMatch, StringComparison.OrdinalIgnoreCase) >= 0)
+                                        {
+                                            downloadUrl = urlProp;
+                                            break;
+                                        }
+                                    }
+                                    else if (nameProp.EndsWith(".exe", StringComparison.OrdinalIgnoreCase))
+                                    {
+                                        downloadUrl = urlProp;
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                        if (!string.IsNullOrEmpty(downloadUrl)) break;
+                    }
+                }
+                if (string.IsNullOrEmpty(downloadUrl))
+                {
+                    PostUpdateResult(core, false, error: "no matching .exe asset found");
+                    return;
+                }
+
+                PostUpdateProgress(core, "开始下载安装包...");
+                var tmpDir = Path.Combine(Path.GetTempPath(), "AgenticRAG", "updates");
+                Directory.CreateDirectory(tmpDir);
+                var fileName = Path.GetFileName(new Uri(downloadUrl).LocalPath);
+                var savePath = Path.Combine(tmpDir, fileName);
+                using (var respDl = await http.GetAsync(downloadUrl, HttpCompletionOption.ResponseHeadersRead))
+                {
+                    if (!respDl.IsSuccessStatusCode)
+                    {
+                        PostUpdateResult(core, false, error: $"download failed: {(int)respDl.StatusCode}");
+                        return;
+                    }
+                    var total = respDl.Content.Headers.ContentLength;
+                    using (var inStream = await respDl.Content.ReadAsStreamAsync())
+                    using (var fs = new FileStream(savePath, FileMode.Create, FileAccess.Write, FileShare.None))
+                    {
+                        var buffer = new byte[81920];
+                        long readTotal = 0;
+                        while (true)
+                        {
+                            var read = await inStream.ReadAsync(buffer, 0, buffer.Length);
+                            if (read == 0) break;
+                            await fs.WriteAsync(buffer, 0, read);
+                            readTotal += read;
+                            if (total.HasValue && total.Value > 0)
+                            {
+                                var percent = (int)(readTotal * 100 / total.Value);
+                                PostUpdateProgressPercent(core, percent);
+                            }
+                        }
+                    }
+                }
+
+                PostUpdateProgress(core, "下载完成");
+                PostUpdateResult(core, true, message: "downloaded", path: savePath);
             }
             catch (Exception ex)
             {
-                AppLogger.Error("HandleExportProjectStateResult: exception", ex);
-                _exportStateTcs?.TrySetResult(false);
+                PostUpdateResult(core, false, error: ex.Message);
             }
         }
 
         /// <summary>
-        /// 在页面加载完成后，从本地文件读取项目状态并发送到前端进行恢复
+        /// 执行已下载的安装程序（前端确认后触发）
         /// </summary>
-        public void ImportProjectState(CoreWebView2 core)
+        private void HandleAppUpdateExecute(System.Text.Json.JsonElement obj, CoreWebView2 core)
         {
             try
             {
-                if (core == null) return;
-                var path = GetStateFilePath();
-                if (!File.Exists(path))
+                if (!obj.TryGetProperty("payload", out var payload))
                 {
-                    AppLogger.Info("ImportProjectState: no state file found");
+                    PostUpdateResult(core, false, error: "missing payload");
                     return;
                 }
-                var text = File.ReadAllText(path, new UTF8Encoding(false));
-                var resp = new
+                var path = payload.TryGetProperty("path", out var p) ? p.GetString() ?? string.Empty : string.Empty;
+                var args = payload.TryGetProperty("args", out var a) ? a.GetString() ?? string.Empty : string.Empty;
+                if (string.IsNullOrWhiteSpace(path) || !File.Exists(path))
                 {
-                    type = "import_project_state",
-                    payload = System.Text.Json.JsonSerializer.Deserialize<object>(text)
+                    PostUpdateResult(core, false, error: "invalid installer path");
+                    return;
+                }
+                var startInfo = new ProcessStartInfo
+                {
+                    FileName = path,
+                    UseShellExecute = true,
+                    Arguments = args ?? string.Empty
                 };
-                core.PostWebMessageAsJson(System.Text.Json.JsonSerializer.Serialize(resp));
-                AppLogger.Info($"ImportProjectState: posted to web (bytes={text?.Length ?? 0})");
+                var proc = Process.Start(startInfo);
+                if (proc != null)
+                {
+                    PostUpdateResult(core, true, message: "installer started");
+                }
+                else
+                {
+                    PostUpdateResult(core, false, error: "failed to start installer");
+                }
             }
             catch (Exception ex)
             {
-                AppLogger.Error("ImportProjectState: exception", ex);
+                PostUpdateResult(core, false, error: ex.Message);
             }
         }
 
         /// <summary>
-        /// 获取项目状态持久化文件路径（位于 LocalAppData 下）
+        /// 发送更新进度消息到前端
         /// </summary>
-        private string GetStateFilePath()
+        private void PostUpdateProgress(CoreWebView2 core, string message)
         {
-            try
-            {
-                var appName = System.Reflection.Assembly.GetEntryAssembly()?.GetName().Name ?? "BUD Sustainable Building Designer";
-                var localAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
-                var dir = Path.Combine(localAppData, appName, "state");
-                return Path.Combine(dir, "wind_analysis_state.json");
-            }
-            catch
-            {
-                return Path.Combine(Path.GetTempPath(), "wind_analysis_state.json");
-            }
+            var resp = new { type = "app_update_progress", message };
+            core?.PostWebMessageAsJson(System.Text.Json.JsonSerializer.Serialize(resp));
         }
+
+        /// <summary>
+        /// 发送更新结果消息到前端
+        /// </summary>
+        private void PostUpdateResult(CoreWebView2 core, bool success, string? message = null, string? error = null, string? path = null)
+        {
+            var resp = new { type = "app_update_result", success, message, error, path };
+            core?.PostWebMessageAsJson(System.Text.Json.JsonSerializer.Serialize(resp));
+        }
+
+        /// <summary>
+        /// 发送下载百分比进度到前端
+        /// </summary>
+        private void PostUpdateProgressPercent(CoreWebView2 core, int percent)
+        {
+            if (percent < 0) percent = 0; if (percent > 100) percent = 100;
+            var resp = new { type = "app_update_progress", percent };
+            core?.PostWebMessageAsJson(System.Text.Json.JsonSerializer.Serialize(resp));
+        }
+
+  
     }
 }

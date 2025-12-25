@@ -6,8 +6,9 @@ from pypdf import PdfReader
 from .splitters import (
     NormalSplitter,
     AdaptiveSplitter,
-    TableSplitter,
 )
+from .splitters.splitter_table import TableSplitter
+from .knowledge_base import FileInfo
 
 
 def _table_to_markdown(rows: List[List[Any]]) -> str:
@@ -209,13 +210,13 @@ def read_excel_text(excel_path: str, max_rows_per_sheet: int = 2000, max_cols: i
 
 
 def ingest_pdf(kb_controller, kb_id: int, pdf_path: str, chunk_size: int = 500, overlap: int = 100, use_llm_headings: Optional[bool] = None):
-    """读取指定PDF文件，优先识别目录并保持完整；否则按编号标题分割，最后回退为定长分割
+    """解析 PDF 并更新已存在文件的片段信息，不再创建文件记录
 
     - `kb_controller`：持久化知识库控制器实例
     - `kb_id`：知识库ID
     - `pdf_path`：PDF文件路径
     - `chunk_size` 与 `overlap`：回退分割参数
-    - 返回：创建的文件元信息对象
+    - 返回：更新后的文件元信息对象（FileInfo）
     """
     text = read_pdf_text(pdf_path)
     use_llm = (
@@ -231,9 +232,21 @@ def ingest_pdf(kb_controller, kb_id: int, pdf_path: str, chunk_size: int = 500, 
         else:
             chunks = NormalSplitter(chunk_size=chunk_size, overlap=overlap).split(text)
     filename = pdf_path.split("/")[-1].split("\\")[-1]
-    info = kb_controller.add_file(kb_id, filename=filename, chunk_count=len(chunks), status="done")
-    kb_controller.save_chunks(kb_id, file_id=info.id, chunks=chunks)
-    return info
+    meta = kb_controller._load_files(kb_id)
+    files = meta.get("files", [])
+    record = None
+    for f in files:
+        if str(f.get("filename")) == filename:
+            record = f
+            break
+    if record is None:
+        raise RuntimeError(f"文件未在知识库中登记：{filename}")
+    file_id = int(record.get("id"))
+    record["chunk_count"] = len(chunks)
+    record["status"] = "done"
+    kb_controller._save_files(kb_id, meta)
+    kb_controller.save_chunks(kb_id, file_id=file_id, chunks=chunks)
+    return FileInfo(id=file_id, filename=filename, chunk_count=len(chunks), status="done")
 
 
 def ingest_excel(
@@ -246,10 +259,11 @@ def ingest_excel(
     max_rows_per_chunk: int = 80,
     max_chars_per_chunk: int = 8000,
 ):
-    """读取指定 Excel 文件并按表格（Sheet）拆分后写入知识库
+    """解析 Excel 并更新已存在文件的片段信息，不再创建文件记录
 
     - 拆分结构：表格名称（Excel 文件名） + Sheet 名称 + Sheet 内容（Markdown 表格）
     - 可选：基于“表格名称 + Sheet 名称 + 表头字段”调用 LLM 生成摘要并放在片段开头
+    - 返回：更新后的文件元信息对象（FileInfo）
     """
     text = read_excel_text(
         excel_path,
@@ -275,8 +289,19 @@ def ingest_excel(
             "metadata": {"type": "table", "table_name": table_name, "sheet_name": "", "part_index": 1, "part_count": 1, "header": []},
         }]
 
-    info = kb_controller.add_file(kb_id, filename=filename, chunk_count=len(chunks), status="done")
-    kb_controller.save_chunks(kb_id, file_id=info.id, chunks=chunks)
-    return info
-
+    meta = kb_controller._load_files(kb_id)
+    files = meta.get("files", [])
+    record = None
+    for f in files:
+        if str(f.get("filename")) == filename:
+            record = f
+            break
+    if record is None:
+        raise RuntimeError(f"文件未在知识库中登记：{filename}")
+    file_id = int(record.get("id"))
+    record["chunk_count"] = len(chunks)
+    record["status"] = "done"
+    kb_controller._save_files(kb_id, meta)
+    kb_controller.save_chunks(kb_id, file_id=file_id, chunks=chunks)
+    return FileInfo(id=file_id, filename=filename, chunk_count=len(chunks), status="done")
 

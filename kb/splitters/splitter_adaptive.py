@@ -2,17 +2,20 @@ from typing import List, Dict, Any, Optional
 import os
 import re
 from dotenv import load_dotenv
-from langchain_openai import ChatOpenAI
 from app.prompts import get_toc_parser_system_prompt, get_toc_parser_user_prompt
 from .splitter_base import Splitter
 from .splitter_utils import parse_json_array, normalize_title, is_toc_line, detect_toc_bounds
-from .splitter_headings import HeadingsSplitter
+from .splitter_headings import HeadingsSplitter, HeadingItem
 
 
-def get_toc_parsing_llm() -> Optional[ChatOpenAI]:
+def get_toc_parsing_llm() -> Optional[object]:
     """获取用于解析目录的专用LLM对象"""
     api_key = os.getenv("DEEPSEEK_API_KEY")
     if not api_key:
+        return None
+    try:
+        from langchain_openai import ChatOpenAI
+    except Exception:
         return None
     return ChatOpenAI(
         temperature=0,
@@ -31,7 +34,7 @@ class AdaptiveSplitter(Splitter):
     name = "adaptive"
 
     def __init__(self, use_llm: bool = False):
-        self.use_llm = bool(True)
+        self.use_llm = bool(use_llm)
 
     def _is_toc_line(self, line: str) -> bool:
         return is_toc_line(line)
@@ -39,7 +42,7 @@ class AdaptiveSplitter(Splitter):
     def _detect_toc_bounds(self, lines: List[str]) -> Optional[tuple[int, int, str]]:
         return detect_toc_bounds(lines)
 
-    def _llm_extract_toc_headings(self, toc_text: str) -> List[Dict[str, str]]:
+    def _llm_extract_toc_headings(self, toc_text: str) -> List[HeadingItem]:
         sample = (toc_text or "").strip()
         if not sample:
             return []
@@ -57,7 +60,7 @@ class AdaptiveSplitter(Splitter):
                 ("user", user_prompt),
             ])
             arr = parse_json_array(getattr(msg, "content", "") or "")
-            out: List[Dict[str, str]] = []
+            out: List[HeadingItem] = []
             seen = set()
             for h in arr:
                 num = str(h.get("number", "")).strip()
@@ -68,7 +71,7 @@ class AdaptiveSplitter(Splitter):
                 if key in seen:
                     continue
                 seen.add(key)
-                out.append({"number": num, "title": title})
+                out.append(HeadingItem(number=num, title=title))
             return out
         except Exception:
             return []
@@ -91,7 +94,7 @@ class AdaptiveSplitter(Splitter):
             ]
         ).replace(".....", "").strip()
         rest = "\n".join(lines[:s] + lines[e:])
-        allowed: Optional[List[Dict[str, str]]] = None
+        allowed: Optional[List[HeadingItem]] = None
         if self.use_llm:
             allowed = self._llm_extract_toc_headings(toc_text)
 

@@ -1,7 +1,16 @@
 from typing import List, Dict, Any, Optional
 import re
+from pydantic import BaseModel
 from .splitter_base import Splitter
 from .splitter_utils import normalize_title
+
+
+class HeadingItem(BaseModel):
+    """
+    Represents a heading item with a number and a title.
+    """
+    number: str
+    title: str
 
 
 class HeadingsSplitter(Splitter):
@@ -9,11 +18,68 @@ class HeadingsSplitter(Splitter):
 
     name = "headings"
 
-    def __init__(self, allowed_headings: Optional[List[Dict[str, str]]] = None):
+    def __init__(self, allowed_headings: Optional[List[HeadingItem]] = None):
         self.allowed_headings = allowed_headings or []
+
+    def _scan_with_allowed(self, lines: List[str]) -> List[Dict[str, Any]]:
+        """Strictly scan lines for allowed headings."""
+        heads: List[Dict[str, Any]] = []
+        matchers = []
+        for h in self.allowed_headings:
+            n = str(h.number).strip()
+            t = normalize_title(h.title)
+            if not n:
+                continue
+            # Match number at start of line, followed by separator or end of line
+            # Separators: dot, space, colon, dash, closing paren
+            # We use re.escape to handle dots in number (e.g. "1.1")
+            pat = re.compile(r"^\s*" + re.escape(n) + r"(?=$|[\.\s\:\-\u2013\)])", re.IGNORECASE)
+            matchers.append((pat, t, n, h.title))
+
+        for i, line in enumerate(lines):
+            line_norm = normalize_title(line)
+            for (pat, t_norm, n_raw, t_raw) in matchers:
+                if pat.match(line):
+                    # Check if normalized title is present
+                    if t_norm in line_norm:
+                        heads.append({"index": i, "number": n_raw, "title": t_raw})
+                        break
+        return heads
+
+    def _chunk(self, lines: List[str], heads: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+        if not heads:
+            return [{"content": "\n".join(lines).strip(), "metadata": {"number": "", "title": "", "path": []}}]
+
+        number_to_title: Dict[str, str] = {h["number"]: h["title"] for h in heads}
+        chunks: List[Dict[str, Any]] = []
+
+        ordered = sorted(heads, key=lambda x: x["index"])
+        for idx, h in enumerate(ordered):
+            start = h["index"]
+            end = ordered[idx + 1]["index"] if idx + 1 < len(ordered) else len(lines)
+            content = "\n".join(lines[start:end]).strip()
+            segs = h["number"].split(".")
+            path: List[Dict[str, Any]] = []
+            for j in range(1, len(segs) + 1):
+                key = ".".join(segs[:j])
+                if key in number_to_title:
+                    path.append({"number": key, "title": number_to_title[key]})
+                else:
+                    if j == len(segs):
+                        path.append({"number": key, "title": h["title"]})
+            chunks.append({
+                "content": content,
+                "metadata": {"number": h["number"], "title": h["title"], "path": path},
+            })
+        return chunks
 
     def split(self, text: str) -> List[Dict[str, Any]]:
         lines = (text or "").splitlines()
+
+        if self.allowed_headings:
+            heads = self._scan_with_allowed(lines)
+            return self._chunk(lines, heads)
+
         heading_re = re.compile(r"^\s*(\d+(?:\.\d+)*)(?:\s+|\s*[\-\u2013]\s*)(.+?)\s*$")
         appendix_re = re.compile(r"^\s*(?:Appendix\s+)(\d+|[A-Za-z])(?:\.|\-|\s)+(.+?)\s*$", re.IGNORECASE)
         appendix_letter_re = re.compile(r"^\s*([A-Za-z])(?:\.|\-|\s)+(.+?)\s*$")
@@ -47,13 +113,14 @@ class HeadingsSplitter(Splitter):
         allowed_map: Dict[str, str] = {}
         if self.allowed_headings:
             for h in self.allowed_headings:
-                raw_n = str(h.get("number", "")).strip()
+                # Use attribute access for Pydantic model
+                raw_n = str(h.number).strip()
                 m_app = re.match(r"^\s*Appendix\s+(\d+|[A-Za-z])\s*$", raw_n, flags=re.IGNORECASE)
                 if m_app:
                     n = f"Appendix {norm_num(m_app.group(1).strip().upper())}"
                 else:
                     n = norm_num(raw_n)
-                t = normalize_title(h.get("title", ""))
+                t = normalize_title(h.title)
                 if t:
                     allowed_map[n] = t
                     allowed_pairs.add((n, t))
@@ -159,28 +226,4 @@ class HeadingsSplitter(Splitter):
             final_num = num_norm if current_appendix is None else f"{current_appendix[0]}.{num_norm}"
             heads.append({"index": i, "number": final_num, "title": title})
 
-        if not heads:
-            return [{"content": "\n".join(lines).strip(), "metadata": {"number": "", "title": "", "path": []}}]
-
-        number_to_title: Dict[str, str] = {h["number"]: h["title"] for h in heads}
-        chunks: List[Dict[str, Any]] = []
-
-        ordered = sorted(heads, key=lambda x: x["index"])
-        for idx, h in enumerate(ordered):
-            start = h["index"]
-            end = ordered[idx + 1]["index"] if idx + 1 < len(ordered) else len(lines)
-            content = "\n".join(lines[start:end]).strip()
-            segs = h["number"].split(".")
-            path: List[Dict[str, Any]] = []
-            for j in range(1, len(segs) + 1):
-                key = ".".join(segs[:j])
-                if key in number_to_title:
-                    path.append({"number": key, "title": number_to_title[key]})
-                else:
-                    if j == len(segs):
-                        path.append({"number": key, "title": h["title"]})
-            chunks.append({
-                "content": content,
-                "metadata": {"number": h["number"], "title": h["title"], "path": path},
-            })
-        return chunks
+        return self._chunk(lines, heads)

@@ -1,4 +1,4 @@
-﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿[Setup]
+[Setup]
 AppId=AgenticRAG
 AppName=Agentic RAG
 AppVersion=1.0.0
@@ -16,13 +16,17 @@ UsePreviousAppDir=yes
 AppMutex=AgenticRAGMutex
 DefaultGroupName=Agentic RAG
 DisableProgramGroupPage=yes
+; 安装包图标（必须为 .ico）
+SetupIconFile=assets\icons\appIcon.ico
 
 [Files]
 Source: "web\agui-wpf\AGUI.WPF\bin\Release\net8.0-windows\*"; DestDir: "{app}"; Flags: recursesubdirs createallsubdirs ignoreversion
+; 复制快捷方式图标到安装目录
+Source: "assets\icons\appIcon.ico"; DestDir: "{app}"; Flags: ignoreversion
 [Icons]
-Name: "{commondesktop}\Agentic RAG"; Filename: "{app}\AGUI.WPF.exe"; WorkingDir: "{app}"; Check: IsAdminInstallMode
-Name: "{userdesktop}\Agentic RAG"; Filename: "{app}\AGUI.WPF.exe"; WorkingDir: "{app}"; Check: not IsAdminInstallMode
-Name: "{group}\Agentic RAG"; Filename: "{app}\AGUI.WPF.exe"; WorkingDir: "{app}"
+Name: "{commondesktop}\Agentic RAG"; Filename: "{app}\AGUI.WPF.exe"; WorkingDir: "{app}"; IconFilename: "{app}\appIcon.ico"; Check: IsAdminInstallMode
+Name: "{userdesktop}\Agentic RAG"; Filename: "{app}\AGUI.WPF.exe"; WorkingDir: "{app}"; IconFilename: "{app}\appIcon.ico"; Check: not IsAdminInstallMode
+Name: "{group}\Agentic RAG"; Filename: "{app}\AGUI.WPF.exe"; WorkingDir: "{app}"; IconFilename: "{app}\appIcon.ico"
 
 
 [Code]
@@ -46,9 +50,9 @@ begin
   Result := (Pos(pf, Dir) = 1) or (Pos(pf32, Dir) = 1) or (Pos(pf64, Dir) = 1) or (Pos(windir, Dir) = 1);
 end;
 
-// 鍑芥暟锛氭牴鎹綋鍓嶅畨瑁呮ā寮忚繑鍥為粯璁ゅ畨瑁呯洰锟?
-// 浣滅敤锛氱鐞嗗憳妯″紡锛堜负鎵€鏈変汉瀹夎锛変娇锟?Program Files锛涙櫘閫氭ā寮忥紙涓鸿嚜宸卞畨瑁咃級浣跨敤鐢ㄦ埛鏁版嵁鐩綍
-function GetDefaultDirForMode(): string;
+// 函数：根据当前安装模式返回默认安装目录
+// 说明：作为 {code:GetDefaultDirForMode} 的实现，必须接受一个 string 参数（可忽略）
+function GetDefaultDirForMode(Param: string): string;
 begin
   if IsAdminInstallMode then
     Result := ExpandConstant('{pf}\Agentic RAG')
@@ -134,7 +138,7 @@ procedure InitializeWizard();
 var UninstStr, UninstExe: string; Code: Integer;
 begin
   // 鏍规嵁瀹夎妯″紡璁剧疆榛樿鐩綍锛氱鐞嗗憳妯″紡涓烘墍鏈変汉瀹夎锛屾櫘閫氭ā寮忎负褰撳墠鐢ㄦ埛瀹夎
-  WizardForm.DirEdit.Text := GetDefaultDirForMode();
+  WizardForm.DirEdit.Text := GetDefaultDirForMode('');
 
   if GetUninstallString(UninstStr) then
   begin

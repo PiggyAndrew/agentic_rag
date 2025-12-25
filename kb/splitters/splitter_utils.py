@@ -1,8 +1,6 @@
 from typing import List, Dict, Any, Optional, Tuple
-import os
 import json
 import re
-from langchain_openai import ChatOpenAI
 
 
 def parse_json_array(s: str) -> List[Dict[str, Any]]:
@@ -138,48 +136,3 @@ def detect_toc_bounds(lines: List[str]) -> Optional[Tuple[int, int, str]]:
     if end - start < 3:
         return None
     return (start, end, title or "Table of Contents")
-
-
-def llm_extract_toc_headings(toc_text: str) -> List[Dict[str, str]]:
-    sample = (toc_text or "").strip()
-    if not sample:
-        return []
-    api_key = os.getenv("DEEPSEEK_API_KEY")
-    if not api_key:
-        return []
-    llm = ChatOpenAI(
-        temperature=0,
-        max_retries=2,
-        base_url="https://api.deepseek.com/v1",
-        model="deepseek-chat",
-        api_key=api_key,
-    )
-    sys_prompt = (
-        "你是目录解析器。仅根据下面的目录文本，提取真正的章节条目并输出 JSON 数组。\n"
-        "- 每项结构：{number: '1.2.3', title: '章节标题'}\n"
-        "- 保持顺序，不要包含页码或点线，不要返回除 JSON 外的任何文本。"
-    )
-    user_prompt = (
-        "目录：\n" + sample + "\n\n请仅输出 JSON 数组，字段为 number 与 title。"
-    )
-    try:
-        msg = llm.invoke([
-            ("system", sys_prompt),
-            ("user", user_prompt),
-        ])
-        arr = parse_json_array(getattr(msg, "content", "") or "")
-        out: List[Dict[str, str]] = []
-        seen = set()
-        for h in arr:
-            num = str(h.get("number", "")).strip()
-            title = str(h.get("title", "")).strip()
-            if not title:
-                continue
-            key = (num, normalize_title(title))
-            if key in seen:
-                continue
-            seen.add(key)
-            out.append({"number": num, "title": title})
-        return out
-    except Exception:
-        return []

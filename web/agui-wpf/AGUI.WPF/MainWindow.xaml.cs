@@ -26,7 +26,17 @@ namespace WPF_ArchiPlaning
             _exeProcessService = new ExeProcessService();
             _webMessageService = new WebMessageService();
             InitializeWebView();
+
+            this.Loaded += MainWindow_Loaded;
+            this.Closing += MainWindow_OnClosing; ;
         }
+
+        private void MainWindow_OnClosing(object? sender, System.ComponentModel.CancelEventArgs e)
+        {
+            AppLogger.Info("MainWindow_Closing");
+            _exeProcessService.StopWindPathApiProcess();
+        }
+
         /// <summary>
         /// 窗口加载完成事件处理
         /// </summary>
@@ -45,14 +55,6 @@ namespace WPF_ArchiPlaning
             }
         }
 
-        /// <summary>
-        /// 窗口关闭事件处理
-        /// </summary>
-        private async void MainWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
-        {
-            AppLogger.Info("MainWindow_Closing");
-            _exeProcessService.StopWindPathApiProcess();
-        }
 
         private async void InitializeWebView()
         {

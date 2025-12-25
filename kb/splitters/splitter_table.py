@@ -4,8 +4,6 @@ from typing import List, Dict, Any, Optional, Tuple
 import os
 import re
 
-from langchain_openai import ChatOpenAI
-
 from .splitter_base import Splitter
 from app.prompts import (
     get_table_summary_system_prompt,
@@ -132,6 +130,11 @@ def _llm_summarize_table(
 
     header_text = " | ".join([c for c in (header_cells or []) if c]).strip()
     if not header_text:
+        return ""
+
+    try:
+        from langchain_openai import ChatOpenAI  # 延迟导入，避免在冻结环境中不必要的依赖加载
+    except Exception:
         return ""
 
     llm = ChatOpenAI(

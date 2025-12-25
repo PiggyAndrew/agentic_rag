@@ -304,14 +304,6 @@ def ingest_uploaded_file(kb_id: str, payload: Dict[str, Any]):
     src_path = os.path.join(uploads_dir, name)
     if not os.path.exists(src_path):
         raise HTTPException(status_code=404, detail="文件不存在，请先上传")
-    # 删除未向量化的同名占位，以避免重复
-    try:
-        meta0 = KB_CTRL._load_files(kb_int)
-        for f in list(meta0.get("files", [])):
-            if str(f.get("filename")) == name and str(f.get("status", "")) == "uploaded":
-                KB_CTRL.deleteFile(kb_int, int(f.get("id")))
-    except Exception:
-        pass
     # 选择合适的摄取器
     try:
         from kb.ingestion import ingest_pdf, ingest_excel
