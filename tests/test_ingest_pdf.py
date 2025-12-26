@@ -94,7 +94,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--pdf",
-        default=r"test\\testfiles\\结构的规范BIM Guide for Structural Engineering Ver3.1_Dec23.pdf",
+        default=r"tests\\testfiles\\Attachment E - BIM Guide for Facilities Upkeep_Ver2.0_Jun21-20211007-113450.pdf",
         help="PDF文件路径",
     )
     parser.add_argument("--kb", type=int, default=1, help="知识库ID")

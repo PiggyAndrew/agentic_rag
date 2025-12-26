@@ -1,17 +1,11 @@
 {
   "files": [
     {
-      "id": 18,
-      "filename": "EMSD BIM-AM Standards and Guidelines v2.0.pdf",
-      "chunk_count": 59,
-      "status": "done"
-    },
-    {
-      "id": 19,
+      "id": 26,
       "filename": "Attachment E - BIM Guide for Facilities Upkeep_Ver2.0_Jun21-20211007-113450.pdf",
-      "chunk_count": 26,
+      "chunk_count": 28,
       "status": "done"
     }
   ],
-  "next_id": 20
+  "next_id": 27
 }

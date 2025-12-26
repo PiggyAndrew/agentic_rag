@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from dotenv import load_dotenv
 import os
 
@@ -23,6 +24,12 @@ def create_app() -> FastAPI:
     from backend.api.routers.kb import router as kb_router
     app.include_router(chat_router)
     app.include_router(kb_router)
+
+    # 静态资源挂载：暴露 data/kb 目录用于图片访问
+    # 访问示例：/assets/{kbId}/assets/images/{fileId}/{imageName}
+    kb_assets_dir = os.path.join("data", "kb")
+    os.makedirs(kb_assets_dir, exist_ok=True)
+    app.mount("/assets", StaticFiles(directory=kb_assets_dir), name="kb_assets")
     return app
 
 

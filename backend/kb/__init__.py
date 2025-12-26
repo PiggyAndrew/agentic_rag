@@ -4,7 +4,7 @@ from .knowledge_base import (
     PersistentKnowledgeBaseController,
 )
 from .ingestion import (
-    read_pdf_text,
+    read_pdf_markdown_with_images,
     read_chm_text,
     read_excel_text,
     ingest_pdf,
@@ -16,7 +16,7 @@ __all__ = [
     "FileInfo",
     "FileChunk",
     "PersistentKnowledgeBaseController",
-    "read_pdf_text",
+    "read_pdf_markdown_with_images",
     "read_chm_text",
     "read_excel_text",
     "ingest_pdf",

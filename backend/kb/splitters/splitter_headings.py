@@ -22,7 +22,7 @@ class HeadingsSplitter(Splitter):
         self.allowed_headings = allowed_headings or []
 
     def _scan_with_allowed(self, lines: List[str]) -> List[Dict[str, Any]]:
-        """Strictly scan lines for allowed headings."""
+        """严格在行中扫描匹配允许的编号标题，先匹配编号再匹配标题，兼容 Markdown 前缀与强调标记"""
         heads: List[Dict[str, Any]] = []
         matchers = []
         for h in self.allowed_headings:
@@ -30,17 +30,19 @@ class HeadingsSplitter(Splitter):
             t = normalize_title(h.title)
             if not n:
                 continue
-            # Match number at start of line, followed by separator or end of line
-            # Separators: dot, space, colon, dash, closing paren
-            # We use re.escape to handle dots in number (e.g. "1.1")
-            pat = re.compile(r"^\s*" + re.escape(n) + r"(?=$|[\.\s\:\-\u2013\)])", re.IGNORECASE)
+            # 在整行中查找编号（不再要求行首），使用单词边界提高鲁棒性
+            pat = re.compile(r"\b" + re.escape(n) + r"\b", re.IGNORECASE)
             matchers.append((pat, t, n, h.title))
 
         for i, line in enumerate(lines):
-            line_norm = normalize_title(line)
+            s = (line or "")
+            # 去掉 Markdown 标题前缀与全局强调标记
+            s = re.sub(r"^\s*(?:#{1,6}\s*)", "", s)
+            s = re.sub(r"[\*_]+", "", s)
+            line_norm = normalize_title(s)
             for (pat, t_norm, n_raw, t_raw) in matchers:
-                if pat.match(line):
-                    # Check if normalized title is present
+                # 先匹配编号，再确认标题（归一化后）在行中出现
+                if pat.search(s):
                     if t_norm in line_norm:
                         heads.append({"index": i, "number": n_raw, "title": t_raw})
                         break
@@ -155,8 +157,11 @@ class HeadingsSplitter(Splitter):
 
         for i, raw in enumerate(lines):
             line = raw or ""
+            s = re.sub(r"^\s*(?:#{1,6}\s*)", "", line)
+            s = re.sub(r"^\s*(?:\*\*|\*|_)\s*", "", s)
+            s = re.sub(r"\s*(?:\*\*|\*|_)\s*$", "", s)
 
-            ma = appendix_re.match(line)
+            ma = appendix_re.match(s)
             if ma:
                 a_id = f"Appendix {norm_num(ma.group(1).strip().upper())}"
                 a_title = ma.group(2).strip()
@@ -176,7 +181,7 @@ class HeadingsSplitter(Splitter):
                 last_appendix_segments = None
                 heads.append({"index": i, "number": a_id, "title": a_title})
                 continue
-            mb = appendix_letter_re.match(line)
+            mb = appendix_letter_re.match(s)
             if mb:
                 a_id = norm_num(mb.group(1).strip().upper())
                 a_title = mb.group(2).strip()
@@ -197,16 +202,16 @@ class HeadingsSplitter(Splitter):
                 heads.append({"index": i, "number": a_id, "title": a_title})
                 continue
 
-            m = heading_re.match(line)
+            m = heading_re.match(s)
             if not m:
                 continue
             num_raw = m.group(1).strip()
             title = m.group(2).strip()
             if title.lower() in {"contents", "table of contents", "目录"}:
                 continue
-            if re.match(r"^\s*\d+\)\s+", line):
+            if re.match(r"^\s*\d+\)\s+", s):
                 continue
-            if re.search(r"\b\d{1,5}\s*$", line) and re.search(r"[\.·\-]{3,}", line):
+            if re.search(r"\b\d{1,5}\s*$", s) and re.search(r"[\.·\-]{3,}", s):
                 continue
 
             num_norm = norm_num(num_raw)
