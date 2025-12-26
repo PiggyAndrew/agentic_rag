@@ -22,4 +22,5 @@ dependencies = [
     "charset-normalizer>=3.3.2",
     "python-multipart>=0.0.21",
     "openpyxl>=3.1.5",
+    "pydantic-settings>=2.5.2",
 ]

@@ -1,0 +1,25 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UseWPF>true</UseWPF>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="Resources\appIcon.ico" />
+  </ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="EmbedIO" Version="3.0.0" />
+		<PackageReference Include="Microsoft.Web.WebView2" Version="1.0.3065.39" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Resource Include="Resources\appIcon.ico">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </Resource>
+	</ItemGroup>
+</Project>
