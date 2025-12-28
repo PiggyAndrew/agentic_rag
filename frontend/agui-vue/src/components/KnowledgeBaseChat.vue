@@ -70,6 +70,22 @@ import {
   ToolInput,
   ToolOutput,
 } from "@/components/ai-elements/tool";
+import ChunkViewerDialog from "@/components/ChunkViewerDialog.vue";
+import {
+  InlineCitation,
+  InlineCitationCard,
+  InlineCitationCardBody,
+  InlineCitationCardTrigger,
+  InlineCitationCarousel,
+  InlineCitationCarouselContent,
+  InlineCitationCarouselHeader,
+  InlineCitationCarouselIndex,
+  InlineCitationCarouselItem,
+  InlineCitationCarouselNext,
+  InlineCitationCarouselPrev,
+  InlineCitationSource,
+} from "@/components/ai-elements/inline-citation";
+import { marked } from "marked";
 /**
  * 事件类型：LangChain 原始事件的类封装
  */
@@ -165,6 +181,7 @@ interface MessageCitation {
   chunk_index: number;
   filename: string;
   content: string;
+  metadata?: Record<string, any>;
 }
 
 interface MessageReasoning {
@@ -222,9 +239,182 @@ const kbStore = useKbStore();
 const kbSelectorOpen = ref(false);
 const selectedKbId = ref<string>("");
 
+const apiBase = computed<string>(() => {
+  const raw =
+    (import.meta as any).env?.VITE_API_BASE ||
+    (import.meta as any).env?.VITE_API_URL ||
+    "http://localhost:8000";
+  const s = String(raw).replace(/\/$/, "");
+  if (s.endsWith("/api/chat")) return s.slice(0, -"/api/chat".length);
+  if (s.endsWith("/api")) return s.slice(0, -"/api".length);
+  return s;
+});
+
 const selectedModelData = computed(() =>
   models.find((m) => m.id === modelId.value)
 );
+
+type InlineCiteRef = { fileId: number; chunkIndex: number };
+
+type InlinePart =
+  | { kind: "text"; text: string }
+  | { kind: "cite"; index: number; refs: InlineCiteRef[] };
+
+function latestContent(message: MessageType): string {
+  return message.versions[message.versions.length - 1]?.content || "";
+}
+
+function parseInlineCiteRef(s: string): InlineCiteRef | null {
+  const m = s
+    .trim()
+    .match(
+      /file(?:Id|_id)\s*=\s*(\d+)\s*,\s*chunk(?:Index|_index)\s*=\s*(\d+)/i
+    );
+  if (!m) return null;
+  return { fileId: Number(m[1]), chunkIndex: Number(m[2]) };
+}
+
+function tokenizeInlineCitations(content: string): InlinePart[] {
+  const text = content || "";
+  const out: InlinePart[] = [];
+  let cursor = 0;
+  let idx = 0;
+  while (cursor < text.length) {
+    const start = text.indexOf("〔cite:", cursor);
+    if (start === -1) {
+      out.push({ kind: "text", text: text.slice(cursor) });
+      break;
+    }
+    const end = text.indexOf("〕", start);
+    if (end === -1) {
+      out.push({ kind: "text", text: text.slice(cursor) });
+      break;
+    }
+    if (start > cursor) out.push({ kind: "text", text: text.slice(cursor, start) });
+    const inner = text.slice(start + "〔cite:".length, end);
+    const refs = inner
+      .split(";")
+      .map(parseInlineCiteRef)
+      .filter(Boolean) as InlineCiteRef[];
+    idx += 1;
+    out.push({ kind: "cite", index: idx, refs });
+    cursor = end + 1;
+  }
+  return out;
+}
+
+function renderInlineMarkdown(text: string): string {
+  const r = marked.parseInline(text || "");
+  return typeof r === "string" ? r : "";
+}
+
+function normalizeCitationDescription(s: string): string {
+  const text = (s || "").replace(/[\r\n]+/g, " ").trim();
+  if (text.length <= 240) return text;
+  return text.slice(0, 240) + "...";
+}
+
+function buildChunkUrl(fileId: number, chunkIndex: number): string {
+  const kid = selectedKbId.value || kbStore.selectedKbId || "kb-1";
+  return `${apiBase.value}/api/kb/${kid}/files/f-${fileId}/chunks#chunk=${chunkIndex}`;
+}
+
+function buildCitationItems(message: MessageType, refs: InlineCiteRef[]) {
+  const uniq = new Map<string, InlineCiteRef>();
+  for (const r of refs || []) {
+    const key = `${r.fileId}:${r.chunkIndex}`;
+    if (!uniq.has(key)) uniq.set(key, r);
+  }
+  return Array.from(uniq.values()).map((r) => {
+    const found = message.citations?.find(
+      (c) => Number(c.file_id) === r.fileId && Number(c.chunk_index) === r.chunkIndex
+    );
+    const url = buildChunkUrl(r.fileId, r.chunkIndex);
+    const titleParts: string[] = [];
+    if (found?.filename) titleParts.push(found.filename);
+    titleParts.push(`#${r.chunkIndex}`);
+    if (found?.metadata?.number) titleParts.push(String(found.metadata.number));
+    if (found?.metadata?.title) titleParts.push(String(found.metadata.title));
+    const title = titleParts.join(" ").trim();
+    return {
+      key: `${r.fileId}:${r.chunkIndex}`,
+      title: title || `fileId=${r.fileId} chunkIndex=${r.chunkIndex}`,
+      url,
+      description: normalizeCitationDescription(found?.content || ""),
+    };
+  });
+}
+
+function collectChunksForRefs(message: MessageType, refs: InlineCiteRef[]) {
+  const need = new Set(refs.map((r) => `${r.fileId}:${r.chunkIndex}`));
+  const out: any[] = [];
+  for (const c of message.citations || []) {
+    const key = `${Number(c.file_id)}:${Number(c.chunk_index)}`;
+    if (need.has(key)) {
+      out.push({
+        file_id: Number(c.file_id),
+        chunk_index: Number(c.chunk_index),
+        content: String(c.content || ""),
+        metadata: c.metadata || undefined,
+      });
+    }
+  }
+  return out;
+}
+
+const citationDialogOpen = ref(false);
+const citationDialogChunks = ref<any[]>([]);
+
+function openCitationDialogForRefs(message: MessageType, refs: InlineCiteRef[]) {
+  citationDialogChunks.value = collectChunksForRefs(message, refs);
+  citationDialogOpen.value = true;
+}
+
+function parseToolChunks(output: any): MessageCitation[] {
+  const normalized = normalizeToolOutput(output);
+  const raw = typeof normalized === "string" ? normalized.trim() : normalized;
+  let data: any = raw;
+  if (typeof raw === "string") {
+    try {
+      data = JSON.parse(raw);
+    } catch {
+      return [];
+    }
+  }
+  if (!Array.isArray(data)) return [];
+  const out: MessageCitation[] = [];
+  for (const item of data) {
+    if (!item || typeof item !== "object") continue;
+    const file_id = Number((item as any).file_id ?? (item as any).fileId);
+    const chunk_index = Number((item as any).chunk_index ?? (item as any).chunkIndex);
+    if (!Number.isFinite(file_id) || !Number.isFinite(chunk_index)) continue;
+    out.push({
+      file_id,
+      chunk_index,
+      filename: String((item as any).filename ?? "unknown"),
+      content: String((item as any).content ?? ""),
+      metadata:
+        (item as any).metadata && typeof (item as any).metadata === "object"
+          ? (item as any).metadata
+          : undefined,
+    });
+  }
+  return out;
+}
+
+function upsertMessageCitations(versionId: string, chunks: MessageCitation[]) {
+  if (!chunks || chunks.length === 0) return;
+  const target = messages.value.find((msg) =>
+    msg.versions.some((version) => version.id === versionId)
+  );
+  if (!target) return;
+  const current = target.citations ? [...target.citations] : [];
+  const map = new Map<string, MessageCitation>();
+  for (const c of current) map.set(`${c.file_id}:${c.chunk_index}`, c);
+  for (const c of chunks) map.set(`${c.file_id}:${c.chunk_index}`, c);
+  target.citations = Array.from(map.values());
+  messages.value = [...messages.value];
+}
 
 /**
  * 解析后端原始事件为结构化对象
@@ -429,6 +619,10 @@ async function streamResponse(versionId: string) {
           output: ev.output,
           id: ev.id,
         });
+        if (ev.tool === "read_file_chunks" || ev.tool === "read_file_chunks_multi") {
+          const chunks = parseToolChunks(ev.output);
+          upsertMessageCitations(versionId, chunks);
+        }
       } else if (ev.kind === "on_tool_error") {
         updateStreamingTool(versionId, {
           type: "tool_end",
@@ -656,12 +850,69 @@ watch(
                   </Tool>
 
                   <MessageContent>
-                    <MessageResponse
-                      :content="
-                        message.versions[message.versions.length - 1]
-                          ?.content || ''
+                    <template
+                      v-if="
+                        message.from === 'assistant' &&
+                        latestContent(message).includes('〔cite:')
                       "
-                    />
+                    >
+                      <div class="whitespace-pre-wrap text-sm leading-relaxed">
+                        <template
+                          v-for="(part, pidx) in tokenizeInlineCitations(
+                            latestContent(message)
+                          )"
+                          :key="pidx"
+                        >
+                          <span
+                            v-if="part.kind === 'text'"
+                            v-html="renderInlineMarkdown(part.text)"
+                          />
+                          <InlineCitation v-else class="inline-flex items-center">
+                            <InlineCitationCard>
+                              <InlineCitationCardTrigger
+                                :label="`[${part.index}]`"
+                                :sources="
+                                  buildCitationItems(message, part.refs).map(
+                                    (s) => s.url
+                                  )
+                                "
+                              />
+                              <InlineCitationCardBody>
+                                <InlineCitationCarousel>
+                                  <InlineCitationCarouselHeader>
+                                    <InlineCitationCarouselPrev />
+                                    <InlineCitationCarouselNext />
+                                    <InlineCitationCarouselIndex />
+                                    <ElButton
+                                      size="small"
+                                      type="primary"
+                                      plain
+                                      @click="openCitationDialogForRefs(message, part.refs)"
+                                    >查看全部</ElButton>
+                                  </InlineCitationCarouselHeader>
+                                  <InlineCitationCarouselContent>
+                                    <InlineCitationCarouselItem
+                                      v-for="item in buildCitationItems(
+                                        message,
+                                        part.refs
+                                      )"
+                                      :key="item.key"
+                                    >
+                                      <InlineCitationSource
+                                        :description="item.description"
+                                        :title="item.title"
+                                        :url="item.url"
+                                      />
+                                    </InlineCitationCarouselItem>
+                                  </InlineCitationCarouselContent>
+                                </InlineCitationCarousel>
+                              </InlineCitationCardBody>
+                            </InlineCitationCard>
+                          </InlineCitation>
+                        </template>
+                      </div>
+                    </template>
+                    <MessageResponse v-else :content="latestContent(message)" />
                   </MessageContent>
                 </div>
               </Message>
@@ -835,4 +1086,6 @@ watch(
       </div>
     </div>
   </div>
+
+  <ChunkViewerDialog v-model="citationDialogOpen" :chunks="citationDialogChunks" />
 </template>

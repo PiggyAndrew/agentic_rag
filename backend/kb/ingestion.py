@@ -9,6 +9,44 @@ from .splitters import (
 from .splitters.splitter_table import TableSplitter
 from .knowledge_base import FileInfo
 
+def _server_base() -> str:
+    port = int(os.getenv("PORT", "8000"))
+    return f"http://localhost:{port}"
+
+def _resolve_image_src(src: str, kb_id: int, file_id: int) -> str:
+    s = (src or "").strip()
+    if re.match(r"^https?://", s, flags=re.I):
+        return s
+    normalized = re.sub(r"[\\]+", "/", s)
+    if re.match(r"^[a-zA-Z]:/", normalized) or normalized.lower().startswith("file:///"):
+        path = re.sub(r"^file:///", "", normalized, flags=re.I)
+        m = re.search(r"data/kb/(\d+)/assets/images/(\d+)/(.+)$", path, flags=re.I)
+        if m:
+            kb = m.group(1)
+            fid = m.group(2)
+            name = m.group(3)
+            return f"{_server_base()}/assets/{kb}/assets/images/{fid}/{name}"
+    after_output = None
+    if "output_images/" in normalized:
+        after_output = normalized.split("output_images/")[1] or normalized.split("/")[-1] or normalized
+    else:
+        after_output = normalized.split("/")[-1] or normalized
+    return f"{_server_base()}/assets/{kb_id}/assets/images/{file_id}/{after_output}"
+
+def _rewrite_markdown_image_urls(md: str, kb_id: int, file_id: int) -> str:
+    text = md or ""
+    def _md_repl(m):
+        full = m.group(0)
+        src = m.group(1)
+        return full.replace(src, _resolve_image_src(src, kb_id, file_id))
+    def _html_repl(m):
+        tag = m.group(0)
+        src = m.group(1)
+        return tag.replace(src, _resolve_image_src(src, kb_id, file_id))
+    text = re.sub(r"!\[[^\]]*\]\(([^)]+)\)", _md_repl, text)
+    text = re.sub(r"<img\s+[^>]*src=[\"']([^\"']+)[\"'][^>]*>", _html_repl, text, flags=re.I)
+    return text
+
 def read_pdf_markdown_with_images(pdf_path: str, image_dir: str) -> str:
     """使用 PyMuPDF4LLM 读取 PDF 为 Markdown，并将图片写入指定目录
 
@@ -170,6 +208,7 @@ def ingest_pdf(kb_controller, kb_id: int, pdf_path: str, chunk_size: int = 500, 
 
     assets_dir = os.path.join(kb_controller._kb_dir(kb_id), "assets", "images", str(file_id))
     text = read_pdf_markdown_with_images(pdf_path, assets_dir)
+    text = _rewrite_markdown_image_urls(text, kb_id, file_id)
     use_llm = (
         bool(str(os.getenv("INGEST_USE_LLM_HEADING", "")).lower() in {"1", "true", "yes"})
         if use_llm_headings is None else bool(use_llm_headings)

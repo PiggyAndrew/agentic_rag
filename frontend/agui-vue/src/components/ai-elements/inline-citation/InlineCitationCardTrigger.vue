@@ -7,10 +7,14 @@ import { computed } from 'vue'
 
 const props = defineProps<{
   sources: string[]
+  label?: string
   class?: HTMLAttributes['class']
 }>()
 
 const displayText = computed(() => {
+  if (typeof props.label === 'string' && props.label.trim())
+    return props.label
+
   const firstSource = props.sources[0]
   if (!firstSource)
     return 'unknown'

@@ -3,7 +3,6 @@ import { computed, ref, nextTick } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Document, CopyDocument, Search } from '@element-plus/icons-vue'
 import { StreamMarkdown } from 'streamdown-vue'
-import { useKbStore } from '@/stores/kb'
 
 interface ChunkItem {
   file_id?: number
@@ -30,12 +29,7 @@ const total = computed<number>(() => (props.chunks?.length ?? 0))
 const searchQuery = ref('')
 const activeChunkIndex = ref<number | null>(null)
 
-const kbStore = useKbStore()
-const currentKbId = computed<string>(() => kbStore.selectedKbId || '1')
-const apiBase = computed<string>(() => {
-  const base = (import.meta as any).env?.VITE_API_BASE || (import.meta as any).env?.VITE_API_URL || 'http://localhost:8000'
-  return String(base).replace(/\/$/, '')
-})
+// 后端已统一重写图片URL至静态HTTP路径，这里直接渲染内容
 
 const filteredChunks = computed(() => {
   if (!searchQuery.value) return props.chunks
@@ -46,37 +40,7 @@ const filteredChunks = computed(() => {
   )
 })
 
-/**
- * 将Markdown中的图片链接解析为后端静态HTTP路径
- * - 支持形如 `![](output_images/xxx.jpg)` 的相对路径
- * - 输出为 `file:///d:/Gitspace/agentic_rag/data/kb/{kbId}/assets/images/{fileId}/xxx.jpg`
- */
-function resolveImageSrc(src: string, fileId?: number | string): string {
-  const s = (src || '').trim()
-  if (/^(https?:|file:\/\/)/i.test(s)) return s
-  const normalized = s.replace(/[\\]/g, '/')
-  const afterOutput = normalized.includes('output_images/')
-    ? normalized.split('output_images/')[1] || normalized.split('/').pop() || normalized
-    : normalized.split('/').pop() || normalized
-  const baseDir = `${apiBase.value}/assets/${currentKbId.value}/assets/images/${fileId ?? ''}/`
-  const full = `${baseDir}${afterOutput}`
-  return encodeURI(full)
-}
-
-/**
- * 将片段内容按Markdown渲染前进行预处理
- * - 处理图片Markdown语法与HTML <img> 标签的 src 路径
- */
-function transformMarkdown(md: string, fileId?: number): string {
-  const text = md || ''
-  const replacedMd = text.replace(/!\[[^\]]*\]\(([^)]+)\)/g, (full, src) => {
-    return full.replace(src, resolveImageSrc(src, fileId))
-  })
-  const replacedHtml = replacedMd.replace(/<img\s+[^>]*src=["']([^"']+)["'][^>]*>/gi, (tag, src) => {
-    return tag.replace(src, resolveImageSrc(src, fileId))
-  })
-  return replacedHtml
-}
+// 无需处理图片链接，直接渲染服务器已重写的内容
 
 /**
  * 复制片段内容到剪贴板
@@ -214,7 +178,7 @@ function scrollToChunk(index: number) {
                 <!-- 片段内容 -->
                 <div class="p-5">
                   <StreamMarkdown
-                    :content="transformMarkdown(item.content, item.file_id)"
+                    :content="item.content"
                     :shiki-theme="{ light: 'github-light', dark: 'github-dark' }"
                     class="text-sm leading-relaxed text-gray-700 bg-gray-50 rounded-md p-4 border border-gray-100"
                   />

@@ -20,10 +20,23 @@ class OllamaEmbeddingProvider:
         }
         data = json.dumps(payload).encode("utf-8")
         req = urllib.request.Request(url, data=data, headers={"Content-Type": "application/json"})
-        with urllib.request.urlopen(req, timeout=self._timeout) as resp:
-            body = resp.read()
-        parsed = json.loads(body.decode("utf-8"))
-        # Ollama 返回 { "embeddings": [[...], [...]] }
+        try:
+            with urllib.request.urlopen(req, timeout=self._timeout) as resp:
+                body = resp.read()
+            parsed = json.loads(body.decode("utf-8"))
+        except Exception:
+            if self._model_name == "qwen3-embedding":
+                fb_payload = {
+                    "model": "bge-m3",
+                    "input": inputs,
+                }
+                fb_data = json.dumps(fb_payload).encode("utf-8")
+                fb_req = urllib.request.Request(url, data=fb_data, headers={"Content-Type": "application/json"})
+                with urllib.request.urlopen(fb_req, timeout=self._timeout) as resp:
+                    body = resp.read()
+                parsed = json.loads(body.decode("utf-8"))
+            else:
+                raise
         embs = parsed.get("embeddings") or parsed.get("embedding")
         if not embs:
             raise RuntimeError("Ollama embed API 未返回 embeddings 字段")
@@ -49,12 +62,5 @@ class OllamaEmbeddingProvider:
 
 
 def get_default_embedder():
-    """根据环境变量选择默认嵌入提供器
-
-    - 当 `EMBEDDING_BACKEND=ollama` 时，使用 `OllamaEmbeddingProvider`
-    - 否则使用 `SentenceEmbeddingProvider`
-    """
-    backend = os.getenv("EMBEDDING_BACKEND", "sentence_transformers").lower()
-    if backend == "ollama":
-        return OllamaEmbeddingProvider()
+    backend = os.getenv("EMBEDDING_BACKEND", "ollama").lower()
     return OllamaEmbeddingProvider()

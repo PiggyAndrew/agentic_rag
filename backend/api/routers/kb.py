@@ -1,4 +1,5 @@
 from typing import List, Dict, Any
+import logging
 from fastapi import APIRouter, HTTPException
 
 from backend.api.models import KnowledgeBase, KnowledgeBaseCreate, KnowledgeBaseUpdate, KBFile, KBFileCreate
@@ -6,6 +7,7 @@ from backend.services import kb_service
 
 
 router = APIRouter()
+logger = logging.getLogger(__name__)
 
 
 @router.get("/api/kb", response_model=List[KnowledgeBase])
@@ -78,7 +80,8 @@ def ingest_uploaded_file(kb_id: str, payload: Dict[str, Any]):
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"向量化失败: {e}")
+        logger.exception("kb ingest failed: kb_id=%s filename=%s", kb_id, name)
+        raise HTTPException(status_code=500, detail=f"向量化失败: {type(e).__name__}: {e}")
     return KBFile(**info)
 
 

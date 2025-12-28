@@ -207,7 +207,7 @@ def ingest_uploaded_file(kb_id: str, filename: str) -> Dict[str, Any]:
     src_path = os.path.join(uploads_dir, filename)
     if not os.path.exists(src_path):
         raise FileNotFoundError("文件不存在，请先上传")
-    from kb.ingestion import ingest_pdf, ingest_excel
+    from backend.kb.ingestion import ingest_pdf, ingest_excel
     if lower.endswith(".pdf"):
         info = ingest_pdf(KB_CTRL, kb_int, src_path)
         ftype = "application/pdf"
