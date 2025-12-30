@@ -10,6 +10,13 @@ import os
 import re
 import heapq
 import shutil
+import time
+
+from sqlalchemy import select
+
+from backend.database.sqlite import SqliteSessionManager, get_default_sqlite_manager, init_sqlite_database
+from backend.kb.knowledge_models import KnowledgeChunkORM
+from backend.kb.knowledge_repository import KnowledgeNotFoundError, SqlAlchemyKnowledgeRepository
 
 
 @dataclass
@@ -34,97 +41,163 @@ class FileInfo:
 
 
 class PersistentKnowledgeBaseController:
-    """持久化知识库控制器：基于文件系统存储文件与片段
+    """持久化知识库控制器：元数据与片段持久化到 SQLite，向量索引保留原实现。"""
 
-    - 根目录结构：`data/kb/{kb_id}/`
-      - `files.json`：文件列表与元信息
-      - `chunks/{file_id}.json`：对应文件的片段内容数组
-    """
-
-    def __init__(self, base_dir: str = "data/kb", embedder: Optional[Any] = None):
+    def __init__(
+        self,
+        base_dir: str = "data/kb",
+        embedder: Optional[Any] = None,
+        *,
+        manager: Optional[SqliteSessionManager] = None,
+        repo: Optional[SqlAlchemyKnowledgeRepository] = None,
+    ):
         """初始化控制器并确保基础目录存在"""
         self.base_dir = base_dir
         os.makedirs(self.base_dir, exist_ok=True)
         self._embedder = embedder or get_default_embedder()
         self._vstore = LocalVectorStore(base_dir=self.base_dir)
+        self._manager = manager or get_default_sqlite_manager()
+        init_sqlite_database(manager=self._manager)
+        self._repo = repo or SqlAlchemyKnowledgeRepository(manager=self._manager)
 
     def _kb_dir(self, kb_id: int) -> str:
         """获取指定知识库的根目录路径"""
         return os.path.join(self.base_dir, str(kb_id))
 
-    def _files_path(self, kb_id: int) -> str:
-        """获取文件元信息存储路径"""
-        return os.path.join(self._kb_dir(kb_id), "files.json")
-
-    def _chunks_dir(self, kb_id: int) -> str:
-        """获取片段存储目录路径"""
-        return os.path.join(self._kb_dir(kb_id), "chunks")
-
     def _ensure_kb(self, kb_id: int) -> None:
-        """确保知识库目录与必要文件存在"""
-        kb_dir = self._kb_dir(kb_id)
-        chunks_dir = self._chunks_dir(kb_id)
-        os.makedirs(chunks_dir, exist_ok=True)
-        files_path = self._files_path(kb_id)
-        if not os.path.exists(files_path):
-            with open(files_path, "w", encoding="utf-8") as f:
-                json.dump({"files": [], "next_id": 1}, f, ensure_ascii=False, indent=2)
+        """确保知识库目录与必要资源存在"""
+        os.makedirs(self._kb_dir(kb_id), exist_ok=True)
+        self._ensure_kb_row(kb_id)
 
-    def createKnowledgeBase(self, kb_id: int) -> None:
+    def _ensure_kb_row(self, kb_id: int) -> None:
+        existing = self._repo.get_kb(int(kb_id))
+        if existing is not None:
+            return
+        created_at = int(os.path.getmtime(self._kb_dir(kb_id)) * 1000) if os.path.exists(self._kb_dir(kb_id)) else int(time.time() * 1000)
+        self._repo.create_kb(
+            {
+                "kb_id": int(kb_id),
+                "name": f"知识库 {kb_id}",
+                "description": None,
+                "created_at_ms": created_at,
+                "updated_at_ms": created_at,
+            }
+        )
+
+    def createKnowledgeBase(self, kb_id: int, *, reset_sqlite: bool = True) -> None:
         """创建或重置一个知识库的基础目录与索引"""
         os.makedirs(self._kb_dir(kb_id), exist_ok=True)
-        self._ensure_kb(kb_id)
-        with open(self._files_path(kb_id), "w", encoding="utf-8") as f:
-            json.dump({"files": [], "next_id": 1}, f, ensure_ascii=False, indent=2)
+        if reset_sqlite:
+            try:
+                self._repo.delete_kb(int(kb_id))
+            except KnowledgeNotFoundError:
+                pass
+            self._ensure_kb_row(kb_id)
         self._vstore.clear(kb_id)
 
     def deleteKnowledgeBase(self, kb_id: int) -> None:
         """删除整个知识库目录，包括文件索引、片段与向量存储"""
+        try:
+            self._repo.delete_kb(int(kb_id))
+        except KnowledgeNotFoundError:
+            pass
         shutil.rmtree(self._kb_dir(kb_id), ignore_errors=True)
 
     def _load_files(self, kb_id: int) -> Dict:
         """加载文件列表与下一个可用ID"""
         self._ensure_kb(kb_id)
-        with open(self._files_path(kb_id), "r", encoding="utf-8") as f:
-            return json.load(f)
+        rows = self._repo.list_files(int(kb_id))
+        files = [
+            FileMeta(
+                id=int(r["file_id"]),
+                filename=r["name"],
+                chunk_count=int(r["chunk_count"]),
+                status=str(r.get("status") or "done"),
+            ).to_dict()
+            for r in rows
+        ]
+        next_id = (max([int(f["id"]) for f in files]) + 1) if files else 1
+        return {"files": files, "next_id": next_id}
 
     def _save_files(self, kb_id: int, data: Dict) -> None:
         """保存文件列表与下一个可用ID"""
-        with open(self._files_path(kb_id), "w", encoding="utf-8") as f:
-            json.dump(data, f, ensure_ascii=False, indent=2)
+        self._ensure_kb(kb_id)
+        target = data or {}
+        files = target.get("files") or []
+        wanted_ids: set[int] = set()
+        now_ms = int(time.time() * 1000)
+        for f in files:
+            fid = int(f.get("id"))
+            wanted_ids.add(fid)
+            filename = str(f.get("filename") or "")
+            chunk_count = int(f.get("chunk_count", 0))
+            status = str(f.get("status") or "done")
+            existing = self._repo.get_file(int(kb_id), fid)
+            if existing is None:
+                self._repo.create_file(
+                    int(kb_id),
+                    {
+                        "file_id": fid,
+                        "name": filename,
+                        "mime_type": self._guess_mime_type(filename),
+                        "created_at_ms": now_ms,
+                        "updated_at_ms": now_ms,
+                        "chunk_count": chunk_count,
+                        "status": status,
+                        "source_path": None,
+                    },
+                )
+            else:
+                self._repo.update_file(
+                    int(kb_id),
+                    fid,
+                    {
+                        "name": filename,
+                        "chunk_count": chunk_count,
+                        "status": status,
+                        "updated_at_ms": now_ms,
+                    },
+                )
+
+        existing_ids = {int(r["file_id"]) for r in self._repo.list_files(int(kb_id))}
+        for fid in sorted(existing_ids - wanted_ids):
+            self.deleteFile(kb_id, fid)
 
     def add_file(self, kb_id: int, filename: str, chunk_count: int, status: str = "done") -> FileInfo:
         """新增文件元信息并返回创建后的 `FileInfo`"""
+        self._ensure_kb(kb_id)
         meta = self._load_files(kb_id)
-        file_id = meta.get("next_id", 1)
+        file_id = int(meta.get("next_id", 1))
         info = FileInfo(id=file_id, filename=filename, chunk_count=chunk_count, status=status)
-        meta["files"].append(FileMeta(id=info.id, filename=info.filename, chunk_count=info.chunk_count, status=info.status).to_dict())
-        meta["next_id"] = file_id + 1
-        self._save_files(kb_id, meta)
+        now_ms = int(time.time() * 1000)
+        self._repo.create_file(
+            int(kb_id),
+            {
+                "file_id": int(info.id),
+                "name": info.filename,
+                "mime_type": self._guess_mime_type(info.filename),
+                "created_at_ms": now_ms,
+                "updated_at_ms": now_ms,
+                "chunk_count": int(info.chunk_count),
+                "status": str(info.status),
+                "source_path": None,
+            },
+        )
         return info
 
     def deleteFile(self, kb_id: int, file_id: int) -> bool:
         """删除指定文件的元信息、片段与其向量索引"""
-        meta = self._load_files(kb_id)
-        files = meta.get("files", [])
-        new_files = [f for f in files if int(f.get("id")) != int(file_id)]
-        if len(new_files) == len(files):
+        self._ensure_kb(kb_id)
+        existing = self._repo.get_file(int(kb_id), int(file_id))
+        if existing is None:
             return False
-        meta["files"] = new_files
-        self._save_files(kb_id, meta)
-        chunk_path = os.path.join(self._chunks_dir(kb_id), f"{int(file_id)}.json")
-        if os.path.exists(chunk_path):
-            os.remove(chunk_path)
+        self._repo.delete_file(int(kb_id), int(file_id))
         self._vstore.delete_items(kb_id, {"file_id": int(file_id)})
         return True
 
     def save_chunks(self, kb_id: int, file_id: int, chunks: List[Any]) -> None:
-        """将片段内容持久化到 `chunks/{file_id}.json`
-
-        - 支持字符串片段或包含 `content` 与可选 `metadata` 的字典
-        """
+        """将片段内容持久化到 SQLite，并同步向量索引。"""
         self._ensure_kb(kb_id)
-        path = os.path.join(self._chunks_dir(kb_id), f"{file_id}.json")
         texts: List[str] = []
         normalized: List[Dict[str, Any]] = []
         vitems: List[Dict[str, Any]] = []
@@ -184,8 +257,19 @@ class PersistentKnowledgeBaseController:
         except Exception:
             # 失败时跳过嵌入，不影响片段持久化
             pass
-        with open(path, "w", encoding="utf-8") as f:
-            json.dump(normalized, f, ensure_ascii=False, indent=2)
+        now_ms = int(time.time() * 1000)
+        payload: List[Dict[str, Any]] = []
+        for r in normalized:
+            payload.append(
+                {
+                    "chunk_index": int(r.get("chunk_index")),
+                    "content": str(r.get("content", "")),
+                    "metadata": r.get("metadata"),
+                    "created_at_ms": now_ms,
+                    "updated_at_ms": now_ms,
+                }
+            )
+        self._repo.upsert_chunks(int(kb_id), int(file_id), payload)
         try:
             # 仅追加有嵌入的条目，避免全部因嵌入失败而不写入向量库
             vitems_embedded = [vi for vi in vitems if "embedding" in vi]
@@ -206,20 +290,19 @@ class PersistentKnowledgeBaseController:
 
     def _load_file_chunks(self, kb_id: int, file_id: int) -> List[FileChunk]:
         """加载某个文件的全部片段为 `FileChunk` 列表"""
-        path = os.path.join(self._chunks_dir(kb_id), f"{file_id}.json")
-        if not os.path.exists(path):
-            return []
-        with open(path, "r", encoding="utf-8") as f:
-            raw = json.load(f)
+        self._ensure_kb(kb_id)
+        rows = self._repo.list_chunks(int(kb_id), int(file_id))
         out: List[FileChunk] = []
-        for r in raw:
-            out.append(FileChunk(
-                file_id=r.get("file_id"),
-                chunk_index=r.get("chunk_index"),
-                content=r.get("content", ""),
-                metadata=r.get("metadata"),
-                embedding=r.get("embedding"),
-            ))
+        for r in rows:
+            out.append(
+                FileChunk(
+                    file_id=int(r.get("file_id") or file_id),
+                    chunk_index=int(r.get("chunk_index") or 0),
+                    content=str(r.get("content", "") or ""),
+                    metadata=r.get("metadata"),
+                    embedding=None,
+                )
+            )
         return out
 
     def _tokenize_query_for_keyword_search(self, query: str) -> List[str]:
@@ -249,12 +332,9 @@ class PersistentKnowledgeBaseController:
         tokens = self._tokenize_query_for_keyword_search(q)
         if not tokens:
             return []
-
-        meta = self._load_files(kb_id)
-        name_map = {int(f["id"]): f["filename"] for f in meta.get("files", [])}
-        chunks_dir = self._chunks_dir(kb_id)
-        if not os.path.exists(chunks_dir):
-            return []
+        self._ensure_kb(kb_id)
+        file_rows = self._repo.list_files(int(kb_id))
+        name_map = {int(r["file_id"]): str(r["name"]) for r in file_rows}
 
         exclude_set: set[Tuple[int, int]] = exclude or set()
         heap: List[Tuple[float, int, int, Dict[str, Any]]] = []
@@ -264,60 +344,65 @@ class PersistentKnowledgeBaseController:
         token_lowers = [t.lower() for t in tokens]
         is_ascii = [bool(re.fullmatch(r"[A-Za-z0-9_]+", t)) for t in tokens]
 
-        for fname in os.listdir(chunks_dir):
-            if not fname.endswith(".json"):
+        with self._manager.session_scope() as session:
+            rows = session.execute(select(KnowledgeChunkORM).where(KnowledgeChunkORM.kb_id == int(kb_id))).scalars().all()
+        for r in rows:
+            fid = int(r.file_id)
+            idx = int(r.chunk_index)
+            if (fid, idx) in exclude_set:
                 continue
-            fpath = os.path.join(chunks_dir, fname)
-            try:
-                with open(fpath, "r", encoding="utf-8") as f:
-                    raw = json.load(f) or []
-            except Exception:
+            content = str(r.content or "")
+            if not content.strip():
                 continue
-            for r in raw:
-                try:
-                    fid = int(r.get("file_id"))
-                    idx = int(r.get("chunk_index"))
-                except Exception:
-                    continue
-                if (fid, idx) in exclude_set:
-                    continue
-                content = str(r.get("content", "") or "")
-                if not content.strip():
-                    continue
-                content_lower = content.lower()
+            content_lower = content.lower()
 
-                score = 0.0
-                for i, t in enumerate(tokens):
-                    if is_ascii[i]:
-                        c = content_lower.count(token_lowers[i])
-                    else:
-                        c = content.count(t)
-                    score += float(min(c, 3))
-                if q_lower and q_lower in content_lower:
-                    score += 5.0
-                if score <= 0:
-                    continue
-
-                preview = (content[:200] + "...") if len(content) > 200 else content
-                item = {
-                    "file_id": fid,
-                    "chunk_index": idx,
-                    "filename": name_map.get(fid, "unknown"),
-                    "score": score,
-                    "preview": preview,
-                    "metadata": r.get("metadata"),
-                }
-
-                counter += 1
-                key = (score, -len(content), counter, item)
-                if len(heap) < int(top_k):
-                    heapq.heappush(heap, key)
+            score = 0.0
+            for i, t in enumerate(tokens):
+                if is_ascii[i]:
+                    c = content_lower.count(token_lowers[i])
                 else:
-                    if key > heap[0]:
-                        heapq.heapreplace(heap, key)
+                    c = content.count(t)
+                score += float(min(c, 3))
+            if q_lower and q_lower in content_lower:
+                score += 5.0
+            if score <= 0:
+                continue
+
+            preview = (content[:200] + "...") if len(content) > 200 else content
+            metadata = None
+            if r.metadata_json:
+                try:
+                    metadata = json.loads(r.metadata_json)
+                except Exception:
+                    metadata = r.metadata_json
+
+            item = {
+                "file_id": fid,
+                "chunk_index": idx,
+                "filename": name_map.get(fid, "unknown"),
+                "score": score,
+                "preview": preview,
+                "metadata": metadata,
+            }
+
+            counter += 1
+            key = (score, -len(content), counter, item)
+            if len(heap) < int(top_k):
+                heapq.heappush(heap, key)
+            else:
+                if key > heap[0]:
+                    heapq.heapreplace(heap, key)
 
         heap.sort(reverse=True)
         return [it for _, __, ___, it in heap]
+
+    def _guess_mime_type(self, filename: str) -> str:
+        lower = (filename or "").lower()
+        if lower.endswith(".pdf"):
+            return "application/pdf"
+        if lower.endswith(".xlsx"):
+            return "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        return "application/octet-stream"
 
     def search(self, kb_id: int, query: str) -> List[Dict]:
         """混合召回：语义检索 5 条 + 关键词检索 5 条，合并后 rerank 输出 8 条。

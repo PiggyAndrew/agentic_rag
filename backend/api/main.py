@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from dotenv import load_dotenv
+from contextlib import asynccontextmanager
 import os
 
 
@@ -10,7 +11,15 @@ def create_app() -> FastAPI:
     os.environ.setdefault("OTEL_PYTHON_DISABLED", "true")
     os.environ.setdefault("LANGCHAIN_TRACING_V2", "false")
     load_dotenv()
-    app = FastAPI()
+
+    @asynccontextmanager
+    async def lifespan(_: FastAPI):
+        from backend.database.sqlite import init_sqlite_database
+
+        init_sqlite_database()
+        yield
+
+    app = FastAPI(lifespan=lifespan)
     app.add_middleware(
         CORSMiddleware,
         allow_origins=["*"],

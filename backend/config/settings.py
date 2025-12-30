@@ -3,7 +3,11 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
     """应用配置，集中管理环境变量与默认值"""
-    DEEPSEEK_API_KEY: str
+    DEEPSEEK_API_KEY: str = ""
+
+    KB_SQLITE_URL: str = "sqlite:///data/kb/knowledge.sqlite3"
+    KB_SQLITE_ECHO: bool = False
+    KB_SQLITE_MIGRATIONS_DIR: str = "backend/database/migrations"
 
     model_config = SettingsConfigDict(env_file=".env", env_prefix="", extra="ignore")
 

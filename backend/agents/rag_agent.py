@@ -8,7 +8,7 @@ from langchain.agents.middleware import (
     ToolRetryMiddleware,
 )
 
-from backend.tools.runtime import build_tools, build_tools_multi
+from backend.tools.runtime import build_tools
 from backend.prompts.system import get_system_prompt
 from backend.kb.knowledge_base import PersistentKnowledgeBaseController
 from backend.config.settings import get_settings
