@@ -2,10 +2,12 @@ import os
 from fastapi import FastAPI
 import uvicorn
 from backend.api.main import create_app as create_api_app
+from backend.config.settings import configure_logging
 
 
 def create_app() -> FastAPI:
-    """创建 FastAPI 应用（恢复原有服务入口，不集成 CopilotKit）"""
+    """创建 FastAPI 应用并初始化日志"""
+    configure_logging()
     return create_api_app()
 
 

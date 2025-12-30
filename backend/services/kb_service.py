@@ -219,9 +219,11 @@ def ingest_uploaded_file(kb_id: str, filename: str) -> Dict[str, Any]:
     meta = KB_CTRL._load_files(kb_int)
     files = meta.get("files", [])
     chunk_count = 0
+    status = "uploaded"
     for f in files:
         if int(f.get("id")) == int(info.id):
             chunk_count = int(f.get("chunk_count", 0))
+            status = str(f.get("status", status))
             break
     return {
         "id": f"f-{info.id}",
@@ -230,7 +232,7 @@ def ingest_uploaded_file(kb_id: str, filename: str) -> Dict[str, Any]:
         "type": ftype,
         "createdAt": now_ts(),
         "chunkCount": chunk_count,
-        "status": "done",
+        "status": status,
     }
 
 

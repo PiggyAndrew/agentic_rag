@@ -10,12 +10,12 @@ REM 3) Compile Inno Setup installer
 
 REM Directory Variables
 set "ROOT=D:\Gitspace\agentic_rag"
-set "VUE_DIR=%ROOT%\web\agui-vue"
-set "WPF_DIR=%ROOT%\web\agui-wpf\AGUI.WPF\bin\Release\net8.0-windows"
-set "ISS_PATH=%ROOT%\installer.iss"
+set "VUE_DIR=%ROOT%\frontend\agui-vue"
+set "WPF_DIR=%ROOT%\frontend\agui-wpf\AGUI.WPF\bin\Release\net8.0-windows"
+set "ISS_PATH=%ROOT%\setup\installer.iss"
 
 REM Step 1: Build Frontend
-echo [1/3] Building Frontend: %VUE_DIR%
+echo [1/4] Building Frontend: %VUE_DIR%
 pushd "%VUE_DIR%" || (echo Error: Cannot enter directory %VUE_DIR% & pause & exit /b 1)
 if not exist package.json (
   echo Error: package.json not found
@@ -33,7 +33,7 @@ if errorlevel 1 (
 popd
 
 REM Step 2: Build Python backend (cx_Freeze)
-echo [2/4] Building Python backend: %ROOT%\setup.py
+echo [2/4] Building Python backend: %ROOT%\setup\setup.py
 pushd "%ROOT%" || (echo Error: Cannot enter directory %ROOT% & pause & exit /b 1)
 rem Prefer using uv virtual environment if available
 where uv >nul 2>&1
@@ -67,10 +67,10 @@ if errorlevel 1 (
     pause
     exit /b 1
   ) else (
-    py -3 setup.py build
+    py -3 setup\setup.py build
   )
 ) else (
-  python setup.py build
+  python setup\setup.py build
 )
 if errorlevel 1 (
   echo Error: Python backend build failed
@@ -88,9 +88,8 @@ if not exist "%VUE_DIR%\dist" (
   exit /b 1
 )
 if not exist "%WPF_DIR%" (
-  echo Error: WPF target directory not found: %WPF_DIR%
-  pause
-  exit /b 1
+  echo WPF target directory not found, creating: %WPF_DIR%
+  mkdir "%WPF_DIR%"
 )
 if not exist "%WPF_DIR%\dist" mkdir "%WPF_DIR%\dist"
 robocopy "%VUE_DIR%\dist" "%WPF_DIR%\dist" /E /PURGE
@@ -98,14 +97,18 @@ set "ROBO_EXIT=%ERRORLEVEL%"
 echo Robocopy dist exit code: %ROBO_EXIT%
 
 REM Copy Python build output (exe + libs) without purge
-set "PY_BUILD=%ROOT%\build\exe.win-amd64-3.13"
-if exist "%PY_BUILD%" (
-  echo Copying Python backend from %PY_BUILD% to %WPF_DIR%
-  robocopy "%PY_BUILD%" "%WPF_DIR%" /E
+set "PY_BUILD=%ROOT%\build"
+set "PY_EXE_DIR="
+for /d %%D in ("%PY_BUILD%\exe.win-amd64-*") do (
+  set "PY_EXE_DIR=%%~fD"
+)
+if defined PY_EXE_DIR (
+  echo Copying Python backend from %PY_EXE_DIR% to %WPF_DIR%
+  robocopy "%PY_EXE_DIR%" "%WPF_DIR%" /E
   set "ROBO_EXIT2=%ERRORLEVEL%"
   echo Robocopy backend exit code: %ROBO_EXIT2%
 ) else (
-  echo Warning: Python build output not found: %PY_BUILD%
+  echo Warning: Python build output directory not found under %PY_BUILD%
 )
 
 REM Step 4: Compile Installer

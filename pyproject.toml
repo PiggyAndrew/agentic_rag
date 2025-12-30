@@ -26,4 +26,5 @@ dependencies = [
     "pymupdf4llm>=0.2.7",
     "langchain-community>=0.4.1",
     "chromadb>=1.4.0",
+    "dashscope>=1.25.5",
 ]

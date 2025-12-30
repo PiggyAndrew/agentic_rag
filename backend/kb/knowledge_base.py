@@ -193,6 +193,23 @@ class PersistentKnowledgeBaseController:
                 # 先删除旧的向量数据，支持重新解析
                 self._vstore.delete_items(kb_id, {"file_id": int(file_id)})
                 self._vstore.add_items(kb_id, vitems_embedded)
+                # 更新文件状态为已完成向量化
+                meta = self._load_files(kb_id)
+                for f in meta.get("files", []):
+                    if int(f.get("id")) == int(file_id):
+                        f["status"] = "vectorized"
+                        f["chunk_count"] = len(normalized)
+                        break
+                self._save_files(kb_id, meta)
+            else:
+                # 未产生嵌入，仅完成分割
+                meta = self._load_files(kb_id)
+                for f in meta.get("files", []):
+                    if int(f.get("id")) == int(file_id):
+                        f["status"] = "chunked"
+                        f["chunk_count"] = len(normalized)
+                        break
+                self._save_files(kb_id, meta)
         except Exception:
             pass
 
