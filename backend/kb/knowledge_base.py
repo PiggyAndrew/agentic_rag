@@ -354,7 +354,7 @@ class PersistentKnowledgeBaseController:
 
         combined: List[Dict[str, Any]] = []
         combined.extend(semantic)
-        combined.extend(keyword)
+        # combined.extend(keyword)
         if not combined:
             return []
 
@@ -370,7 +370,7 @@ class PersistentKnowledgeBaseController:
         def _load_content(fid: int, idx: int) -> str:
             return content_map.get((fid, idx), "")
 
-        return reranker.rerank(q, combined, _load_content, top_k=8)
+        return reranker.rerank(q, combined, _load_content, top_k=5)
 
     def getFilesMeta(self, kb_id: int, file_ids: List[int]) -> List[Dict]:
         """根据文件ID数组返回对应的元信息"""

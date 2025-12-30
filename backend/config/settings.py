@@ -1,13 +1,26 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
-import logging
-from logging import handlers
 import os
+from enum import Enum
+
+
+class AppEnv(str, Enum):
+    """环境枚举，用于区分开发与生产模式"""
+    development = "development"
+    production = "production"
+
+
+class EmbeddingBackend(str, Enum):
+    """嵌入后端枚举，用于选择具体提供者"""
+    ollama = "ollama"
+    dashscope = "dashscope"
 
 
 class Settings(BaseSettings):
     """应用配置，集中管理环境变量与默认值"""
     DEEPSEEK_API_KEY: str
 
+    APP_ENV: AppEnv = os.getenv("APP_ENV", AppEnv.development)
+    EMBEDDING_BACKEND: EmbeddingBackend | None = None
     LOG_DIR: str = "logs"
     LOG_FILE: str = "app.log"
     LOG_LEVEL: str = "INFO"
@@ -28,37 +41,18 @@ def get_settings() -> Settings:
     return _settings
 
 
-def configure_logging() -> None:
-    """配置全局日志文件与控制台输出"""
+# 日志配置已迁移至 backend.config.logging.configure_logging
+
+
+def resolve_embedding_backend() -> EmbeddingBackend:
+    """根据 APP_ENV 与显式配置选择嵌入后端
+
+    - 若 EMBEDDING_BACKEND 明确设置则优先使用
+    - 否则 production → dashscope，其他 → ollama
+    """
     s = get_settings()
-    os.makedirs(s.LOG_DIR, exist_ok=True)
-    log_path = os.path.join(s.LOG_DIR, s.LOG_FILE)
-
-    root = logging.getLogger()
-    level = getattr(logging, (s.LOG_LEVEL or "INFO").upper(), logging.INFO)
-
-    if root.handlers:
-        for h in root.handlers:
-            h.setLevel(level)
-        root.setLevel(level)
-        return
-
-    root.setLevel(level)
-    fmt = logging.Formatter("%(asctime)s %(levelname)s %(name)s: %(message)s")
-
-    fh = handlers.RotatingFileHandler(
-        log_path,
-        maxBytes=int(s.LOG_MAX_BYTES),
-        backupCount=int(s.LOG_BACKUP_COUNT),
-        encoding="utf-8",
-    )
-    fh.setLevel(level)
-    fh.setFormatter(fmt)
-
-    ch = logging.StreamHandler()
-    ch.setLevel(level)
-    ch.setFormatter(fmt)
-
-    root.addHandler(fh)
-    root.addHandler(ch)
+    if s.EMBEDDING_BACKEND:
+        return s.EMBEDDING_BACKEND
+    env = s.APP_ENV or AppEnv.development
+    return EmbeddingBackend.dashscope if env == AppEnv.production else EmbeddingBackend.ollama
 

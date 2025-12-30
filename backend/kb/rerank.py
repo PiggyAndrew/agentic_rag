@@ -1,5 +1,8 @@
 from typing import List, Dict, Any, Callable, Optional
 import os
+import logging
+import numpy as np
+from backend.kb.embeddings import OllamaEmbeddingProvider
 
 
 def _truthy(s: Optional[str]) -> bool:
@@ -34,29 +37,27 @@ class NoopReranker(Reranker):
         return initial[:top_k]
 
 
-class CrossEncoderReranker(Reranker):
-    """基于 sentence-transformers CrossEncoder 的重排实现。"""
+class OllamaReranker(Reranker):
+    """基于 Ollama embeddings 的重排实现（qllama/bge-reranker-v2-m3）"""
 
-    def __init__(self, model_name: Optional[str] = None, pre_k: Optional[int] = None):
-        self.model_name = model_name or os.getenv("KB_RERANK_MODEL", "dengcao/Qwen3-Reranker-8B:Q3_K_M")
+    def __init__(self, model_name: Optional[str] = None, base_url: Optional[str] = None, pre_k: Optional[int] = None):
+        self.model_name = model_name or os.getenv("KB_RERANK_MODEL", "qllama/bge-reranker-v2-m3")
         self.pre_k = int(pre_k or os.getenv("KB_RERANK_PRE_K", "20"))
-        self._model = None
-
-    def _ensure_model(self):
-        if self._model is None:
-            from sentence_transformers import CrossEncoder  # type: ignore
-            self._model = CrossEncoder(self.model_name)
+        self._embedder = OllamaEmbeddingProvider(
+            base_url=base_url or os.getenv("OLLAMA_BASE_URL", "http://localhost:11434"),
+            model_name=self.model_name,
+        )
 
     def rerank(self, query: str, initial: List[Dict[str, Any]], load_content: Callable[[int, int], str], top_k: int = 5) -> List[Dict[str, Any]]:
+        """对候选进行重排并返回前 top_k 结果"""
+        logger = logging.getLogger(__name__)
+        logger.debug("Rerank start (Ollama): model=%s, initial=%d, top_k=%d", self.model_name, len(initial or []), top_k)
         if not initial:
+            logger.info("Rerank skipped: empty initial candidates")
             return []
-        try:
-            self._ensure_model()
-        except Exception:
-            # 模型不可用则直接回退初始结果
-            return initial[:top_k]
 
-        pairs = []
+        # 构造文档内容
+        contents: List[str] = []
         keep_idx: List[int] = []
         for i, r in enumerate(initial):
             fid = int(r.get("file_id"))
@@ -64,14 +65,25 @@ class CrossEncoderReranker(Reranker):
             content = load_content(fid, idx) or r.get("preview", "")
             if not content:
                 continue
-            pairs.append((query, content))
+            contents.append(content)
             keep_idx.append(i)
-        if not pairs:
+        if not contents:
+            logger.info("Rerank skipped: no content built")
             return initial[:top_k]
+        logger.debug("Rerank contents ready: count=%d, kept=%d, skipped=%d", len(contents), len(keep_idx), len(initial) - len(keep_idx))
 
         try:
-            scores = self._model.predict(pairs)
+            q_vec = self._embedder.embed_text(query)
+            d_mat = self._embedder.embed_texts(contents)
         except Exception:
+            logger.exception("Rerank embedding failed: model=%s, count=%d", self.model_name, len(contents))
+            return initial[:top_k]
+
+        # 计算余弦相似度（embedder 已标准化，可用点乘）
+        try:
+            scores = (d_mat @ q_vec).tolist()
+        except Exception:
+            logger.exception("Rerank score compute failed: shapes=%s", str((d_mat.shape, q_vec.shape)))
             return initial[:top_k]
 
         ranked: List[Dict[str, Any]] = []
@@ -80,7 +92,10 @@ class CrossEncoderReranker(Reranker):
             item["rerank_score"] = float(scores[k])
             ranked.append(item)
         ranked.sort(key=lambda x: x.get("rerank_score", 0.0), reverse=True)
-        return ranked[:top_k]
+        out = ranked[:top_k]
+        top_score = out[0]["rerank_score"] if out else None
+        logger.info("Rerank success (Ollama): model=%s, outputs=%d, top_score=%s", self.model_name, len(out), f"{top_score:.4f}" if isinstance(top_score, float) else str(top_score))
+        return out
 
 
 def get_default_reranker() -> Reranker:
@@ -90,5 +105,13 @@ def get_default_reranker() -> Reranker:
     - 否则，使用 `NoopReranker`。
     """
     if _truthy(os.getenv("KB_RERANK")):
-        return CrossEncoderReranker()
+        logging.getLogger(__name__).info(
+            "Reranker selected: OllamaReranker (model=%s, pre_k=%s)",
+            os.getenv("KB_RERANK_MODEL", "qllama/bge-reranker-v2-m3"),
+            os.getenv("KB_RERANK_PRE_K", "20"),
+        )
+        return OllamaReranker()
+    logging.getLogger(__name__).info(
+        "Reranker selected: NoopReranker (KB_RERANK=%s)", os.getenv("KB_RERANK")
+    )
     return NoopReranker()

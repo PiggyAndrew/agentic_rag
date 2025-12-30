@@ -29,7 +29,7 @@ def create_agentic_rag_system(kb_id: int):
     key = _get_api_key()
     llm = ChatOpenAI(
         temperature=0,
-        max_retries=3,
+        max_retries=5,
         base_url="https://api.deepseek.com/v1",
         model="deepseek-chat",
         api_key=key,
@@ -40,8 +40,8 @@ def create_agentic_rag_system(kb_id: int):
         system_prompt=SYSTEM_PROMPT,
         middleware=[
             ContextEditingMiddleware(),
-            ToolCallLimitMiddleware(thread_limit=20, run_limit=10),
-            ToolRetryMiddleware(max_retries=3, backoff_factor=2.0, initial_delay=1.0),
+            ToolCallLimitMiddleware(thread_limit=20, run_limit=15),
+            ToolRetryMiddleware(max_retries=5, backoff_factor=2.0, initial_delay=1.0),
         ],
     )
     return agent
