@@ -12,7 +12,7 @@ namespace BUD_Sustainable_Building_Designer
     class ExeProcessService
     {
 
-        private Process _windPathApiProcess;
+        private Process _windPathApiProcess=null;
         private readonly string _exeName = "agent_api.exe";
 
         /// <summary>

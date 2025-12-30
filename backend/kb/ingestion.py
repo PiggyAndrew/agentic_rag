@@ -222,7 +222,7 @@ def ingest_pdf(kb_controller, kb_id: int, pdf_path: str, chunk_size: int = 500, 
         else:
             chunks = NormalSplitter(chunk_size=chunk_size, overlap=overlap).split(text)
     record["chunk_count"] = len(chunks)
-    record["status"] = "done"
+    record["status"] = "chunked"
     kb_controller._save_files(kb_id, meta)
     kb_controller.save_chunks(kb_id, file_id=file_id, chunks=chunks)
     return FileInfo(id=file_id, filename=filename, chunk_count=len(chunks), status="done")

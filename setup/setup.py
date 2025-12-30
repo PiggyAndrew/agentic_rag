@@ -13,17 +13,8 @@ build_exe_options = {
         "langchain_core",
         "langchain_openai",
         "langgraph",
-        "app",
-        "backend",
-        "backend.kb",
-        "backend.kb.splitters",
-        "backend.agents",
-        "backend.api",
-        "backend.api.routers",
-        "backend.tools",
-        "backend.config",
-        "backend.protocols",
         "langsmith",
+        "langchain_community",
     ],
     "excludes": [
         "transformers",
@@ -35,6 +26,8 @@ build_exe_options = {
     ],
     "include_files": [
         ".env",
+        ("backend", "backend"),
+        ("data", "data"),
     ],
 }
 
@@ -42,6 +35,6 @@ setup(
     name="agent_api",
     version="1.0",
     description="Agentic RAG API",
-    executables=[Executable("backend/api/main.py", target_name="agent_api.exe")],
+    executables=[Executable("backend/entrypoints/server.py", target_name="agent_api.exe")],
     options={"build_exe": build_exe_options}
 )

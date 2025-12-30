@@ -37,6 +37,17 @@ const chunks = ref<any[]>([])
 const parsingFileIds = ref<Set<string>>(new Set())
 
 /**
+ * 将后端文件状态映射为中文文案与样式
+ */
+function statusMeta(status: string): { text: string; type: 'info' | 'success' | 'warning' | 'danger' } {
+  const s = (status || '').toLowerCase()
+  if (s === 'uploaded') return { text: '未分割', type: 'warning' }
+  if (s === 'chunked') return { text: '已分割', type: 'info' }
+  if (s === 'vectorized' || s === 'done') return { text: '已向量化', type: 'success' }
+  return { text: '未知', type: 'danger' }
+}
+
+/**
  * 加载知识库列表（后端）
  */
 function loadKnowledgeBases(): void {
@@ -312,6 +323,14 @@ function onUploadChange(file: any): void {
               </el-tag>
             </template>
           </el-table-column>
+
+          <el-table-column prop="status" label="状态" width="120">
+            <template #default="{ row }">
+              <el-tag size="small" :type="statusMeta(row.status).type" effect="plain">
+                {{ statusMeta(row.status).text }}
+              </el-tag>
+            </template>
+          </el-table-column>
           
           <el-table-column prop="chunkCount" label="片段数" width="100" align="center">
             <template #default="{ row }">
@@ -336,7 +355,15 @@ function onUploadChange(file: any): void {
                 :loading="parsingFileIds.has(row.id)"
                 :disabled="parsingFileIds.has(row.id)"
               >
-                {{ parsingFileIds.has(row.id) ? '解析中...' : (row.chunkCount > 0 ? '重新解析' : '解析') }}
+                {{
+                  parsingFileIds.has(row.id)
+                    ? '解析中...'
+                    : (row.status === 'uploaded'
+                        ? '解析'
+                        : (row.status === 'chunked'
+                            ? '向量化'
+                            : '重新向量化'))
+                }}
               </el-button>
               <el-button type="danger" size="small" plain text @click="removeFile(row.id)">删除</el-button>
             </template>

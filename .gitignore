@@ -56,11 +56,17 @@ CodeCoverage/
 *.VisualState.xml
 TestResult.xml
 nunit-*.xml
+.env
 
 .venv/
 .langgraph_api/
 .vscode/
 __pycache__/
 [Dd]ata/
-.env
+[Dd]ist/
+[Ll]og/
+[Oo]ut/
 
+
+/setup/Output
+/web/agui-vue/dist

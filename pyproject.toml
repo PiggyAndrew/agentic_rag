@@ -27,4 +27,5 @@ dependencies = [
     "langchain-community>=0.4.1",
     "chromadb>=1.4.0",
     "sqlalchemy>=2.0.45",
+    "dashscope>=1.25.5",
 ]
