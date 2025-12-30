@@ -1,8 +1,5 @@
-from .knowledge_base import (
-    FileInfo,
-    FileChunk,
-    PersistentKnowledgeBaseController,
-)
+from .types import FileChunk, FileInfo
+from .knowledge_base import PersistentKnowledgeBaseController
 from .ingestion import (
     read_pdf_markdown_with_images,
     read_chm_text,

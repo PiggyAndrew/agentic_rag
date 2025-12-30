@@ -7,7 +7,7 @@ ROOT_DIR = os.path.dirname(os.path.dirname(__file__))
 if ROOT_DIR not in sys.path:
     sys.path.insert(0, ROOT_DIR)
 
-from kb import read_excel_text
+from backend.kb.ingestion import read_excel_text
 
 
 def print_summary(text: str, preview_len: int = 500) -> None:

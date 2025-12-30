@@ -28,8 +28,9 @@ class TestPersistentKnowledgeBaseControllerSqlite(unittest.TestCase):
         self.assertFalse(os.path.exists(os.path.join(self._base_dir, "1", "files.json")))
         self.assertFalse(os.path.exists(os.path.join(self._base_dir, "1", "chunks", f"{info.id}.json")))
 
-        meta = self._kb._load_files(1)
-        self.assertEqual(len(meta.get("files") or []), 1)
+        files = self._kb._repo.list_files(1)
+        self.assertEqual(len(files), 1)
+        self.assertEqual(files[0].file_id, info.id)
         chunks = self._kb._load_file_chunks(1, info.id)
         self.assertEqual(len(chunks), 1)
         self.assertEqual(chunks[0].content, "hello")
@@ -37,4 +38,3 @@ class TestPersistentKnowledgeBaseControllerSqlite(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
-

@@ -13,6 +13,13 @@ from backend.kb.knowledge_repository import (
     KnowledgeNotFoundError,
     SqlAlchemyKnowledgeRepository,
 )
+from backend.kb.types import (
+    FileStatus,
+    KnowledgeBaseCreate,
+    KnowledgeBasePatch,
+    KnowledgeFileCreate,
+    KnowledgeFilePatch,
+)
 
 
 def _now_ms() -> int:
@@ -48,17 +55,17 @@ class KnowledgeService:
         for r in rows:
             out.append(
                 {
-                    "id": format_kb_id(int(r["kb_id"])),
-                    "name": r["name"],
-                    "description": r.get("description"),
-                    "createdAt": int(r["created_at_ms"]),
+                    "id": format_kb_id(int(r.kb_id)),
+                    "name": r.name,
+                    "description": r.description,
+                    "createdAt": int(r.created_at_ms),
                 }
             )
         out.sort(key=lambda m: m.get("createdAt", 0), reverse=True)
         return out
 
     def create_kb(self, payload: Dict[str, Any]) -> Dict[str, Any]:
-        existing_ids = [int(r["kb_id"]) for r in self.repo.list_kbs()]
+        existing_ids = [int(r.kb_id) for r in self.repo.list_kbs()]
         start_id = (max(existing_ids) + 1) if existing_ids else 1
         ts = _now_ms()
         name = str(payload.get("name", "")).strip()
@@ -67,13 +74,13 @@ class KnowledgeService:
             try:
                 self.controller.createKnowledgeBase(candidate, reset_sqlite=False)
                 self.repo.create_kb(
-                    {
-                        "kb_id": candidate,
-                        "name": name,
-                        "description": desc,
-                        "created_at_ms": ts,
-                        "updated_at_ms": ts,
-                    }
+                    KnowledgeBaseCreate(
+                        kb_id=candidate,
+                        name=name,
+                        description=desc,
+                        created_at_ms=ts,
+                        updated_at_ms=ts,
+                    )
                 )
                 return {"id": format_kb_id(candidate), "name": name, "description": desc, "createdAt": ts}
             except KnowledgeConflictError:
@@ -84,32 +91,32 @@ class KnowledgeService:
         kb_int = parse_kb_id(kb_id)
         self.controller._ensure_kb(kb_int)
         ts = _now_ms()
-        patch: Dict[str, Any] = {"updated_at_ms": ts}
-        if "name" in payload and payload["name"] is not None:
-            patch["name"] = str(payload["name"]).strip()
-        if "description" in payload:
-            patch["description"] = (str(payload["description"]).strip() or None) if payload["description"] is not None else None
+        patch = KnowledgeBasePatch(
+            name=str(payload["name"]).strip() if ("name" in payload and payload["name"] is not None) else None,
+            description=(str(payload["description"]).strip() or None) if ("description" in payload and payload["description"] is not None) else None,
+            updated_at_ms=ts,
+        )
         try:
             row = self.repo.update_kb(kb_int, patch)
         except KnowledgeNotFoundError:
             created_at = self._disk_kb_created_at(kb_int)
             self.repo.create_kb(
-                {
-                    "kb_id": kb_int,
-                    "name": patch.get("name") or f"知识库 {kb_int}",
-                    "description": patch.get("description"),
-                    "created_at_ms": created_at,
-                    "updated_at_ms": ts,
-                }
+                KnowledgeBaseCreate(
+                    kb_id=kb_int,
+                    name=patch.name or f"知识库 {kb_int}",
+                    description=patch.description,
+                    created_at_ms=created_at,
+                    updated_at_ms=ts,
+                )
             )
             row = self.repo.get_kb(kb_int)
             if row is None:
                 raise KnowledgeNotFoundError(f"知识库不存在: kb_id={kb_int}")
         return {
             "id": format_kb_id(kb_int),
-            "name": row["name"],
-            "description": row.get("description"),
-            "createdAt": int(row["created_at_ms"]),
+            "name": row.name,
+            "description": row.description,
+            "createdAt": int(row.created_at_ms),
         }
 
     def delete_kb(self, kb_id: str) -> None:
@@ -129,13 +136,13 @@ class KnowledgeService:
         for r in rows:
             out.append(
                 {
-                    "id": f"f-{int(r['file_id'])}",
+                    "id": f"f-{int(r.file_id)}",
                     "kbId": format_kb_id(kb_int),
-                    "name": r["name"],
-                    "type": r["mime_type"],
-                    "createdAt": int(r["created_at_ms"]),
-                    "chunkCount": int(r["chunk_count"]),
-                    "status": r["status"],
+                    "name": r.name,
+                    "type": r.mime_type,
+                    "createdAt": int(r.created_at_ms),
+                    "chunkCount": int(r.chunk_count),
+                    "status": str(r.status),
                 }
             )
         return out
@@ -158,30 +165,30 @@ class KnowledgeService:
         rows = self.repo.list_files(kb_int)
         existing_row = None
         for r in rows:
-            if str(r.get("name") or "") == name:
+            if str(r.name or "") == name:
                 existing_row = r
                 break
 
         if existing_row is not None:
-            fid = int(existing_row["file_id"])
+            fid = int(existing_row.file_id)
         else:
-            used_ids = [int(r["file_id"]) for r in rows]
+            used_ids = [int(r.file_id) for r in rows]
             start_id = (max(used_ids) + 1) if used_ids else 1
             fid = start_id
             for candidate in range(start_id, start_id + 50):
                 try:
                     self.repo.create_file(
                         kb_int,
-                        {
-                            "file_id": candidate,
-                            "name": name,
-                            "mime_type": "application/octet-stream",
-                            "created_at_ms": ts,
-                            "updated_at_ms": ts,
-                            "chunk_count": 0,
-                            "status": "uploaded",
-                            "source_path": saved_path,
-                        },
+                        KnowledgeFileCreate(
+                            file_id=candidate,
+                            name=name,
+                            mime_type="application/octet-stream",
+                            created_at_ms=ts,
+                            updated_at_ms=ts,
+                            chunk_count=0,
+                            status=FileStatus.uploaded,
+                            source_path=saved_path,
+                        ),
                     )
                     fid = candidate
                     break
@@ -203,7 +210,7 @@ class KnowledgeService:
             created_at_ms=ts,
             updated_at_ms=ts,
             chunk_count=0,
-            status="uploaded",
+            status=str(FileStatus.uploaded),
             source_path=saved_path,
         )
         return {
@@ -213,7 +220,7 @@ class KnowledgeService:
             "type": mime,
             "createdAt": ts,
             "chunkCount": 0,
-            "status": "uploaded",
+            "status": str(FileStatus.uploaded),
         }
 
     def ingest_uploaded_file(self, kb_id: str, filename: str) -> Dict[str, Any]:
@@ -270,9 +277,9 @@ class KnowledgeService:
             out.append(
                 {
                     "file_id": fid,
-                    "chunk_index": int(r["chunk_index"]),
-                    "content": r["content"],
-                    "metadata": r.get("metadata"),
+                    "chunk_index": int(r.chunk_index),
+                    "content": r.content,
+                    "metadata": (r.metadata.data if r.metadata is not None else None),
                     "embedding": None,
                 }
             )
@@ -307,13 +314,13 @@ class KnowledgeService:
             return
         created_at = self._disk_kb_created_at(kb_int)
         self.repo.create_kb(
-            {
-                "kb_id": kb_int,
-                "name": f"知识库 {kb_int}",
-                "description": None,
-                "created_at_ms": created_at,
-                "updated_at_ms": created_at,
-            }
+            KnowledgeBaseCreate(
+                kb_id=kb_int,
+                name=f"知识库 {kb_int}",
+                description=None,
+                created_at_ms=created_at,
+                updated_at_ms=created_at,
+            )
         )
 
     def _upsert_file_row(
@@ -333,29 +340,29 @@ class KnowledgeService:
         if existing is None:
             self.repo.create_file(
                 kb_int,
-                {
-                    "file_id": file_id,
-                    "name": name,
-                    "mime_type": mime_type,
-                    "created_at_ms": created_at_ms,
-                    "updated_at_ms": updated_at_ms,
-                    "chunk_count": chunk_count,
-                    "status": status,
-                    "source_path": source_path,
-                },
+                KnowledgeFileCreate(
+                    file_id=int(file_id),
+                    name=name,
+                    mime_type=mime_type,
+                    created_at_ms=int(created_at_ms),
+                    updated_at_ms=int(updated_at_ms),
+                    chunk_count=int(chunk_count),
+                    status=FileStatus.coerce(status),
+                    source_path=source_path,
+                ),
             )
         else:
             self.repo.update_file(
                 kb_int,
                 file_id,
-                {
-                    "name": name,
-                    "mime_type": mime_type,
-                    "chunk_count": chunk_count,
-                    "status": status,
-                    "source_path": source_path,
-                    "updated_at_ms": updated_at_ms,
-                },
+                KnowledgeFilePatch(
+                    name=name,
+                    mime_type=mime_type,
+                    chunk_count=chunk_count,
+                    status=FileStatus.coerce(status),
+                    source_path=source_path,
+                    updated_at_ms=updated_at_ms,
+                ),
             )
 
 

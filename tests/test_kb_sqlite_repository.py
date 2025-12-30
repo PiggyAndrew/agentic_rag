@@ -4,6 +4,7 @@ import unittest
 
 from backend.database.sqlite import SqliteSessionManager, init_sqlite_database
 from backend.kb.knowledge_repository import SqlAlchemyKnowledgeRepository
+from backend.kb.types import FileStatus, KnowledgeBaseCreate, KnowledgeBasePatch, KnowledgeChunkUpsert, KnowledgeFileCreate
 
 
 class TestSqliteKnowledgeRepository(unittest.TestCase):
@@ -22,17 +23,17 @@ class TestSqliteKnowledgeRepository(unittest.TestCase):
     def test_kb_crud(self):
         ts = 1700000000000
         created = self._repo.create_kb(
-            {"kb_id": 1, "name": "kb1", "description": None, "created_at_ms": ts, "updated_at_ms": ts}
+            KnowledgeBaseCreate(kb_id=1, name="kb1", description=None, created_at_ms=ts, updated_at_ms=ts)
         )
-        self.assertEqual(created["kb_id"], 1)
-        self.assertEqual(created["name"], "kb1")
+        self.assertEqual(created.kb_id, 1)
+        self.assertEqual(created.name, "kb1")
 
         got = self._repo.get_kb(1)
         self.assertIsNotNone(got)
-        self.assertEqual(got["kb_id"], 1)
+        self.assertEqual(got.kb_id, 1)
 
-        updated = self._repo.update_kb(1, {"name": "kb1-new", "updated_at_ms": ts + 1})
-        self.assertEqual(updated["name"], "kb1-new")
+        updated = self._repo.update_kb(1, KnowledgeBasePatch(name="kb1-new", updated_at_ms=ts + 1))
+        self.assertEqual(updated.name, "kb1-new")
 
         all_kbs = self._repo.list_kbs()
         self.assertEqual(len(all_kbs), 1)
@@ -42,36 +43,37 @@ class TestSqliteKnowledgeRepository(unittest.TestCase):
 
     def test_file_and_chunks(self):
         ts = 1700000000000
-        self._repo.create_kb({"kb_id": 1, "name": "kb1", "description": None, "created_at_ms": ts, "updated_at_ms": ts})
+        self._repo.create_kb(KnowledgeBaseCreate(kb_id=1, name="kb1", description=None, created_at_ms=ts, updated_at_ms=ts))
         f = self._repo.create_file(
             1,
-            {
-                "file_id": 10,
-                "name": "a.pdf",
-                "mime_type": "application/pdf",
-                "created_at_ms": ts,
-                "updated_at_ms": ts,
-                "chunk_count": 0,
-                "status": "uploaded",
-                "source_path": None,
-            },
+            KnowledgeFileCreate(
+                file_id=10,
+                name="a.pdf",
+                mime_type="application/pdf",
+                created_at_ms=ts,
+                updated_at_ms=ts,
+                chunk_count=0,
+                status=FileStatus.uploaded,
+                source_path=None,
+            ),
         )
-        self.assertEqual(f["file_id"], 10)
-        self.assertEqual(f["status"], "uploaded")
+        self.assertEqual(f.file_id, 10)
+        self.assertEqual(f.status, FileStatus.uploaded)
 
         chunks = [
-            {"chunk_index": 0, "content": "hello", "metadata": {"p": 1}, "created_at_ms": ts, "updated_at_ms": ts},
-            {"chunk_index": 1, "content": "world", "metadata": None, "created_at_ms": ts, "updated_at_ms": ts},
+            KnowledgeChunkUpsert(chunk_index=0, content="hello", metadata={"p": 1}, created_at_ms=ts, updated_at_ms=ts),
+            KnowledgeChunkUpsert(chunk_index=1, content="world", metadata=None, created_at_ms=ts, updated_at_ms=ts),
         ]
         self._repo.upsert_chunks(1, 10, chunks)
         got_chunks = self._repo.list_chunks(1, 10)
         self.assertEqual(len(got_chunks), 2)
-        self.assertEqual(got_chunks[0]["chunk_index"], 0)
-        self.assertEqual(got_chunks[0]["metadata"], {"p": 1})
+        self.assertEqual(got_chunks[0].chunk_index, 0)
+        self.assertIsNotNone(got_chunks[0].metadata)
+        self.assertEqual(got_chunks[0].metadata.data, {"p": 1})
 
         file_after = self._repo.get_file(1, 10)
         self.assertIsNotNone(file_after)
-        self.assertEqual(file_after["chunk_count"], 2)
+        self.assertEqual(file_after.chunk_count, 2)
 
         self._repo.delete_file(1, 10)
         self.assertIsNone(self._repo.get_file(1, 10))

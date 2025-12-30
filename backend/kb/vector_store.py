@@ -1,11 +1,41 @@
 import os
 import json
 import shutil
-from typing import List, Dict, Any, Optional
+from abc import ABC, abstractmethod
+from typing import List, Dict, Any, Optional, Protocol, runtime_checkable, Iterable
 import numpy as np
 
 
-class LocalVectorStore:
+@runtime_checkable
+class VectorStore(Protocol):
+    def add_items(self, kb_id: int, items: List[Dict[str, Any]]) -> None: ...
+    def query_embeddings(self, kb_id: int, query_vec: np.ndarray, top_k: int = 5) -> List[Dict[str, Any]]: ...
+    def delete_items(self, kb_id: int, filter: Dict[str, Any]) -> int: ...
+    def clear(self, kb_id: int) -> None: ...
+
+
+class BaseVectorStore(ABC):
+    def __init__(self, base_dir: str = "data/kb"):
+        self.base_dir = base_dir
+
+    @abstractmethod
+    def add_items(self, kb_id: int, items: List[Dict[str, Any]]) -> None:
+        raise NotImplementedError
+
+    @abstractmethod
+    def query_embeddings(self, kb_id: int, query_vec: np.ndarray, top_k: int = 5) -> List[Dict[str, Any]]:
+        raise NotImplementedError
+
+    @abstractmethod
+    def delete_items(self, kb_id: int, filter: Dict[str, Any]) -> int:
+        raise NotImplementedError
+
+    @abstractmethod
+    def clear(self, kb_id: int) -> None:
+        raise NotImplementedError
+
+
+class LocalVectorStore(BaseVectorStore):
     """本地持久化向量存储，基于 numpy 与 json
 
     - 存储位置：`data/kb/{kb_id}/vector_store/`
@@ -14,7 +44,7 @@ class LocalVectorStore:
     """
 
     def __init__(self, base_dir: str = "data/kb"):
-        self.base_dir = base_dir
+        super().__init__(base_dir=base_dir)
 
     def _store_dir(self, kb_id: int) -> str:
         return os.path.join(self.base_dir, str(kb_id), "vector_store")
@@ -155,3 +185,158 @@ class LocalVectorStore:
         dirp = self._store_dir(kb_id)
         if os.path.exists(dirp):
             shutil.rmtree(dirp, ignore_errors=True)
+
+
+class MilvusLiteVectorStore(BaseVectorStore):
+    def __init__(self, base_dir: str = "data/kb", uri: Optional[str] = None):
+        super().__init__(base_dir=base_dir)
+        self._client = None
+        self._uri = uri or os.path.join(self.base_dir, "milvus_lite.db")
+
+    def _get_client(self):
+        if self._client is not None:
+            return self._client
+        try:
+            from pymilvus import MilvusClient
+        except Exception:
+            raise RuntimeError("pymilvus 未安装，请执行: pip install -U pymilvus[milvus-lite]")
+        dirp = os.path.dirname(self._uri)
+        if dirp:
+            os.makedirs(dirp, exist_ok=True)
+        self._client = MilvusClient(self._uri)
+        return self._client
+
+    def _collection_name(self, kb_id: int) -> str:
+        return f"kb_{int(kb_id)}"
+
+    def _ensure_collection(self, kb_id: int, dim: int) -> None:
+        client = self._get_client()
+        name = self._collection_name(kb_id)
+        if not client.has_collection(collection_name=name):
+            client.create_collection(
+                collection_name=name,
+                dimension=int(dim),
+                auto_id=True,
+                metric_type="COSINE",
+                enable_dynamic_field=True,
+            )
+
+    def _iter_hits(self, res: Any) -> Iterable[Any]:
+        if res is None:
+            return []
+        if isinstance(res, list) and res:
+            first = res[0]
+            if isinstance(first, list):
+                return first
+        return []
+
+    def _hit_entity(self, hit: Any) -> Dict[str, Any]:
+        if isinstance(hit, dict):
+            ent = hit.get("entity") or hit.get("fields")
+            if isinstance(ent, dict):
+                return ent
+            return {k: v for k, v in hit.items() if k not in {"id", "distance", "score", "entity", "fields"}}
+        ent = getattr(hit, "entity", None)
+        if isinstance(ent, dict):
+            return ent
+        return {}
+
+    def _hit_score(self, hit: Any) -> float:
+        if isinstance(hit, dict):
+            if hit.get("score") is not None:
+                return float(hit.get("score"))
+            if hit.get("distance") is not None:
+                return float(hit.get("distance"))
+            return 0.0
+        score = getattr(hit, "score", None)
+        if score is not None:
+            return float(score)
+        dist = getattr(hit, "distance", None)
+        if dist is not None:
+            return float(dist)
+        return 0.0
+
+    def add_items(self, kb_id: int, items: List[Dict[str, Any]]) -> None:
+        if not items:
+            return
+        dim = len(items[0].get("embedding") or [])
+        if dim <= 0:
+            return
+        for it in items:
+            emb = it.get("embedding") or []
+            if len(emb) != dim:
+                raise ValueError("同一批次写入的 embedding 维度不一致")
+        client = self._get_client()
+        name = self._collection_name(kb_id)
+        self._ensure_collection(kb_id, dim)
+        data = []
+        for it in items:
+            data.append(
+                {
+                    "vector": list(it.get("embedding") or []),
+                    "file_id": int(it.get("file_id")),
+                    "chunk_index": int(it.get("chunk_index")),
+                    "filename": it.get("filename", ""),
+                    "preview": it.get("preview"),
+                    "metadata": it.get("metadata"),
+                }
+            )
+        client.insert(collection_name=name, data=data)
+
+    def query_embeddings(self, kb_id: int, query_vec: np.ndarray, top_k: int = 5) -> List[Dict[str, Any]]:
+        client = self._get_client()
+        name = self._collection_name(kb_id)
+        if not client.has_collection(collection_name=name):
+            return []
+        q = query_vec.astype(float).tolist()
+        res = client.search(
+            collection_name=name,
+            data=[q],
+            limit=int(top_k),
+            output_fields=["file_id", "chunk_index", "filename", "preview", "metadata"],
+        )
+        out: List[Dict[str, Any]] = []
+        for h in self._iter_hits(res):
+            fields = self._hit_entity(h)
+            score = self._hit_score(h)
+            item = {
+                "file_id": int(fields.get("file_id", -1)),
+                "chunk_index": int(fields.get("chunk_index", -1)),
+                "filename": fields.get("filename", ""),
+                "score": float(score),
+                "preview": fields.get("preview"),
+                "metadata": fields.get("metadata"),
+            }
+            out.append(item)
+        return out
+
+    def delete_items(self, kb_id: int, filter: Dict[str, Any]) -> int:
+        client = self._get_client()
+        name = self._collection_name(kb_id)
+        if not client.has_collection(collection_name=name):
+            return 0
+        clauses: List[str] = []
+        if filter.get("file_id") is not None:
+            clauses.append(f"file_id == {int(filter['file_id'])}")
+        if filter.get("chunk_index") is not None:
+            clauses.append(f"chunk_index == {int(filter['chunk_index'])}")
+        if filter.get("filename") is not None:
+            v = str(filter["filename"]).replace("\"", "\\\"")
+            clauses.append(f"filename == \"{v}\"")
+        if not clauses:
+            return 0
+        flt = " and ".join(clauses)
+        res = client.delete(collection_name=name, filter=flt)
+        if isinstance(res, dict):
+            dc = res.get("delete_count")
+            return int(dc or 0)
+        return int(getattr(res, "delete_count", 0) or 0)
+
+    def clear(self, kb_id: int) -> None:
+        client = self._get_client()
+        name = self._collection_name(kb_id)
+        if client.has_collection(collection_name=name):
+            try:
+                client.drop_collection(collection_name=name)
+            except Exception:
+                pass

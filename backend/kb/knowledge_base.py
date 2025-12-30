@@ -1,10 +1,17 @@
-from dataclasses import dataclass
 from typing import List, Dict, Tuple, Any, Optional
 import numpy as np
 from .embeddings import get_default_embedder
 from .rerank import get_default_reranker, Reranker
-from .vector_store import LocalVectorStore
-from .types import FileMeta
+from .vector_store import LocalVectorStore, MilvusLiteVectorStore
+from .types import (
+    FileInfo,
+    FileChunk,
+    FileStatus,
+    KnowledgeBaseCreate,
+    KnowledgeChunkUpsert,
+    KnowledgeFileCreate,
+    KnowledgeFilePatch,
+)
 import json
 import os
 import re
@@ -17,28 +24,6 @@ from sqlalchemy import select
 from backend.database.sqlite import SqliteSessionManager, get_default_sqlite_manager, init_sqlite_database
 from backend.kb.knowledge_models import KnowledgeChunkORM
 from backend.kb.knowledge_repository import KnowledgeNotFoundError, SqlAlchemyKnowledgeRepository
-
-
-@dataclass
-class FileChunk:
-    """文件片段数据结构"""
-
-    file_id: int
-    chunk_index: int
-    content: str
-    metadata: Optional[Dict[str, Any]] = None
-    embedding: Optional[List[float]] = None
-
-
-@dataclass
-class FileInfo:
-    """文件元信息数据结构"""
-
-    id: int
-    filename: str
-    chunk_count: int
-    status: str = "done"
-
 
 class PersistentKnowledgeBaseController:
     """持久化知识库控制器：元数据与片段持久化到 SQLite，向量索引保留原实现。"""
@@ -55,7 +40,11 @@ class PersistentKnowledgeBaseController:
         self.base_dir = base_dir
         os.makedirs(self.base_dir, exist_ok=True)
         self._embedder = embedder or get_default_embedder()
-        self._vstore = LocalVectorStore(base_dir=self.base_dir)
+        try:
+            import pymilvus  # type: ignore
+            self._vstore = MilvusLiteVectorStore(base_dir=self.base_dir)
+        except Exception:
+            self._vstore = LocalVectorStore(base_dir=self.base_dir)
         self._manager = manager or get_default_sqlite_manager()
         init_sqlite_database(manager=self._manager)
         self._repo = repo or SqlAlchemyKnowledgeRepository(manager=self._manager)
@@ -75,13 +64,13 @@ class PersistentKnowledgeBaseController:
             return
         created_at = int(os.path.getmtime(self._kb_dir(kb_id)) * 1000) if os.path.exists(self._kb_dir(kb_id)) else int(time.time() * 1000)
         self._repo.create_kb(
-            {
-                "kb_id": int(kb_id),
-                "name": f"知识库 {kb_id}",
-                "description": None,
-                "created_at_ms": created_at,
-                "updated_at_ms": created_at,
-            }
+            KnowledgeBaseCreate(
+                kb_id=int(kb_id),
+                name=f"知识库 {kb_id}",
+                description=None,
+                created_at_ms=created_at,
+                updated_at_ms=created_at,
+            )
         )
 
     def createKnowledgeBase(self, kb_id: int, *, reset_sqlite: bool = True) -> None:
@@ -103,85 +92,25 @@ class PersistentKnowledgeBaseController:
             pass
         shutil.rmtree(self._kb_dir(kb_id), ignore_errors=True)
 
-    def _load_files(self, kb_id: int) -> Dict:
-        """加载文件列表与下一个可用ID"""
-        self._ensure_kb(kb_id)
-        rows = self._repo.list_files(int(kb_id))
-        files = [
-            FileMeta(
-                id=int(r["file_id"]),
-                filename=r["name"],
-                chunk_count=int(r["chunk_count"]),
-                status=str(r.get("status") or "done"),
-            ).to_dict()
-            for r in rows
-        ]
-        next_id = (max([int(f["id"]) for f in files]) + 1) if files else 1
-        return {"files": files, "next_id": next_id}
-
-    def _save_files(self, kb_id: int, data: Dict) -> None:
-        """保存文件列表与下一个可用ID"""
-        self._ensure_kb(kb_id)
-        target = data or {}
-        files = target.get("files") or []
-        wanted_ids: set[int] = set()
-        now_ms = int(time.time() * 1000)
-        for f in files:
-            fid = int(f.get("id"))
-            wanted_ids.add(fid)
-            filename = str(f.get("filename") or "")
-            chunk_count = int(f.get("chunk_count", 0))
-            status = str(f.get("status") or "done")
-            existing = self._repo.get_file(int(kb_id), fid)
-            if existing is None:
-                self._repo.create_file(
-                    int(kb_id),
-                    {
-                        "file_id": fid,
-                        "name": filename,
-                        "mime_type": self._guess_mime_type(filename),
-                        "created_at_ms": now_ms,
-                        "updated_at_ms": now_ms,
-                        "chunk_count": chunk_count,
-                        "status": status,
-                        "source_path": None,
-                    },
-                )
-            else:
-                self._repo.update_file(
-                    int(kb_id),
-                    fid,
-                    {
-                        "name": filename,
-                        "chunk_count": chunk_count,
-                        "status": status,
-                        "updated_at_ms": now_ms,
-                    },
-                )
-
-        existing_ids = {int(r["file_id"]) for r in self._repo.list_files(int(kb_id))}
-        for fid in sorted(existing_ids - wanted_ids):
-            self.deleteFile(kb_id, fid)
-
-    def add_file(self, kb_id: int, filename: str, chunk_count: int, status: str = "done") -> FileInfo:
+    def add_file(self, kb_id: int, filename: str, chunk_count: int, status: FileStatus | str = FileStatus.done) -> FileInfo:
         """新增文件元信息并返回创建后的 `FileInfo`"""
         self._ensure_kb(kb_id)
-        meta = self._load_files(kb_id)
-        file_id = int(meta.get("next_id", 1))
+        existing_ids = [int(r.file_id) for r in self._repo.list_files(int(kb_id))]
+        file_id = (max(existing_ids) + 1) if existing_ids else 1
         info = FileInfo(id=file_id, filename=filename, chunk_count=chunk_count, status=status)
         now_ms = int(time.time() * 1000)
         self._repo.create_file(
             int(kb_id),
-            {
-                "file_id": int(info.id),
-                "name": info.filename,
-                "mime_type": self._guess_mime_type(info.filename),
-                "created_at_ms": now_ms,
-                "updated_at_ms": now_ms,
-                "chunk_count": int(info.chunk_count),
-                "status": str(info.status),
-                "source_path": None,
-            },
+            KnowledgeFileCreate(
+                file_id=int(info.id),
+                name=info.filename,
+                mime_type=self._guess_mime_type(info.filename),
+                created_at_ms=now_ms,
+                updated_at_ms=now_ms,
+                chunk_count=int(info.chunk_count),
+                status=info.status,
+                source_path=None,
+            ),
         )
         return info
 
@@ -258,16 +187,16 @@ class PersistentKnowledgeBaseController:
             # 失败时跳过嵌入，不影响片段持久化
             pass
         now_ms = int(time.time() * 1000)
-        payload: List[Dict[str, Any]] = []
+        payload: List[KnowledgeChunkUpsert] = []
         for r in normalized:
             payload.append(
-                {
-                    "chunk_index": int(r.get("chunk_index")),
-                    "content": str(r.get("content", "")),
-                    "metadata": r.get("metadata"),
-                    "created_at_ms": now_ms,
-                    "updated_at_ms": now_ms,
-                }
+                KnowledgeChunkUpsert(
+                    chunk_index=int(r.get("chunk_index")),
+                    content=str(r.get("content", "")),
+                    metadata=r.get("metadata"),
+                    created_at_ms=now_ms,
+                    updated_at_ms=now_ms,
+                )
             )
         self._repo.upsert_chunks(int(kb_id), int(file_id), payload)
         try:
@@ -277,33 +206,32 @@ class PersistentKnowledgeBaseController:
                 # 先删除旧的向量数据，支持重新解析
                 self._vstore.delete_items(kb_id, {"file_id": int(file_id)})
                 self._vstore.add_items(kb_id, vitems_embedded)
-                # 更新文件状态为已完成向量化
-                meta = self._load_files(kb_id)
-                for f in meta.get("files", []):
-                    if int(f.get("id")) == int(file_id):
-                        f["status"] = "vectorized"
-                        f["chunk_count"] = len(normalized)
-                        break
-                self._save_files(kb_id, meta)
+                self._repo.update_file(
+                    int(kb_id),
+                    int(file_id),
+                    KnowledgeFilePatch(
+                        chunk_count=len(normalized),
+                        status=FileStatus.vectorized,
+                        updated_at_ms=now_ms,
+                    ),
+                )
             else:
-                # 未产生嵌入，仅完成分割
-                meta = self._load_files(kb_id)
-                for f in meta.get("files", []):
-                    if int(f.get("id")) == int(file_id):
-                        f["status"] = "chunked"
-                        f["chunk_count"] = len(normalized)
-                        break
-                self._save_files(kb_id, meta)
+                self._repo.update_file(
+                    int(kb_id),
+                    int(file_id),
+                    KnowledgeFilePatch(
+                        chunk_count=len(normalized),
+                        status=FileStatus.chunked,
+                        updated_at_ms=now_ms,
+                    ),
+                )
         except Exception:
             pass
 
     def _filename_of(self, kb_id: int, file_id: int) -> str:
         """根据文件ID获取文件名"""
-        meta = self._load_files(kb_id)
-        for f in meta.get("files", []):
-            if int(f["id"]) == int(file_id):
-                return f["filename"]
-        return ""
+        row = self._repo.get_file(int(kb_id), int(file_id))
+        return row.name if row is not None else ""
 
     def _load_file_chunks(self, kb_id: int, file_id: int) -> List[FileChunk]:
         """加载某个文件的全部片段为 `FileChunk` 列表"""
@@ -313,10 +241,10 @@ class PersistentKnowledgeBaseController:
         for r in rows:
             out.append(
                 FileChunk(
-                    file_id=int(r.get("file_id") or file_id),
-                    chunk_index=int(r.get("chunk_index") or 0),
-                    content=str(r.get("content", "") or ""),
-                    metadata=r.get("metadata"),
+                    file_id=int(r.file_id),
+                    chunk_index=int(r.chunk_index),
+                    content=str(r.content or ""),
+                    metadata=r.metadata,
                     embedding=None,
                 )
             )
@@ -351,7 +279,7 @@ class PersistentKnowledgeBaseController:
             return []
         self._ensure_kb(kb_id)
         file_rows = self._repo.list_files(int(kb_id))
-        name_map = {int(r["file_id"]): str(r["name"]) for r in file_rows}
+        name_map = {int(r.file_id): str(r.name) for r in file_rows}
 
         exclude_set: set[Tuple[int, int]] = exclude or set()
         heap: List[Tuple[float, int, int, Dict[str, Any]]] = []
@@ -459,13 +387,21 @@ class PersistentKnowledgeBaseController:
 
     def getFilesMeta(self, kb_id: int, file_ids: List[int]) -> List[Dict]:
         """根据文件ID数组返回对应的元信息"""
-        meta = self._load_files(kb_id)
-        idset = set(int(i) for i in (file_ids or []))
-        res = []
-        for f in meta.get("files", []):
-            if int(f["id"]) in idset:
-                res.append(FileMeta(id=int(f["id"]), filename=f["filename"], chunk_count=int(f["chunk_count"]), status=f.get("status", "done")).to_dict())
-        return res
+        self._ensure_kb(kb_id)
+        idset = {int(i) for i in (file_ids or [])}
+        rows = self._repo.list_files(int(kb_id))
+        out: List[Dict[str, Any]] = []
+        for r in rows:
+            if int(r.file_id) in idset:
+                out.append(
+                    {
+                        "id": int(r.file_id),
+                        "filename": r.name,
+                        "chunk_count": int(r.chunk_count),
+                        "status": str(r.status),
+                    }
+                )
+        return out
 
     def readFileChunks(self, kb_id: int, chunks: List[Dict[str, int]]) -> List[Dict]:
         """读取指定的 `fileId`/`file_id` 与 `chunkIndex`/`chunk_index` 片段内容"""
@@ -491,8 +427,8 @@ class PersistentKnowledgeBaseController:
                 continue
             by_file.setdefault(fid, []).append(idx)
 
-        meta = self._load_files(kb_id)
-        name_map = {int(f["id"]): f["filename"] for f in meta.get("files", [])}
+        rows = self._repo.list_files(int(kb_id))
+        name_map = {int(r.file_id): r.name for r in rows}
         for fid, indices in by_file.items():
             chunks_all = self._load_file_chunks(kb_id, fid)
             want = set(indices)
@@ -505,14 +441,24 @@ class PersistentKnowledgeBaseController:
                         "filename": name_map.get(fid, "unknown"),
                     }
                     if ch.metadata:
-                        item["metadata"] = ch.metadata
+                        item["metadata"] = ch.metadata.data
                     results.append(item)
         return results
 
     def listFilesPaginated(self, kb_id: int, page: int, page_size: int) -> List[Dict]:
         """分页列出文件元信息"""
-        meta = self._load_files(kb_id)
-        files = meta.get("files", [])
+        self._ensure_kb(kb_id)
+        rows = self._repo.list_files(int(kb_id))
         start = page * page_size
         end = start + page_size
-        return [FileMeta(id=int(f["id"]), filename=f["filename"], chunk_count=int(f["chunk_count"]), status=f.get("status", "done")).to_dict() for f in files[start:end]]
+        out: List[Dict[str, Any]] = []
+        for r in rows[start:end]:
+            out.append(
+                {
+                    "id": int(r.file_id),
+                    "filename": r.name,
+                    "chunk_count": int(r.chunk_count),
+                    "status": str(r.status),
+                }
+            )
+        return out

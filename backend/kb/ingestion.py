@@ -7,7 +7,7 @@ from .splitters import (
     AdaptiveSplitter,
 )
 from .splitters.splitter_table import TableSplitter
-from .knowledge_base import FileInfo
+from .types import FileInfo
 
 def _server_base() -> str:
     port = int(os.getenv("PORT", "8000"))
