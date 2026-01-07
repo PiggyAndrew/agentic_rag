@@ -65,7 +65,8 @@ __pycache__/
 [Dd]ata/
 [Dd]ist/
 [Ll]og/
-[Oo]ut/
+[Oo]utput/
+langsmith/
 
 
 /setup/Output
