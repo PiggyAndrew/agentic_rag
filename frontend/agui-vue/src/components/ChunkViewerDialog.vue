@@ -119,14 +119,17 @@ function scrollToChunk(index: number) {
                     <div class="flex items-center gap-2 min-w-0">
                       <span class="font-mono font-medium text-xs shrink-0" :class="activeChunkIndex === item.chunk_index ? 'text-primary' : 'text-gray-600'">#{{ item.chunk_index }}</span>
                       <template v-if="item.metadata">
-                        <span v-if="item.metadata.number" class="text-xs text-gray-500 font-medium shrink-0">{{ item.metadata.number }}</span>
-                        <span v-if="item.metadata.title" class="text-xs text-gray-500 truncate" :title="item.metadata.title">{{ item.metadata.title }}</span>
+                         <span v-if="item.metadata"  >{{ item.metadata.data.number }}</span>
+                        <span
+                          v-if="item.metadata"
+                          class="truncate max-w-[320px]"
+                          :title="item.metadata.data.title"
+                        >
+                          {{ item.metadata.data.title }}
+                        </span>
                       </template>
                     </div>
                     <span class="text-[10px] text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded-full shrink-0">{{ item.content.length }}字符</span>
-                  </div>
-                  <div class="text-xs text-gray-500 truncate opacity-80 pl-1 border-l-2" :class="activeChunkIndex === item.chunk_index ? 'border-primary/40' : 'border-gray-300'">
-                    {{ item.content.slice(0, 30).replace(/[\r\n]+/g, ' ') }}...
                   </div>
                 </div>
               </template>

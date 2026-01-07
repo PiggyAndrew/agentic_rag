@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, watch, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import { ChatLineSquare, FolderOpened, Download, User } from '@element-plus/icons-vue'
+import { ChatLineSquare, FolderOpened, Download, User, Setting } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import UpdateFloating from '@/components/UpdateFloating.vue'
 import { useUpdateStore } from '@/stores/update'
@@ -129,6 +129,10 @@ async function checkAndInstallUpdate(): Promise<void> {
           <el-menu-item index="/about">
             <el-icon class="mr-1"><User /></el-icon>
             关于作者
+          </el-menu-item>
+          <el-menu-item index="/settings">
+            <el-icon class="mr-1"><Setting /></el-icon>
+            AI配置
           </el-menu-item>
         </el-menu>
         <el-button size="small" type="primary" plain @click="checkAndInstallUpdate">

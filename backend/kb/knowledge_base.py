@@ -24,7 +24,7 @@ from sqlalchemy import select
 from backend.database.sqlite import SqliteSessionManager, get_default_sqlite_manager, init_sqlite_database
 from backend.kb.knowledge_models import KnowledgeChunkORM
 from backend.kb.knowledge_repository import KnowledgeNotFoundError, SqlAlchemyKnowledgeRepository
-
+from backend.kb.vector_store import MilvusLiteVectorStore, LocalVectorStore
 class PersistentKnowledgeBaseController:
     """持久化知识库控制器：元数据与片段持久化到 SQLite，向量索引保留原实现。"""
 
@@ -41,7 +41,6 @@ class PersistentKnowledgeBaseController:
         os.makedirs(self.base_dir, exist_ok=True)
         self._embedder = embedder or get_default_embedder()
         try:
-            import pymilvus  # type: ignore
             self._vstore = MilvusLiteVectorStore(base_dir=self.base_dir)
         except Exception:
             self._vstore = LocalVectorStore(base_dir=self.base_dir)
@@ -367,7 +366,6 @@ class PersistentKnowledgeBaseController:
 
         combined: List[Dict[str, Any]] = []
         combined.extend(semantic)
-        # combined.extend(keyword)
         if not combined:
             return []
 
@@ -375,15 +373,31 @@ class PersistentKnowledgeBaseController:
         pairs_spec = [{"fileId": r["file_id"], "chunkIndex": r["chunk_index"]} for r in combined]
         full_chunks = self.readFileChunks(kb_id, pairs_spec)
         content_map: Dict[tuple[int, int], str] = {}
+        meta_map: Dict[tuple[int, int], Any] = {}
         for ch in full_chunks:
             fid = int(ch.get("file_id"))
             idx = int(ch.get("chunk_index"))
             content_map[(fid, idx)] = ch.get("content", "")
+            meta_map[(fid, idx)] = ch.get("metadata")
 
         def _load_content(fid: int, idx: int) -> str:
             return content_map.get((fid, idx), "")
+        ranked = reranker.rerank(q, combined, _load_content, top_k=5)
 
-        return reranker.rerank(q, combined, _load_content, top_k=5)
+        def _order_key_of(item: Dict[str, Any]) -> tuple:
+            fid = int(item.get("file_id"))
+            idx = int(item.get("chunk_index"))
+            meta = meta_map.get((fid, idx)) or {}
+            ok = meta.get("order_key") or []
+            if isinstance(ok, list):
+                try:
+                    return tuple(int(x) for x in ok)
+                except Exception:
+                    pass
+            return (fid, idx)
+
+        ranked.sort(key=_order_key_of)
+        return ranked[:5]
 
     def getFilesMeta(self, kb_id: int, file_ids: List[int]) -> List[Dict]:
         """根据文件ID数组返回对应的元信息"""

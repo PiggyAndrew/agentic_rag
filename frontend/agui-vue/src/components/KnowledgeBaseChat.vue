@@ -62,6 +62,7 @@ import { CheckIcon, GlobeIcon } from "lucide-vue-next";
 import { streamChat } from "@/api/chat";
 import { computed, ref, onMounted, watch } from "vue";
 import { useKbStore } from "@/stores/kb";
+import { useAiStore } from "@/stores/ai";
 import { ElRadioGroup, ElRadio, ElDialog, ElButton } from "element-plus";
 import {
   Tool,
@@ -236,6 +237,7 @@ const modelSelectorOpen = ref(false);
 const status = ref<ChatStatus>("ready");
 const messages = ref<MessageType[]>([]);
 const kbStore = useKbStore();
+const aiStore = useAiStore();
 const kbSelectorOpen = ref(false);
 const selectedKbId = ref<string>("");
 
@@ -587,7 +589,13 @@ async function streamResponse(versionId: string) {
   try {
     const iter = await streamChat(
       history,
-      selectedKbId.value ? selectedKbId.value : undefined
+      selectedKbId.value ? selectedKbId.value : undefined,
+      {
+        apiUrl: aiStore.chatApiUrl,
+        llmApiKey: aiStore.llmApiKey,
+        llmBaseUrl: aiStore.llmBaseUrl,
+        llmModel: aiStore.llmModel,
+      }
     );
     let acc = "";
     for await (const raw of iter) {

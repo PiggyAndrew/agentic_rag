@@ -98,19 +98,36 @@ def _log_event_json(event, path: str = os.path.join("data", "logs", "stream_even
         pass
 
 
-async def stream_generator(messages, kb_id=None):
+async def stream_generator(messages, kb_id=None, *, llm_config=None):
     """流式输出 LangChain astream_events 原始事件（逐行 JSON）"""
     os.environ.setdefault("OTEL_PYTHON_DISABLED", "true")
     os.environ.setdefault("LANGCHAIN_TRACING_V2", "false")
     from backend.agents.rag_agent import agent as rag_agent, create_agentic_rag_system
     active_agent = rag_agent
+    kb_int = None
     if kb_id:
         try:
             s = str(kb_id)
             kb_int = int(s[3:]) if s.startswith("kb-") else int(s)
+        except Exception:
+            kb_int = None
+
+    if llm_config is not None:
+        target_kb = kb_int if kb_int is not None else 1
+        try:
+            active_agent = create_agentic_rag_system(
+                target_kb,
+                llm_api_key=(llm_config.get("api_key") or None),
+                llm_base_url=(llm_config.get("base_url") or None),
+                llm_model=(llm_config.get("model") or None),
+            )
+        except Exception:
+            active_agent = None
+    elif kb_int is not None:
+        try:
             active_agent = create_agentic_rag_system(kb_int)
         except Exception:
-            pass
+            active_agent = rag_agent
     if not active_agent:
         yield '0:"Error: Agent not initialized"\n'
         return

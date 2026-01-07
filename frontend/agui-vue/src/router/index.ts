@@ -3,6 +3,7 @@ import type { RouteRecordRaw } from 'vue-router'
 import KnowledgeBaseChat from '@/components/KnowledgeBaseChat.vue'
 import KnowledgeBaseManager from '@/pages/KnowledgeBaseManager.vue'
 import AboutAuthor from '@/pages/AboutAuthor.vue'
+import AiSettings from '@/pages/AiSettings.vue'
 
 const routes: RouteRecordRaw[] = [
   {
@@ -19,6 +20,11 @@ const routes: RouteRecordRaw[] = [
     path: '/about',
     name: 'AboutAuthor',
     component: AboutAuthor,
+  },
+  {
+    path: '/settings',
+    name: 'AiSettings',
+    component: AiSettings,
   },
 ]
 

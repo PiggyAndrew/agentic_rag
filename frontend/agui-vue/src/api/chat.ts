@@ -3,17 +3,40 @@
  * - 参数 `kbId` 为单个知识库ID（字符串，如 'kb-1' 或 '1'）
  * - 返回异步迭代器用于增量读取文本与工具数据
  */
+export type StreamChatOptions = {
+  apiUrl?: string
+  llmApiKey?: string
+  llmBaseUrl?: string
+  llmModel?: string
+}
+
+function resolveChatUrl(raw?: string): string {
+  const fallback = (import.meta as any).env?.VITE_API_URL || 'http://localhost:8000/api/chat'
+  const url = (raw || fallback).trim()
+  if (!url) return 'http://localhost:8000/api/chat'
+  if (url.endsWith('/api/chat')) return url
+  return url.replace(/\/+$/, '') + '/api/chat'
+}
+
 export async function streamChat(
   messages: Array<{ role: string; content: string }>,
   kbId?: string,
-  apiUrl?: string
+  options?: StreamChatOptions
 ) {
-  const url = apiUrl || (import.meta as any).env?.VITE_API_URL || 'http://localhost:8000/api/chat';
+  const url = resolveChatUrl(options?.apiUrl)
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' }
+  const apiKey = (options?.llmApiKey || '').trim()
+  const baseUrl = (options?.llmBaseUrl || '').trim()
+  const model = (options?.llmModel || '').trim()
+  if (apiKey) headers['X-LLM-API-KEY'] = apiKey
+  if (baseUrl) headers['X-LLM-BASE-URL'] = baseUrl
+  if (model) headers['X-LLM-MODEL'] = model
+
   const res = await fetch(url, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers,
     body: JSON.stringify({ messages, kbId }),
-  });
+  })
   if (!res.body || !res.ok) {
     throw new Error(await res.text());
   }
