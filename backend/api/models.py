@@ -51,3 +51,8 @@ class KBFileCreate(BaseModel):
     type: Optional[str] = "application/octet-stream"
     contentBase64: Optional[str] = None
 
+
+class IngestRequest(BaseModel):
+    """向量化处理请求体"""
+    filename: str
+

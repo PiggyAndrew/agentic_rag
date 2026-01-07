@@ -12,7 +12,7 @@ class TestSqliteKnowledgeRepository(unittest.TestCase):
         self._tmp = tempfile.TemporaryDirectory()
         db_path = os.path.join(self._tmp.name, "kb.sqlite3")
         self._manager = SqliteSessionManager.from_url(f"sqlite:///{db_path}", echo=False)
-        migrations_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "backend", "database", "migrations"))
+        migrations_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "backend", "database", "migrations"))
         init_sqlite_database(manager=self._manager, migrations_dir=migrations_dir)
         self._repo = SqlAlchemyKnowledgeRepository(manager=self._manager)
 

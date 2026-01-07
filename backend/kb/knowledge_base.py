@@ -47,7 +47,7 @@ class PersistentKnowledgeBaseController:
             self._vstore = LocalVectorStore(base_dir=self.base_dir)
         self._manager = manager or get_default_sqlite_manager()
         init_sqlite_database(manager=self._manager)
-        self._repo = repo or SqlAlchemyKnowledgeRepository(manager=self._manager)
+        self._repository = repo or SqlAlchemyKnowledgeRepository(manager=self._manager)
 
     def _kb_dir(self, kb_id: int) -> str:
         """获取指定知识库的根目录路径"""
@@ -59,11 +59,11 @@ class PersistentKnowledgeBaseController:
         self._ensure_kb_row(kb_id)
 
     def _ensure_kb_row(self, kb_id: int) -> None:
-        existing = self._repo.get_kb(int(kb_id))
+        existing = self._repository.get_kb(int(kb_id))
         if existing is not None:
             return
         created_at = int(os.path.getmtime(self._kb_dir(kb_id)) * 1000) if os.path.exists(self._kb_dir(kb_id)) else int(time.time() * 1000)
-        self._repo.create_kb(
+        self._repository.create_kb(
             KnowledgeBaseCreate(
                 kb_id=int(kb_id),
                 name=f"知识库 {kb_id}",
@@ -78,7 +78,7 @@ class PersistentKnowledgeBaseController:
         os.makedirs(self._kb_dir(kb_id), exist_ok=True)
         if reset_sqlite:
             try:
-                self._repo.delete_kb(int(kb_id))
+                self._repository.delete_kb(int(kb_id))
             except KnowledgeNotFoundError:
                 pass
             self._ensure_kb_row(kb_id)
@@ -87,7 +87,7 @@ class PersistentKnowledgeBaseController:
     def deleteKnowledgeBase(self, kb_id: int) -> None:
         """删除整个知识库目录，包括文件索引、片段与向量存储"""
         try:
-            self._repo.delete_kb(int(kb_id))
+            self._repository.delete_kb(int(kb_id))
         except KnowledgeNotFoundError:
             pass
         shutil.rmtree(self._kb_dir(kb_id), ignore_errors=True)
@@ -95,11 +95,11 @@ class PersistentKnowledgeBaseController:
     def add_file(self, kb_id: int, filename: str, chunk_count: int, status: FileStatus | str = FileStatus.done) -> FileInfo:
         """新增文件元信息并返回创建后的 `FileInfo`"""
         self._ensure_kb(kb_id)
-        existing_ids = [int(r.file_id) for r in self._repo.list_files(int(kb_id))]
+        existing_ids = [int(r.file_id) for r in self._repository.list_files(int(kb_id))]
         file_id = (max(existing_ids) + 1) if existing_ids else 1
         info = FileInfo(id=file_id, filename=filename, chunk_count=chunk_count, status=status)
         now_ms = int(time.time() * 1000)
-        self._repo.create_file(
+        self._repository.create_file(
             int(kb_id),
             KnowledgeFileCreate(
                 file_id=int(info.id),
@@ -117,10 +117,10 @@ class PersistentKnowledgeBaseController:
     def deleteFile(self, kb_id: int, file_id: int) -> bool:
         """删除指定文件的元信息、片段与其向量索引"""
         self._ensure_kb(kb_id)
-        existing = self._repo.get_file(int(kb_id), int(file_id))
+        existing = self._repository.get_file(int(kb_id), int(file_id))
         if existing is None:
             return False
-        self._repo.delete_file(int(kb_id), int(file_id))
+        self._repository.delete_file(int(kb_id), int(file_id))
         self._vstore.delete_items(kb_id, {"file_id": int(file_id)})
         return True
 
@@ -198,7 +198,7 @@ class PersistentKnowledgeBaseController:
                     updated_at_ms=now_ms,
                 )
             )
-        self._repo.upsert_chunks(int(kb_id), int(file_id), payload)
+        self._repository.upsert_chunks(int(kb_id), int(file_id), payload)
         try:
             # 仅追加有嵌入的条目，避免全部因嵌入失败而不写入向量库
             vitems_embedded = [vi for vi in vitems if "embedding" in vi]
@@ -206,7 +206,7 @@ class PersistentKnowledgeBaseController:
                 # 先删除旧的向量数据，支持重新解析
                 self._vstore.delete_items(kb_id, {"file_id": int(file_id)})
                 self._vstore.add_items(kb_id, vitems_embedded)
-                self._repo.update_file(
+                self._repository.update_file(
                     int(kb_id),
                     int(file_id),
                     KnowledgeFilePatch(
@@ -216,7 +216,7 @@ class PersistentKnowledgeBaseController:
                     ),
                 )
             else:
-                self._repo.update_file(
+                self._repository.update_file(
                     int(kb_id),
                     int(file_id),
                     KnowledgeFilePatch(
@@ -230,13 +230,13 @@ class PersistentKnowledgeBaseController:
 
     def _filename_of(self, kb_id: int, file_id: int) -> str:
         """根据文件ID获取文件名"""
-        row = self._repo.get_file(int(kb_id), int(file_id))
+        row = self._repository.get_file(int(kb_id), int(file_id))
         return row.name if row is not None else ""
 
     def _load_file_chunks(self, kb_id: int, file_id: int) -> List[FileChunk]:
         """加载某个文件的全部片段为 `FileChunk` 列表"""
         self._ensure_kb(kb_id)
-        rows = self._repo.list_chunks(int(kb_id), int(file_id))
+        rows = self._repository.list_chunks(int(kb_id), int(file_id))
         out: List[FileChunk] = []
         for r in rows:
             out.append(
@@ -278,7 +278,7 @@ class PersistentKnowledgeBaseController:
         if not tokens:
             return []
         self._ensure_kb(kb_id)
-        file_rows = self._repo.list_files(int(kb_id))
+        file_rows = self._repository.list_files(int(kb_id))
         name_map = {int(r.file_id): str(r.name) for r in file_rows}
 
         exclude_set: set[Tuple[int, int]] = exclude or set()
@@ -389,7 +389,7 @@ class PersistentKnowledgeBaseController:
         """根据文件ID数组返回对应的元信息"""
         self._ensure_kb(kb_id)
         idset = {int(i) for i in (file_ids or [])}
-        rows = self._repo.list_files(int(kb_id))
+        rows = self._repository.list_files(int(kb_id))
         out: List[Dict[str, Any]] = []
         for r in rows:
             if int(r.file_id) in idset:
@@ -427,7 +427,7 @@ class PersistentKnowledgeBaseController:
                 continue
             by_file.setdefault(fid, []).append(idx)
 
-        rows = self._repo.list_files(int(kb_id))
+        rows = self._repository.list_files(int(kb_id))
         name_map = {int(r.file_id): r.name for r in rows}
         for fid, indices in by_file.items():
             chunks_all = self._load_file_chunks(kb_id, fid)
@@ -448,7 +448,7 @@ class PersistentKnowledgeBaseController:
     def listFilesPaginated(self, kb_id: int, page: int, page_size: int) -> List[Dict]:
         """分页列出文件元信息"""
         self._ensure_kb(kb_id)
-        rows = self._repo.list_files(int(kb_id))
+        rows = self._repository.list_files(int(kb_id))
         start = page * page_size
         end = start + page_size
         out: List[Dict[str, Any]] = []

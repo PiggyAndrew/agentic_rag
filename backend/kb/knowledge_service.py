@@ -15,11 +15,14 @@ from backend.kb.knowledge_repository import (
 )
 from backend.kb.types import (
     FileStatus,
+    KnowledgeBase as KBMeta,
     KnowledgeBaseCreate,
     KnowledgeBasePatch,
+    KnowledgeFile as KBFileMeta,
     KnowledgeFileCreate,
     KnowledgeFilePatch,
 )
+from backend.kb.types.legacy import FileChunk
 
 
 def _now_ms() -> int:
@@ -49,27 +52,28 @@ class KnowledgeService:
     controller: PersistentKnowledgeBaseController
     repo: SqlAlchemyKnowledgeRepository
 
-    def list_kbs(self) -> List[Dict[str, Any]]:
+    def list_kbs(self) -> List[KBMeta]:
         rows = self.repo.list_kbs()
-        out: List[Dict[str, Any]] = []
+        out: List[KBMeta] = []
         for r in rows:
             out.append(
-                {
-                    "id": format_kb_id(int(r.kb_id)),
-                    "name": r.name,
-                    "description": r.description,
-                    "createdAt": int(r.created_at_ms),
-                }
+                KBMeta(
+                    kb_id=int(r.kb_id),
+                    name=r.name,
+                    description=r.description,
+                    created_at_ms=int(r.created_at_ms),
+                    updated_at_ms=int(r.updated_at_ms),
+                )
             )
-        out.sort(key=lambda m: m.get("createdAt", 0), reverse=True)
+        out.sort(key=lambda m: int(getattr(m, "created_at_ms", 0)), reverse=True)
         return out
 
-    def create_kb(self, payload: Dict[str, Any]) -> Dict[str, Any]:
+    def create_kb(self, payload: KnowledgeBaseCreate) -> KBMeta:
         existing_ids = [int(r.kb_id) for r in self.repo.list_kbs()]
         start_id = (max(existing_ids) + 1) if existing_ids else 1
         ts = _now_ms()
-        name = str(payload.get("name", "")).strip()
-        desc = (str(payload.get("description", "")).strip() or None)
+        name = str(payload.name or "").strip()
+        desc = (str(payload.description or "").strip() or None)
         for candidate in range(start_id, start_id + 50):
             try:
                 self.controller.createKnowledgeBase(candidate, reset_sqlite=False)
@@ -82,18 +86,24 @@ class KnowledgeService:
                         updated_at_ms=ts,
                     )
                 )
-                return {"id": format_kb_id(candidate), "name": name, "description": desc, "createdAt": ts}
+                return KBMeta(
+                    kb_id=int(candidate),
+                    name=name,
+                    description=desc,
+                    created_at_ms=ts,
+                    updated_at_ms=ts,
+                )
             except KnowledgeConflictError:
                 continue
         raise KnowledgeConflictError("创建知识库失败：KB ID 已被占用")
 
-    def update_kb(self, kb_id: str, payload: Dict[str, Any]) -> Dict[str, Any]:
+    def update_kb(self, kb_id: str, payload: KnowledgeBasePatch) -> KBMeta:
         kb_int = parse_kb_id(kb_id)
         self.controller._ensure_kb(kb_int)
         ts = _now_ms()
         patch = KnowledgeBasePatch(
-            name=str(payload["name"]).strip() if ("name" in payload and payload["name"] is not None) else None,
-            description=(str(payload["description"]).strip() or None) if ("description" in payload and payload["description"] is not None) else None,
+            name=str(payload.name).strip() if (payload.name is not None) else None,
+            description=(str(payload.description).strip() or None) if (payload.description is not None) else None,
             updated_at_ms=ts,
         )
         try:
@@ -112,12 +122,13 @@ class KnowledgeService:
             row = self.repo.get_kb(kb_int)
             if row is None:
                 raise KnowledgeNotFoundError(f"知识库不存在: kb_id={kb_int}")
-        return {
-            "id": format_kb_id(kb_int),
-            "name": row.name,
-            "description": row.description,
-            "createdAt": int(row.created_at_ms),
-        }
+        return KBMeta(
+            kb_id=int(kb_int),
+            name=row.name,
+            description=row.description,
+            created_at_ms=int(row.created_at_ms),
+            updated_at_ms=int(row.updated_at_ms),
+        )
 
     def delete_kb(self, kb_id: str) -> None:
         kb_int = parse_kb_id(kb_id)
@@ -127,27 +138,29 @@ class KnowledgeService:
             pass
         self.controller.deleteKnowledgeBase(kb_int)
 
-    def list_files(self, kb_id: str) -> List[Dict[str, Any]]:
+    def list_files(self, kb_id: str) -> List[KBFileMeta]:
         kb_int = parse_kb_id(kb_id)
         self.controller._ensure_kb(kb_int)
         self._ensure_kb_row(kb_int)
         rows = self.repo.list_files(kb_int)
-        out: List[Dict[str, Any]] = []
+        out: List[KBFileMeta] = []
         for r in rows:
             out.append(
-                {
-                    "id": f"f-{int(r.file_id)}",
-                    "kbId": format_kb_id(kb_int),
-                    "name": r.name,
-                    "type": r.mime_type,
-                    "createdAt": int(r.created_at_ms),
-                    "chunkCount": int(r.chunk_count),
-                    "status": str(r.status),
-                }
+                KBFileMeta(
+                    kb_id=int(kb_int),
+                    file_id=int(r.file_id),
+                    name=r.name,
+                    mime_type=r.mime_type,
+                    created_at_ms=int(r.created_at_ms),
+                    updated_at_ms=int(r.updated_at_ms),
+                    chunk_count=int(r.chunk_count),
+                    status=r.status,
+                    source_path=r.source_path,
+                )
             )
         return out
 
-    def save_upload(self, kb_id: str, name: str, content_b64: Optional[str]) -> Dict[str, Any]:
+    def save_upload(self, kb_id: str, name: str, content_b64: Optional[str]) -> KBFileMeta:
         kb_int = parse_kb_id(kb_id)
         self.controller._ensure_kb(kb_int)
         self._ensure_kb_row(kb_int)
@@ -213,17 +226,19 @@ class KnowledgeService:
             status=str(FileStatus.uploaded),
             source_path=saved_path,
         )
-        return {
-            "id": f"f-{fid}",
-            "kbId": format_kb_id(kb_int),
-            "name": name,
-            "type": mime,
-            "createdAt": ts,
-            "chunkCount": 0,
-            "status": str(FileStatus.uploaded),
-        }
+        return KBFileMeta(
+            kb_id=int(kb_int),
+            file_id=int(fid),
+            name=name,
+            mime_type=mime,
+            created_at_ms=ts,
+            updated_at_ms=ts,
+            chunk_count=0,
+            status=FileStatus.uploaded,
+            source_path=saved_path,
+        )
 
-    def ingest_uploaded_file(self, kb_id: str, filename: str) -> Dict[str, Any]:
+    def ingest_uploaded_file(self, kb_id: str, filename: str) -> KBFileMeta:
         kb_int = parse_kb_id(kb_id)
         self.controller._ensure_kb(kb_int)
         self._ensure_kb_row(kb_int)
@@ -256,32 +271,34 @@ class KnowledgeService:
             status="done",
             source_path=src_path,
         )
-        return {
-            "id": f"f-{info.id}",
-            "kbId": format_kb_id(kb_int),
-            "name": info.filename,
-            "type": mime,
-            "createdAt": ts,
-            "chunkCount": int(info.chunk_count),
-            "status": "done",
-        }
+        return KBFileMeta(
+            kb_id=int(kb_int),
+            file_id=int(info.id),
+            name=info.filename,
+            mime_type=mime,
+            created_at_ms=ts,
+            updated_at_ms=ts,
+            chunk_count=int(info.chunk_count),
+            status=FileStatus.done,
+            source_path=src_path,
+        )
 
-    def read_file_chunks(self, kb_id: str, file_id: str) -> List[Dict[str, Any]]:
+    def read_file_chunks(self, kb_id: str, file_id: str) -> List[FileChunk]:
         kb_int = parse_kb_id(kb_id)
         fid = parse_file_id(file_id)
         self.controller._ensure_kb(kb_int)
         self._ensure_kb_row(kb_int)
         rows = self.repo.list_chunks(kb_int, fid)
-        out: List[Dict[str, Any]] = []
+        out: List[FileChunk] = []
         for r in rows:
             out.append(
-                {
-                    "file_id": fid,
-                    "chunk_index": int(r.chunk_index),
-                    "content": r.content,
-                    "metadata": (r.metadata.data if r.metadata is not None else None),
-                    "embedding": None,
-                }
+                FileChunk(
+                    file_id=int(fid),
+                    chunk_index=int(r.chunk_index),
+                    content=str(r.content or ""),
+                    metadata=r.metadata,
+                    embedding=None,
+                )
             )
         return out
 

@@ -195,16 +195,11 @@ def ingest_pdf(kb_controller, kb_id: int, pdf_path: str, chunk_size: int = 500, 
     - 返回：更新后的文件元信息对象（FileInfo）
     """
     filename = pdf_path.split("/")[-1].split("\\")[-1]
-    meta = kb_controller._load_files(kb_id)
-    files = meta.get("files", [])
-    record = None
-    for f in files:
-        if str(f.get("filename")) == filename:
-            record = f
-            break
-    if record is None:
+    rows = kb_controller._repository.list_files(int(kb_id))
+    row = next((r for r in rows if str(r.name) == filename), None)
+    if row is None:
         raise RuntimeError(f"文件未在知识库中登记：{filename}")
-    file_id = int(record.get("id"))
+    file_id = int(row.file_id)
 
     assets_dir = os.path.join(kb_controller._kb_dir(kb_id), "assets", "images", str(file_id))
     text = read_pdf_markdown_with_images(pdf_path, assets_dir)
@@ -221,9 +216,6 @@ def ingest_pdf(kb_controller, kb_id: int, pdf_path: str, chunk_size: int = 500, 
             chunks = adaptive_chunks
         else:
             chunks = NormalSplitter(chunk_size=chunk_size, overlap=overlap).split(text)
-    record["chunk_count"] = len(chunks)
-    record["status"] = "chunked"
-    kb_controller._save_files(kb_id, meta)
     kb_controller.save_chunks(kb_id, file_id=file_id, chunks=chunks)
     return FileInfo(id=file_id, filename=filename, chunk_count=len(chunks), status="done")
 
@@ -268,18 +260,10 @@ def ingest_excel(
             "metadata": {"type": "table", "table_name": table_name, "sheet_name": "", "part_index": 1, "part_count": 1, "header": []},
         }]
 
-    meta = kb_controller._load_files(kb_id)
-    files = meta.get("files", [])
-    record = None
-    for f in files:
-        if str(f.get("filename")) == filename:
-            record = f
-            break
-    if record is None:
+    rows = kb_controller._repository.list_files(int(kb_id))
+    row = next((r for r in rows if str(r.name) == filename), None)
+    if row is None:
         raise RuntimeError(f"文件未在知识库中登记：{filename}")
-    file_id = int(record.get("id"))
-    record["chunk_count"] = len(chunks)
-    record["status"] = "done"
-    kb_controller._save_files(kb_id, meta)
+    file_id = int(row.file_id)
     kb_controller.save_chunks(kb_id, file_id=file_id, chunks=chunks)
     return FileInfo(id=file_id, filename=filename, chunk_count=len(chunks), status="done")

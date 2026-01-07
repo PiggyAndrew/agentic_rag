@@ -2,37 +2,45 @@ import argparse
 import json
 import os
 import sys
-from typing import List, Dict, Optional
+from typing import List, Dict, Tuple
 
-# 确保可导入顶层包 `kb`
-ROOT_DIR = os.path.dirname(os.path.dirname(__file__))
+# 将项目根目录加入模块搜索路径，确保可导入顶层包 `kb`
+ROOT_DIR = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
 if ROOT_DIR not in sys.path:
     sys.path.insert(0, ROOT_DIR)
 
 from backend.kb.knowledge_base import PersistentKnowledgeBaseController
+from backend.kb.ingestion import ingest_pdf
+def run_ingest(pdf_path: str, kb_id: int, chunk_size: int, overlap: int) -> Tuple[Dict, List[Dict]]:
+    """执行PDF导入流程并返回文件信息与片段列表
 
-
-def list_all_files(kb_id: int) -> List[Dict]:
-    """列出持久化知识库中的所有文件元信息"""
+    - `pdf_path`：PDF文件路径
+    - `kb_id`：知识库ID
+    - `chunk_size`：片段长度
+    - `overlap`：片段重叠长度
+    - 返回：`(file_info_dict, chunks_dict_list)`
+    """
     kb = PersistentKnowledgeBaseController()
-    return kb.listFilesPaginated(kb_id, page=0, page_size=10000)
-
-
-def read_chunks(kb_id: int, file_id: int) -> List[Dict]:
-    """读取指定文件的全部片段内容"""
-    kb = PersistentKnowledgeBaseController()
-    files = kb.listFilesPaginated(kb_id, page=0, page_size=1)
+    info = ingest_pdf(kb, kb_id, pdf_path, chunk_size=chunk_size, overlap=overlap)
     chunks = kb.readFileChunks(
         kb_id,
-        [{"fileId": file_id, "chunkIndex": i} for i in range(files[0]["chunk_count"])],
+        [{"fileId": info.id, "chunkIndex": i} for i in range(info.chunk_count)],
     )
-    return chunks
+    return (
+        {
+            "id": info.id,
+            "filename": info.filename,
+            "chunk_count": info.chunk_count,
+            "status": info.status,
+        },
+        chunks,
+    )
 
 
-def print_summary(file_info: Dict, chunks: List[Dict]) -> None:
-    """打印文件摘要与片段示例信息"""
+def print_summary(info: Dict, chunks: List[Dict]) -> None:
+    """在控制台打印分割结果摘要与示例片段"""
     print("文件信息:")
-    print(json.dumps(file_info, ensure_ascii=False, indent=2))
+    print(json.dumps(info, ensure_ascii=False, indent=2))
     print(f"片段总数: {len(chunks)}")
     preview_count = min(5, len(chunks))
     print(f"示例前{preview_count}个片段预览:")
@@ -44,12 +52,12 @@ def print_summary(file_info: Dict, chunks: List[Dict]) -> None:
 
 
 def show_gui(chunks: List[Dict]) -> None:
-    """图形界面展示片段列表与内容"""
+    """使用简单窗口展示片段列表与内容查看"""
     import tkinter as tk
     from tkinter import ttk
 
     root = tk.Tk()
-    root.title("持久化分割结果查看")
+    root.title("PDF分割结果查看")
     root.geometry("900x600")
 
     left = ttk.Frame(root)
@@ -82,37 +90,20 @@ def show_gui(chunks: List[Dict]) -> None:
 
 
 def main():
-    """命令行入口：从持久化中读取文件与片段并展示"""
+    """命令行入口：执行PDF分割并输出或窗口展示结果"""
     parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--pdf",
+        default=r"tests\\testfiles\\Attachment E - BIM Guide for Facilities Upkeep_Ver2.0_Jun21-20211007-113450.pdf",
+        help="PDF文件路径",
+    )
     parser.add_argument("--kb", type=int, default=1, help="知识库ID")
-    parser.add_argument("--file_id", type=int, default=None, help="文件ID，不传则选最新")
+    parser.add_argument("--chunk_size", type=int, default=500, help="片段长度")
+    parser.add_argument("--overlap", type=int, default=100, help="片段重叠长度")
     parser.add_argument("--gui", action="store_true", help="是否打开窗口展示")
     args = parser.parse_args()
 
-    files = list_all_files(args.kb)
-    if not files:
-        print("暂无持久化数据，请先执行导入测试脚本")
-        return
-
-    target_id: Optional[int] = args.file_id
-    if target_id is None:
-        target_id = max(f["id"] for f in files)
-    target_file = next((f for f in files if f["id"] == target_id), None)
-    if not target_file:
-        print(f"未找到文件ID: {target_id}")
-        return
-
-    kb = PersistentKnowledgeBaseController()
-    chunks = kb.readFileChunks(
-        args.kb, [{"fileId": target_id, "chunkIndex": i} for i in range(target_file["chunk_count"])],
-    )
-    info = {
-        "id": target_id,
-        "filename": target_file["filename"],
-        "chunk_count": target_file["chunk_count"],
-        "status": target_file.get("status", "done"),
-    }
-
+    info, chunks = run_ingest(args.pdf, args.kb, args.chunk_size, args.overlap)
     print_summary(info, chunks)
     if args.gui:
         show_gui(chunks)
@@ -120,3 +111,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+

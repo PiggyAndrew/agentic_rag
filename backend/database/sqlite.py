@@ -33,14 +33,14 @@ class SqliteSessionManager:
             connect_args={"check_same_thread": False, "timeout": timeout_s},
         )
 
-        @event.listens_for(engine, "connect")
-        def _set_sqlite_pragmas(dbapi_connection, _connection_record):
-            cursor = dbapi_connection.cursor()
-            try:
-                cursor.execute("PRAGMA foreign_keys=ON")
-                cursor.execute("PRAGMA journal_mode=WAL")
-            finally:
-                cursor.close()
+        # @event.listens_for(engine, "connect")
+        # def _set_sqlite_pragmas(dbapi_connection, _connection_record):
+        #     cursor = dbapi_connection.cursor()
+        #     try:
+        #         cursor.execute("PRAGMA foreign_keys=ON")
+        #         cursor.execute("PRAGMA journal_mode=WAL")
+        #     finally:
+        #         cursor.close()
 
         factory = sessionmaker(bind=engine, autoflush=False, autocommit=False, expire_on_commit=False)
         return cls(engine=engine, session_factory=factory)
