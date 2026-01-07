@@ -25,10 +25,10 @@ class HeadingsSplitter(Splitter):
         min_subchunk_chars: int = 50,
     ):
         self.allowed_headings = allowed_headings or []
-        self.min_subchunk_chars = int(50)
+        self.min_subchunk_chars = int(min_subchunk_chars)
 
     _md_heading_re = re.compile(r"^\s*(#{1,6})\s+(.+?)\s*$")
-    _numbered_title_re = re.compile(r"^\s*(\d+(?:\.\d+)*)\s+(.+?)\s*$")
+    _numbered_title_re = re.compile(r"^\s*(\d+(?:\.\d+)*)(?:\s*[\.)])?\s*(?:[-–—:：]\s*)?(.+?)\s*$")
     _bullet_line_re = re.compile(r"^\s*[*+-]\s+(.+?)\s*$")
     _appendix_title_re = re.compile(r"^\s*(appendix\s+(?:\d+|[a-z]))\s+(.+?)\s*$", re.IGNORECASE)
     _letter_numbered_title_re = re.compile(r"^\s*([a-z])\.(\d+(?:\.\d+)*)\s+(.+?)\s*$", re.IGNORECASE)
@@ -296,6 +296,23 @@ class HeadingsSplitter(Splitter):
         chapter_num_norm = self._norm_number(chapter_number)
         subheads: List[Dict[str, Any]] = []
         seen_sub_numbers: set[str] = set()
+
+        def _accept_number(n: str) -> bool:
+            if "." not in n:
+                return False
+            if chapter_num_norm and not (n == chapter_num_norm or n.startswith(chapter_num_norm + ".")):
+                return False
+            if n in seen_sub_numbers:
+                return False
+            return True
+
+        def _add_subhead(i: int, n: str, t: str, lvl: int) -> None:
+            nn = self._norm_number(n)
+            if not _accept_number(nn):
+                return
+            seen_sub_numbers.add(nn)
+            subheads.append({"index": i, "level": int(lvl), "number": nn, "title": (t or "").strip()})
+
         for i in range(1, len(chapter_lines)):
             line = chapter_lines[i] or ""
             m = self._md_heading_re.match(line)
@@ -307,12 +324,7 @@ class HeadingsSplitter(Splitter):
                 parsed = self._parse_numbered_title(raw_title)
                 if parsed is not None:
                     n, t = parsed
-                    if chapter_num_norm and not (n == chapter_num_norm or n.startswith(chapter_num_norm + ".")):
-                        continue
-                    if n in seen_sub_numbers:
-                        continue
-                    seen_sub_numbers.add(n)
-                    subheads.append({"index": i, "level": lvl, "number": n, "title": t})
+                    _add_subhead(i, n, t, lvl)
                 else:
                     subheads.append({"index": i, "level": lvl, "number": "", "title": raw_title})
                 continue
@@ -324,28 +336,13 @@ class HeadingsSplitter(Splitter):
                 if parsed is None:
                     continue
                 n, t = parsed
-                if "." not in n:
-                    continue
-                if chapter_num_norm and not (n == chapter_num_norm or n.startswith(chapter_num_norm + ".")):
-                    continue
-                if n in seen_sub_numbers:
-                    continue
-                seen_sub_numbers.add(n)
-                subheads.append({"index": i, "level": base_level + 1, "number": n, "title": t})
+                _add_subhead(i, n, t, base_level + 1)
                 continue
 
-            nm = self._numbered_title_re.match(line.strip())
-            if nm:
-                n = self._norm_number(nm.group(1))
-                t = (nm.group(2) or "").strip()
-                if "." not in n:
-                    continue
-                if chapter_num_norm and not (n == chapter_num_norm or n.startswith(chapter_num_norm + ".")):
-                    continue
-                if n in seen_sub_numbers:
-                    continue
-                seen_sub_numbers.add(n)
-                subheads.append({"index": i, "level": base_level + 1, "number": n, "title": t})
+            parsed = self._parse_numbered_title(line.strip())
+            if parsed is not None:
+                n, t = parsed
+                _add_subhead(i, n, t, base_level + 1)
                 continue
         if not subheads:
             content = "\n".join(chapter_lines).strip()
