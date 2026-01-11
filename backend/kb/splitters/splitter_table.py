@@ -9,6 +9,9 @@ from backend.prompts.system import (
     get_table_summary_system_prompt,
     get_table_summary_user_prompt,
 )
+from backend.kb.types.chunk import KnowledgeChunk
+from backend.kb.types.metadata import ChunkMetadata
+import time
 
 
 def _split_sheets(text: str) -> List[Tuple[str, str]]:
@@ -180,9 +183,10 @@ class TableSplitter(Splitter):
         self.max_rows_per_chunk = int(max_rows_per_chunk)
         self.max_chars_per_chunk = int(max_chars_per_chunk)
 
-    def split(self, text: str) -> List[Dict[str, Any]]:
+    def split(self, text: str, kb_id: int, file_id: int) -> List[KnowledgeChunk]:
         sheets = _split_sheets(text)
-        chunks: List[Dict[str, Any]] = []
+        chunks: List[KnowledgeChunk] = []
+        now_ms = int(time.time() * 1000)
 
         for sheet_name, sheet_text in sheets:
             table_lines = _extract_markdown_table_lines(sheet_text)
@@ -213,17 +217,24 @@ class TableSplitter(Splitter):
                 if idx == 1 and summary:
                     prefix_lines.append(f"[TableSummary] {summary}")
                 content = ("\n".join(prefix_lines) + "\n" + md).strip()
-                chunks.append({
-                    "content": content,
-                    "metadata": {
-                        "type": "table",
-                        "table_name": self.table_name,
-                        "sheet_name": sheet_name,
-                        "part_index": idx,
-                        "part_count": total_parts,
-                        "header": header_cells,
-                    },
+                meta = ChunkMetadata.coerce({
+                    "type": "table",
+                    "table_name": self.table_name,
+                    "sheet_name": sheet_name,
+                    "part_index": idx,
+                    "part_count": total_parts,
+                    "header": header_cells,
                 })
+                chunks.append(
+                    KnowledgeChunk(
+                        kb_id=int(kb_id),
+                        file_id=int(file_id),
+                        chunk_index=len(chunks),
+                        content=content,
+                        metadata=meta,
+                        created_at_ms=now_ms,
+                        updated_at_ms=now_ms,
+                    )
+                )
 
         return chunks
-

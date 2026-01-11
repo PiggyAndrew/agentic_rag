@@ -26,7 +26,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--chm",
-        default=r"test/testfiles/RevitAPI.chm",
+        default=r"tests/testfiles/RevitAPI.chm",
         help="CHM 文件路径",
     )
     args = parser.parse_args()

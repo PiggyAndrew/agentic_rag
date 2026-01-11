@@ -3,6 +3,9 @@ import re
 from pydantic import BaseModel
 from .splitter_base import Splitter
 from .splitter_utils import normalize_title
+from backend.kb.types.chunk import KnowledgeChunk
+from backend.kb.types.metadata import ChunkMetadata
+import time
 
 
 class HeadingItem(BaseModel):
@@ -433,22 +436,63 @@ class HeadingsSplitter(Splitter):
             chunks.append({"content": content, "metadata": meta})
         return self._merge_small_chunks(chunks)
 
-    def split(self, text: str) -> List[Dict[str, Any]]:
+    def split(self, text: str, kb_id: int, file_id: int) -> List[KnowledgeChunk]:
         # 主入口：
         # - 若未提供 allowed_headings，则按 Markdown 标题的最低层级拆分
         # - 若提供了 allowed_headings，则按白名单顺序扫描并拆分
         lines = (text or "").splitlines()
         if not lines:
-            return [{"content": "", "metadata": {"number": "", "title": "", "path": []}}]
+            now_ms = int(time.time() * 1000)
+            meta = ChunkMetadata.coerce({"number": "", "title": "", "path": []})
+            return [
+                KnowledgeChunk(
+                    kb_id=int(kb_id),
+                    file_id=int(file_id),
+                    chunk_index=0,
+                    content="",
+                    metadata=meta,
+                    created_at_ms=now_ms,
+                    updated_at_ms=now_ms,
+                )
+            ]
 
         if not self.allowed_headings:
-            return self._split_by_markdown_headings(lines)
+            dict_chunks = self._split_by_markdown_headings(lines)
+            now_ms = int(time.time() * 1000)
+            out: List[KnowledgeChunk] = []
+            for i, d in enumerate(dict_chunks):
+                meta = ChunkMetadata.coerce(d.get("metadata"))
+                out.append(
+                    KnowledgeChunk(
+                        kb_id=int(kb_id),
+                        file_id=int(file_id),
+                        chunk_index=i,
+                        content=str(d.get("content", "")),
+                        metadata=meta,
+                        created_at_ms=now_ms,
+                        updated_at_ms=now_ms,
+                    )
+                )
+            return out
 
         chapters, number_to_title = self._scan_allowed_chapters(lines)
         if not chapters:
-            return [{"content": "\n".join(lines).strip(), "metadata": {"number": "", "title": "", "path": []}}]
+            dict_chunks = [{"content": "\n".join(lines).strip(), "metadata": {"number": "", "title": "", "path": []}}]
+            now_ms = int(time.time() * 1000)
+            meta = ChunkMetadata.coerce(dict_chunks[0].get("metadata"))
+            return [
+                KnowledgeChunk(
+                    kb_id=int(kb_id),
+                    file_id=int(file_id),
+                    chunk_index=0,
+                    content=str(dict_chunks[0].get("content", "")),
+                    metadata=meta,
+                    created_at_ms=now_ms,
+                    updated_at_ms=now_ms,
+                )
+            ]
 
-        out: List[Dict[str, Any]] = []
+        out_dict: List[Dict[str, Any]] = []
         for idx, ch in enumerate(chapters):
             start = ch["index"]
             end = chapters[idx + 1]["index"] if idx + 1 < len(chapters) else len(lines)
@@ -456,13 +500,28 @@ class HeadingsSplitter(Splitter):
             chapter_number = ch["number"]
             chapter_title = ch["title"]
             chapter_path = self._build_number_path(chapter_number, number_to_title)
-            out.extend(
+            out_dict.extend(
                 self._split_chapter_by_subheadings(
                     chapter_lines,
                     chapter_level=ch.get("level", 0),
                     chapter_number=chapter_number,
                     chapter_title=chapter_title,
                     chapter_path=chapter_path,
+                )
+            )
+        now_ms = int(time.time() * 1000)
+        out: List[KnowledgeChunk] = []
+        for i, d in enumerate(out_dict):
+            meta = ChunkMetadata.coerce(d.get("metadata"))
+            out.append(
+                KnowledgeChunk(
+                    kb_id=int(kb_id),
+                    file_id=int(file_id),
+                    chunk_index=i,
+                    content=str(d.get("content", "")),
+                    metadata=meta,
+                    created_at_ms=now_ms,
+                    updated_at_ms=now_ms,
                 )
             )
         return out

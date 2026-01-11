@@ -7,6 +7,7 @@ from .types import (
     FileChunk,
     FileStatus,
     KnowledgeBaseCreate,
+    KnowledgeChunk,
     KnowledgeChunkUpsert,
     KnowledgeFileCreate,
     KnowledgeFilePatch,
@@ -124,77 +125,43 @@ class PersistentKnowledgeBaseController:
         self._vstore.delete_items(kb_id, {"file_id": int(file_id)})
         return True
 
-    def save_chunks(self, kb_id: int, file_id: int, chunks: List[Any]) -> None:
+    def save_chunks(self, kb_id: int, file_id: int, chunks: List[KnowledgeChunk]) -> None:
         """将片段内容持久化到 SQLite，并同步向量索引。"""
         self._ensure_kb(kb_id)
         texts: List[str] = []
-        normalized: List[Dict[str, Any]] = []
         vitems: List[Dict[str, Any]] = []
         non_empty_indices: List[int] = []
         for i, c in enumerate(chunks):
-            if isinstance(c, str):
-                normalized.append({"file_id": file_id, "chunk_index": i, "content": c})
-                texts.append(c)
-                if c.strip():
-                    non_empty_indices.append(i)
-                vitems.append({
-                    "file_id": file_id,
-                    "chunk_index": i,
-                    "filename": self._filename_of(kb_id, file_id),
-                    "metadata": None,
-                    "preview": (c[:200] + "...") if len(c) > 200 else c,
-                })
-            elif isinstance(c, dict):
-                content = c.get("content", "")
-                normalized.append({
-                    "file_id": file_id,
-                    "chunk_index": i,
-                    "content": content,
-                    "metadata": c.get("metadata"),
-                })
-                texts.append(content)
-                if content.strip():
-                    non_empty_indices.append(i)
-                vitems.append({
-                    "file_id": file_id,
-                    "chunk_index": i,
-                    "filename": self._filename_of(kb_id, file_id),
-                    "metadata": c.get("metadata"),
-                    "preview": (content[:200] + "...") if len(content) > 200 else content,
-                })
-            else:
-                s = str(c)
-                normalized.append({"file_id": file_id, "chunk_index": i, "content": s})
-                texts.append(s)
-                if s.strip():
-                    non_empty_indices.append(i)
-                vitems.append({
-                    "file_id": file_id,
-                    "chunk_index": i,
-                    "filename": self._filename_of(kb_id, file_id),
-                    "metadata": None,
-                    "preview": (s[:200] + "...") if len(s) > 200 else s,
-                })
+            content = str(c.content or "")
+            texts.append(content)
+            if content.strip():
+                non_empty_indices.append(i)
+            vitems.append({
+                "file_id": int(file_id),
+                "chunk_index": int(c.chunk_index),
+                "filename": self._filename_of(kb_id, file_id),
+                "metadata": (c.metadata.data if c.metadata is not None else None),
+                "preview": (content[:200] + "...") if len(content) > 200 else content,
+            })
         try:
             if non_empty_indices:
                 # 仅对非空文本进行嵌入，避免服务端拒绝空字符串导致失败
-                to_embed = [normalized[i]["content"] for i in non_empty_indices]
+                to_embed = [texts[i] for i in non_empty_indices]
                 embs = self._embedder.embed_texts(to_embed)
                 for k, i in enumerate(non_empty_indices):
-                    normalized[i]["embedding"] = embs[k].tolist()
                     vitems[i]["embedding"] = embs[k].tolist()
         except Exception:
             raise
         now_ms = int(time.time() * 1000)
         payload: List[KnowledgeChunkUpsert] = []
-        for r in normalized:
+        for c in chunks:
             payload.append(
                 KnowledgeChunkUpsert(
-                    chunk_index=int(r.get("chunk_index")),
-                    content=str(r.get("content", "")),
-                    metadata=r.get("metadata"),
-                    created_at_ms=now_ms,
-                    updated_at_ms=now_ms,
+                    chunk_index=int(c.chunk_index),
+                    content=str(c.content or ""),
+                    metadata=(c.metadata.data if c.metadata is not None else None),
+                    created_at_ms=int(c.created_at_ms or now_ms),
+                    updated_at_ms=int(c.updated_at_ms or now_ms),
                 )
             )
         self._repository.upsert_chunks(int(kb_id), int(file_id), payload)
@@ -209,7 +176,7 @@ class PersistentKnowledgeBaseController:
                     int(kb_id),
                     int(file_id),
                     KnowledgeFilePatch(
-                        chunk_count=len(normalized),
+                        chunk_count=len(chunks),
                         status=FileStatus.vectorized,
                         updated_at_ms=now_ms,
                     ),
@@ -219,7 +186,7 @@ class PersistentKnowledgeBaseController:
                     int(kb_id),
                     int(file_id),
                     KnowledgeFilePatch(
-                        chunk_count=len(normalized),
+                        chunk_count=len(chunks),
                         status=FileStatus.chunked,
                         updated_at_ms=now_ms,
                     ),

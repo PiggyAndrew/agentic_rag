@@ -1,4 +1,5 @@
 from typing import List, Dict, Any
+from backend.kb.types.chunk import KnowledgeChunk
 
 
 class Splitter:
@@ -17,5 +18,5 @@ class Splitter:
 
     name: str = "base"
 
-    def split(self, text: str) -> List[Dict[str, Any]]:  # pragma: no cover - interface
+    def split(self, text: str, kb_id: int, file_id: int) -> List[KnowledgeChunk]:  # pragma: no cover - interface
         raise NotImplementedError

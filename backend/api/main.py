@@ -1,9 +1,12 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
+from fastapi.responses import JSONResponse
 from dotenv import load_dotenv
 from contextlib import asynccontextmanager
 import os
+import logging
+from backend.api.models import ApiResponse, ApiError
 
 
 def create_app() -> FastAPI:
@@ -27,6 +30,22 @@ def create_app() -> FastAPI:
         allow_methods=["*"],
         allow_headers=["*"],
     )
+
+    # 全局异常处理
+    logger = logging.getLogger("api")
+
+    @app.exception_handler(ValueError)
+    async def handle_value_error(_: Request, exc: ValueError):
+        return JSONResponse(status_code=400, content=ApiResponse(ok=False, error=ApiError(code=400, message=str(exc))).dict())
+
+    @app.exception_handler(FileNotFoundError)
+    async def handle_not_found(_: Request, exc: FileNotFoundError):
+        return JSONResponse(status_code=404, content=ApiResponse(ok=False, error=ApiError(code=404, message=str(exc))).dict())
+
+    @app.exception_handler(Exception)
+    async def handle_generic_error(req: Request, exc: Exception):
+        logger.exception("API error: path=%s", req.url.path)
+        return JSONResponse(status_code=500, content=ApiResponse(ok=False, error=ApiError(code=500, message=f"服务错误: {type(exc).__name__}: {exc}")).dict())
 
     # 路由注册
     from backend.api.routers.chat import router as chat_router

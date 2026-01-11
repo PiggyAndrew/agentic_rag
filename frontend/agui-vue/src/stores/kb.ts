@@ -17,9 +17,30 @@ export interface KBFile {
   status: string
 }
 
+interface ApiError {
+  code: number
+  message: string
+}
+
+interface ApiResponse<T = any> {
+  ok: boolean
+  data?: T
+  error?: ApiError | null
+}
+
 function getApiBase(): string {
   const base = (import.meta as any).env?.VITE_API_BASE || (import.meta as any).env?.VITE_API_URL || 'http://localhost:8000'
   return base.replace(/\/$/, '')
+}
+
+async function apiRequest<T>(path: string, init?: RequestInit): Promise<T> {
+  const res = await fetch(`${getApiBase()}${path}`, init)
+  const body: ApiResponse<T> = await res.json()
+  if (!body.ok) {
+    const msg = body.error?.message || '请求失败'
+    throw new Error(msg)
+  }
+  return body.data as T
 }
 
 export const useKbStore = defineStore('kb', {
@@ -30,21 +51,25 @@ export const useKbStore = defineStore('kb', {
     loading: false as boolean,
   }),
   persist: true,
-  actions: {
+    actions: {
     /**
      * 拉取知识库列表
      */
     async fetchKnowledgeBases(): Promise<void> {
       this.loading = true
       try {
-        const res = await fetch(`${getApiBase()}/api/kb`)
-        const data = await res.json()
-        this.knowledgeBases = data
+        const list = await apiRequest<KnowledgeBase[]>('/api/kb')
+        console.log('KnowledgeBase list:', list)
+        this.knowledgeBases = list
         if (!this.selectedKbId && this.knowledgeBases.length > 0) {
           const first = this.knowledgeBases[0]
           if (first) this.selectedKbId = first.id
         }
-      } finally {
+      }
+      catch (err) {
+        console.error('KnowledgeBase list error:', err)
+      }
+      finally {
         this.loading = false
       }
     },
@@ -53,12 +78,11 @@ export const useKbStore = defineStore('kb', {
      * 创建知识库
      */
     async createKnowledgeBase(name: string, description?: string): Promise<KnowledgeBase> {
-      const res = await fetch(`${getApiBase()}/api/kb`, {
+      const kb = await apiRequest<KnowledgeBase>('/api/kb', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name, description }),
       })
-      const kb = await res.json()
       this.knowledgeBases = [kb, ...this.knowledgeBases]
       if (!this.selectedKbId) this.selectedKbId = kb.id
       return kb
@@ -68,12 +92,11 @@ export const useKbStore = defineStore('kb', {
      * 更新知识库名称或描述
      */
     async updateKnowledgeBase(kbId: string, name?: string, description?: string): Promise<KnowledgeBase> {
-      const res = await fetch(`${getApiBase()}/api/kb/${kbId}`, {
+      const kb = await apiRequest<KnowledgeBase>(`/api/kb/${kbId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name, description }),
       })
-      const kb = await res.json()
       const idx = this.knowledgeBases.findIndex(k => k.id === kbId)
       if (idx >= 0) this.knowledgeBases[idx] = kb
       return kb
@@ -83,7 +106,7 @@ export const useKbStore = defineStore('kb', {
      * 删除知识库
      */
     async deleteKnowledgeBase(kbId: string): Promise<void> {
-      await fetch(`${getApiBase()}/api/kb/${kbId}`, { method: 'DELETE' })
+      await apiRequest<unknown>(`/api/kb/${kbId}`, { method: 'DELETE' })
       this.knowledgeBases = this.knowledgeBases.filter(k => k.id !== kbId)
       delete this.filesByKb[kbId]
       if (this.selectedKbId === kbId) {
@@ -95,9 +118,8 @@ export const useKbStore = defineStore('kb', {
      * 拉取知识库文件列表
      */
     async fetchFiles(kbId: string): Promise<void> {
-      const res = await fetch(`${getApiBase()}/api/kb/${kbId}/files`)
-      const data = await res.json()
-      this.filesByKb[kbId] = data
+      const list = await apiRequest<KBFile[]>(`/api/kb/${kbId}/files`)
+      this.filesByKb[kbId] = list
     },
 
     /**
@@ -114,7 +136,7 @@ export const useKbStore = defineStore('kb', {
         reader.onerror = reject
         reader.readAsDataURL(file)
       })
-      const res = await fetch(`${getApiBase()}/api/kb/${kbId}/files`, {
+      const item = await apiRequest<KBFile>(`/api/kb/${kbId}/files`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -123,7 +145,6 @@ export const useKbStore = defineStore('kb', {
           contentBase64,
         }),
       })
-      const item: KBFile = await res.json()
       const list = this.filesByKb[kbId] || []
       this.filesByKb[kbId] = [item, ...list]
       return item
@@ -133,8 +154,7 @@ export const useKbStore = defineStore('kb', {
      * 查看文件片段
      */
     async fetchChunks(kbId: string, fileId: string): Promise<any[]> {
-      const res = await fetch(`${getApiBase()}/api/kb/${kbId}/files/${fileId}/chunks`)
-      const data = await res.json()
+      const data = await apiRequest<any[]>(`/api/kb/${kbId}/files/${fileId}/chunks`)
       return data
     },
 
@@ -142,12 +162,11 @@ export const useKbStore = defineStore('kb', {
      * 向量化指定文件名
      */
     async vectorizeFile(kbId: string, filename: string): Promise<KBFile> {
-      const res = await fetch(`${getApiBase()}/api/kb/${kbId}/ingest`, {
+      const item = await apiRequest<KBFile>(`/api/kb/${kbId}/ingest`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ filename }),
       })
-      const item: KBFile = await res.json()
       const list = this.filesByKb[kbId] || []
       const idx = list.findIndex(f => f.id === item.id)
       if (idx >= 0) {
@@ -163,7 +182,7 @@ export const useKbStore = defineStore('kb', {
      * 删除文件
      */
     async deleteFile(fileId: string, kbId: string): Promise<void> {
-      await fetch(`${getApiBase()}/api/files/${fileId}`, { method: 'DELETE' })
+      await apiRequest<unknown>(`/api/files/${fileId}`, { method: 'DELETE' })
       const list = this.filesByKb[kbId] || []
       this.filesByKb[kbId] = list.filter(f => f.id !== fileId)
     },

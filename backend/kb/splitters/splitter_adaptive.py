@@ -6,6 +6,9 @@ from backend.prompts.system import get_toc_parser_system_prompt, get_toc_parser_
 from .splitter_base import Splitter
 from .splitter_utils import parse_json_array, normalize_title, is_toc_line, detect_toc_bounds
 from .splitter_headings import HeadingsSplitter, HeadingItem
+from backend.kb.types.chunk import KnowledgeChunk
+from backend.kb.types.metadata import ChunkMetadata
+import time
 
 
 def get_toc_parsing_llm() -> Optional[object]:
@@ -76,11 +79,11 @@ class AdaptiveSplitter(Splitter):
         except Exception:
             return []
 
-    def split(self, text: str) -> List[Dict[str, Any]]:
+    def split(self, text: str, kb_id: int, file_id: int) -> List[KnowledgeChunk]:
         lines = (text or "").splitlines()
         bounds = self._detect_toc_bounds(lines)
         if not bounds:
-            return HeadingsSplitter().split(text)
+            return HeadingsSplitter().split(text, kb_id, file_id)
         s, e, title = bounds
         toc_text = "\n".join(
             [
@@ -97,12 +100,30 @@ class AdaptiveSplitter(Splitter):
         allowed: Optional[List[HeadingItem]] = None
         if self.use_llm:
             allowed = self._llm_extract_toc_headings(toc_text)
-
-        chunks_rest = HeadingsSplitter(allowed_headings=allowed).split(rest)
-        out: List[Dict[str, Any]] = []
-        out.append({
-            "content": toc_text,
-            "metadata": {"number": "", "title": title, "path": [], "type": "toc"},
-        })
-        out.extend(chunks_rest)
-        return out
+        chunks_rest = HeadingsSplitter(allowed_headings=allowed).split(rest, kb_id, file_id)
+        now_ms = int(time.time() * 1000)
+        toc_meta = ChunkMetadata.coerce({"number": "", "title": title, "path": [], "type": "toc"})
+        toc_chunk = KnowledgeChunk(
+            kb_id=int(kb_id),
+            file_id=int(file_id),
+            chunk_index=0,
+            content=toc_text,
+            metadata=toc_meta,
+            created_at_ms=now_ms,
+            updated_at_ms=now_ms,
+        )
+        all_chunks = [toc_chunk] + chunks_rest
+        reindexed: List[KnowledgeChunk] = []
+        for i, c in enumerate(all_chunks):
+            reindexed.append(
+                KnowledgeChunk(
+                    kb_id=int(kb_id),
+                    file_id=int(file_id),
+                    chunk_index=i,
+                    content=str(c.content or ""),
+                    metadata=c.metadata,
+                    created_at_ms=now_ms,
+                    updated_at_ms=now_ms,
+                )
+            )
+        return reindexed

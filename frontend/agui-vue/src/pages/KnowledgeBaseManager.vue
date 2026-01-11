@@ -22,12 +22,18 @@ interface FileItem {
 }
 
 const kbStore = useKbStore()
-const knowledgeBases = computed<KnowledgeBase[]>(() => kbStore.knowledgeBases)
+const knowledgeBases = computed<KnowledgeBase[]>(() => {
+  const list = kbStore.knowledgeBases as any
+  return Array.isArray(list) ? list : []
+})
 const selectedKbId = computed<string>({
   get: () => kbStore.selectedKbId,
-  set: (v) => (kbStore.selectedKbId = v),
+  set: (v) => (kbStore.selectedKbId = v), 
 })
-const files = computed<FileItem[]>(() => kbStore.filesByKb[selectedKbId.value] || [])
+const files = computed<FileItem[]>(() => {
+  const raw = kbStore.filesByKb[selectedKbId.value] as any
+  return Array.isArray(raw) ? raw : []
+})
 const fileSearch = ref<string>('')
 const isCreatingKb = ref<boolean>(false)
 const newKbName = ref<string>('')
@@ -51,6 +57,7 @@ function statusMeta(status: string): { text: string; type: 'info' | 'success' | 
  * 加载知识库列表（后端）
  */
 function loadKnowledgeBases(): void {
+  console.log('loadKnowledgeBases')
   kbStore.fetchKnowledgeBases().then(() => {
     if (kbStore.selectedKbId) {
       loadFiles(kbStore.selectedKbId)
@@ -62,6 +69,7 @@ function loadKnowledgeBases(): void {
  * 选择知识库并加载其文件（后端）
  */
 function selectKnowledgeBase(id: string): void {
+  console.log('selectKnowledgeBase', id)
   selectedKbId.value = id
   loadFiles(id)
 }

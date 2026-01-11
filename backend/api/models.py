@@ -56,3 +56,14 @@ class IngestRequest(BaseModel):
     """向量化处理请求体"""
     filename: str
 
+
+class ApiError(BaseModel):
+    code: int
+    message: str
+
+
+class ApiResponse(BaseModel):
+    ok: bool
+    data: Optional[Any] = None
+    error: Optional[ApiError] = None
+

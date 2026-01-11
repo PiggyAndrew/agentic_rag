@@ -211,14 +211,18 @@ def ingest_pdf(kb_controller, kb_id: int, pdf_path: str, chunk_size: int = 500, 
         bool(str(os.getenv("INGEST_USE_LLM_HEADING", "")).lower() in {"1", "true", "yes"})
         if use_llm_headings is None else bool(use_llm_headings)
     )
-    adaptive_chunks = AdaptiveSplitter(use_llm=use_llm).split(text)
-    if adaptive_chunks and adaptive_chunks[0].get("metadata", {}).get("number") == "" and adaptive_chunks[0].get("metadata", {}).get("type") == "toc":
-        chunks = adaptive_chunks
-    else:
-        if adaptive_chunks and adaptive_chunks[0].get("metadata", {}).get("number"):
+    adaptive_chunks = AdaptiveSplitter(use_llm=use_llm).split(text, kb_id, file_id)
+    if adaptive_chunks:
+        first_meta = adaptive_chunks[0].metadata.data if adaptive_chunks[0].metadata else {}
+        if str(first_meta.get("number", "")) == "" and str(first_meta.get("type", "")) == "toc":
             chunks = adaptive_chunks
         else:
-            chunks = NormalSplitter(chunk_size=chunk_size, overlap=overlap).split(text)
+            if str(first_meta.get("number", "")):
+                chunks = adaptive_chunks
+            else:
+                chunks = NormalSplitter(chunk_size=chunk_size, overlap=overlap).split(text, kb_id, file_id)
+    else:
+        chunks = NormalSplitter(chunk_size=chunk_size, overlap=overlap).split(text, kb_id, file_id)
     kb_controller.save_chunks(kb_id, file_id=file_id, chunks=chunks)
     return FileInfo(id=file_id, filename=filename, chunk_count=len(chunks), status="done")
 
@@ -251,22 +255,34 @@ def ingest_excel(
     filename = excel_path.split("/")[-1].split("\\")[-1]
     table_name = os.path.splitext(filename)[0]
 
-    chunks = TableSplitter(
-        table_name=table_name,
-        use_llm_summary=use_llm,
-        max_rows_per_chunk=max_rows_per_chunk,
-        max_chars_per_chunk=max_chars_per_chunk,
-    ).split(text)
-    if not chunks:
-        chunks = [{
-            "content": f"[Table] {table_name}\n[ExcelEmpty] 未读取到任何非空表格数据",
-            "metadata": {"type": "table", "table_name": table_name, "sheet_name": "", "part_index": 1, "part_count": 1, "header": []},
-        }]
+    
 
     rows = kb_controller._repository.list_files(int(kb_id))
     row = next((r for r in rows if str(r.name) == filename), None)
     if row is None:
         raise RuntimeError(f"文件未在知识库中登记：{filename}")
     file_id = int(row.file_id)
+    chunks = TableSplitter(
+        table_name=table_name,
+        use_llm_summary=use_llm,
+        max_rows_per_chunk=max_rows_per_chunk,
+        max_chars_per_chunk=max_chars_per_chunk,
+    ).split(text, kb_id, file_id)
+    if not chunks:
+        from backend.kb.types.chunk import KnowledgeChunk
+        from backend.kb.types.metadata import ChunkMetadata
+        now_ms = int(time.time() * 1000)
+        meta = ChunkMetadata.coerce({"type": "table", "table_name": table_name, "sheet_name": "", "part_index": 1, "part_count": 1, "header": []})
+        chunks = [
+            KnowledgeChunk(
+                kb_id=int(kb_id),
+                file_id=int(file_id),
+                chunk_index=0,
+                content=f"[Table] {table_name}\n[ExcelEmpty] 未读取到任何非空表格数据",
+                metadata=meta,
+                created_at_ms=now_ms,
+                updated_at_ms=now_ms,
+            )
+        ]
     kb_controller.save_chunks(kb_id, file_id=file_id, chunks=chunks)
     return FileInfo(id=file_id, filename=filename, chunk_count=len(chunks), status="done")
