@@ -14,7 +14,11 @@ class HeadingItem(BaseModel):
 
 
 class HeadingsSplitter(Splitter):
-    """目录/编号标题拆分器（支持 Markdown 子标题二次拆分）。"""
+    # 目录/编号标题拆分器
+    # - 支持按 Markdown 标题（# 至 ######）作为章节边界
+    # - 支持识别编号标题（如 1、1.2、Appendix 1、A.1 等）并构建层级路径
+    # - 在章节内部继续按子标题/编号/项目符号进行二次拆分
+    # - 提供“allowed_headings”作为白名单，按给定章节顺序扫描并拆分
 
     name = "headings"
 
@@ -22,26 +26,42 @@ class HeadingsSplitter(Splitter):
         self,
         allowed_headings: Optional[List[HeadingItem]] = None,
         *,
-        min_subchunk_chars: int = 50,
+        min_subchunk_chars: int = 100,
     ):
         self.allowed_headings = allowed_headings or []
+        # 注意：这里将最小子块字符数设为 0，意味着禁用“小块合并”逻辑。
+        # 如果希望合并过小的片段，请将其改为传入的参数值（min_subchunk_chars）。
+        # 当前实现保留原有行为，仅做说明，避免误解为“生效的阈值”。
         self.min_subchunk_chars = int(min_subchunk_chars)
 
+    # Markdown 标题正则：匹配 1-6 级标题，捕获级别与标题文本
     _md_heading_re = re.compile(r"^\s*(#{1,6})\s+(.+?)\s*$")
+    # 说明：^ 开头，\s* 允许前导空白，(#{1,6}) 捕获 # 的个数作为层级，\s+ 至少一个空格后跟标题体
+    # 编号标题正则：匹配“1.2.3”格式，可选后缀“)”或“.”，可选分隔符，捕获编号与标题
     _numbered_title_re = re.compile(r"^\s*(\d+(?:\.\d+)*)(?:\s*[\.)])?\s*(?:[-–—:：]\s*)?(.+?)\s*$")
+    # 说明：捕获 1.2.3 等编号；可选 ) 或 . 作为收尾；可选 “- : ：” 作为分隔符；最后捕获标题文本
+    # 无序列表项正则：匹配“* / + / -”开头的列表项，捕获内容
     _bullet_line_re = re.compile(r"^\s*[*+-]\s+(.+?)\s*$")
+    # 说明：用于识别项目符号行，并尝试在其中二次解析编号标题（如 “- 1.1 子节”）
+    # 附录标题正则：匹配“Appendix 1”或“Appendix a”格式，捕获编号与标题（大小写不敏感）
     _appendix_title_re = re.compile(r"^\s*(appendix\s+(?:\d+|[a-z]))\s+(.+?)\s*$", re.IGNORECASE)
+    # 说明：将 “Appendix a/1” 与后续标题分离，大小写不敏感；在解析时会统一规范化为大写编号
+    # 字母编号标题正则：匹配“a.1.2.3”格式，捕获字母、数字编号与标题（大小写不敏感）
     _letter_numbered_title_re = re.compile(r"^\s*([a-z])\.(\d+(?:\.\d+)*)\s+(.+?)\s*$", re.IGNORECASE)
+    # 说明：识别 A.1.2.3 风格，首字母大小写统一在解析时提升为大写
 
     def _strip_heading_prefix(self, line: str) -> tuple[int, str]:
+        # 去掉 Markdown 标题前缀并返回 (层级, 文本)
         s = line or ""
         m = self._md_heading_re.match(s)
         if not m:
             return (0, s)
+        
         level = len(m.group(1))
         return (level, m.group(2).strip())
 
     def _strip_emphasis(self, s: str) -> str:
+        # 去除粗体/斜体等强调标记，便于后续编号与标题识别
         s = (s or "")
         s = re.sub(r"^\s*(?:\*\*|\*|_)\s*", "", s)
         s = re.sub(r"\s*(?:\*\*|\*|_)\s*$", "", s)
@@ -49,6 +69,7 @@ class HeadingsSplitter(Splitter):
         return s
 
     def _norm_number(self, n: str) -> str:
+        # 规范化编号字符串：去结尾点、合并空白
         n = (n or "").strip()
         if n.endswith("."):
             n = n[:-1]
@@ -56,6 +77,9 @@ class HeadingsSplitter(Splitter):
         return n
 
     def _order_key_list(self, number: str) -> List[int]:
+        # 将编号转为可排序的整数序列
+        # - 普通数字：按分段转换为整数 [1,2,3]
+        # - 附录：使用前缀 10000 区分（如 Appendix A → [10000, 65]）
         n = self._norm_number(number)
         if not n:
             return []
@@ -90,14 +114,17 @@ class HeadingsSplitter(Splitter):
         n = self._norm_number(number)
         if re.fullmatch(r"\d+(?:\.\d+)*", n):
             esc = re.escape(n)
-            return re.compile(rf"(?<![\d\.]){esc}(?![\d\.])")
+            return re.compile(rf"{esc}(?:\s*[\.)])?")
         esc = re.escape(n)
-        return re.compile(rf"\b{esc}\b", re.IGNORECASE)
+        return re.compile(rf"{esc}", re.IGNORECASE)
 
     def _content_size(self, text: str) -> int:
+        # 内容大小（去空白后的长度），用于判断小块合并
         return len(re.sub(r"\s+", "", text or ""))
 
     def _parse_numbered_title(self, text: str) -> Optional[tuple[str, str]]:
+        # 解析一行文本为 (编号, 标题)
+        # 顺序：Appendix → 字母编号（A.1）→ 纯数字编号（1.2.3）
         s = self._strip_emphasis(text or "")
         am = self._appendix_title_re.match(s)
         if am:
@@ -127,11 +154,13 @@ class HeadingsSplitter(Splitter):
         return (num, title)
 
     def _build_number_path(self, number: str, number_to_title: Dict[str, str]) -> List[Dict[str, Any]]:
+        # 构建层级路径：用于在元数据中体现章节层次（如 1 → 1.1 → 1.1.1）
         n = self._norm_number(number)
         if not n:
             return []
         m_app = re.match(r"^Appendix\s+([A-Za-z0-9]+)(?:\.(\d+(?:\.\d+)*))?$", n)
         if m_app:
+            # 说明：附录编号的路径构造稍有不同，首段使用 “Appendix X”，其后按点分段扩展
             prefix = f"Appendix {m_app.group(1)}"
             rest = m_app.group(2) or ""
             segs = [prefix] + ([p for p in rest.split(".") if p] if rest else [])
@@ -158,6 +187,9 @@ class HeadingsSplitter(Splitter):
         return path
 
     def _scan_allowed_chapters(self, lines: List[str]) -> tuple[List[Dict[str, Any]], Dict[str, str]]:
+        # 在白名单章节中按顺序扫描匹配到的顶级章节
+        # - 使用正则与归一化标题进行匹配
+        # - 强制推进规则：同层递增/回到上级后的递增/子层推进/进入附录
         allowed: List[Dict[str, Any]] = []
         number_to_title: Dict[str, str] = {}
         for h in self.allowed_headings:
@@ -187,6 +219,8 @@ class HeadingsSplitter(Splitter):
                 continue
             body = self._strip_emphasis(body)
             body_norm = normalize_title(body)
+            if i==311:
+                print(body_norm)
             if not body_norm:
                 continue
             for a in allowed:
@@ -194,8 +228,10 @@ class HeadingsSplitter(Splitter):
                 if num in seen_numbers:
                     continue
                 if not a["pat"].search(body):
+                    # 编号未出现：跳过
                     continue
                 if a["title_norm"] not in body_norm:
+                    # 白名单标题关键字未包含：跳过
                     continue
                 if last_num:
                     prev = self._order_key_list(last_num)
@@ -208,6 +244,7 @@ class HeadingsSplitter(Splitter):
                         is_next_major = len(cur) == 1 and len(prev) >= 1 and cur[0] == prev[0] + 1
                         is_appendix = cur and cur[0] == 10000
                         if not (is_child or is_same_level_next or is_upper_level_next or is_next_major or is_appendix):
+                            # 若推进不满足层级与序号递增关系则拒绝，确保章节顺序合理
                             continue
                 chapters.append({
                     "index": i,
@@ -223,6 +260,7 @@ class HeadingsSplitter(Splitter):
         return (chapters, number_to_title)
 
     def _split_by_markdown_headings(self, lines: List[str]) -> List[Dict[str, Any]]:
+        # 不使用白名单时：按最低层级的 Markdown 标题作为章节边界拆分
         heads: List[Dict[str, Any]] = []
         min_level = 7
         for i, raw in enumerate(lines):
@@ -235,6 +273,7 @@ class HeadingsSplitter(Splitter):
         if not heads:
             return [{"content": "\n".join(lines).strip(), "metadata": {"number": "", "title": "", "path": []}}]
         chapters = [h for h in heads if h["level"] == min_level]
+        # 说明：选择最浅层级作为外层章节边界，避免被更深层子标题过度切分成碎片
         if not chapters:
             return [{"content": "\n".join(lines).strip(), "metadata": {"number": "", "title": "", "path": []}}]
         out: List[Dict[str, Any]] = []
@@ -256,6 +295,7 @@ class HeadingsSplitter(Splitter):
         return out
 
     def _merge_small_chunks(self, chunks: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+        # 合并过小的内容块：保持同一编号下的相邻片段合并，直到达到最小内容阈值
         if len(chunks) <= 1 or self.min_subchunk_chars <= 0:
             return chunks
         out: List[Dict[str, Any]] = []
@@ -267,6 +307,7 @@ class HeadingsSplitter(Splitter):
             while j < len(chunks) - 1 and self._content_size(merged_content) < self.min_subchunk_chars:
                 nxt = chunks[j + 1]
                 if (cur.get("metadata", {}).get("number") != nxt.get("metadata", {}).get("number")):
+                    # 不同编号的片段不合并，保持层级语义
                     break
                 merged_content = (merged_content.strip() + "\n" + nxt.get("content", "").strip()).strip()
                 j += 1
@@ -277,6 +318,7 @@ class HeadingsSplitter(Splitter):
             prev = out[-2]
             last = out[-1]
             if prev.get("metadata", {}).get("number") == last.get("metadata", {}).get("number"):
+                # 尾部小块与前一个同编号片段合并，减少尾碎片
                 prev["content"] = (prev.get("content", "").strip() + "\n" + last.get("content", "").strip()).strip()
                 out.pop()
         return out
@@ -290,10 +332,16 @@ class HeadingsSplitter(Splitter):
         chapter_title: str,
         chapter_path: List[Dict[str, Any]],
     ) -> List[Dict[str, Any]]:
+        # 章节内部二次拆分：
+        # - 识别子标题（更深层级的 Markdown 标题）
+        # - 识别项目符号中的编号标题
+        # - 识别普通文本行中的编号标题
+        # 然后基于这些界标切分内容，并带上层级路径与排序键
         if not chapter_lines:
             return []
         base_level = chapter_level if 1 <= chapter_level <= 6 else 1
         chapter_num_norm = self._norm_number(chapter_number)
+        is_appendix_chapter = bool(re.match(r"^Appendix\s+", chapter_num_norm))
         subheads: List[Dict[str, Any]] = []
         seen_sub_numbers: set[str] = set()
 
@@ -319,6 +367,7 @@ class HeadingsSplitter(Splitter):
             if m:
                 lvl = len(m.group(1))
                 if lvl <= base_level:
+                    # 不是更深层级的标题，不作为子标题界标
                     continue
                 raw_title = m.group(2).strip()
                 parsed = self._parse_numbered_title(raw_title)
@@ -326,6 +375,7 @@ class HeadingsSplitter(Splitter):
                     n, t = parsed
                     _add_subhead(i, n, t, lvl)
                 else:
+                    # 没有编号标题也视为子标题（仅携带标题文本）
                     subheads.append({"index": i, "level": lvl, "number": "", "title": raw_title})
                 continue
 
@@ -344,6 +394,13 @@ class HeadingsSplitter(Splitter):
                 n, t = parsed
                 _add_subhead(i, n, t, base_level + 1)
                 continue
+            if is_appendix_chapter:
+                s = (line or "").strip()
+                bm_bold = re.match(r"^\s*(?:\*\*|__)\s*(.+?)\s*(?:\*\*|__)\s*$", s)
+                if bm_bold:
+                    raw_title = bm_bold.group(1).strip()
+                    subheads.append({"index": i, "level": base_level + 1, "number": "", "title": raw_title})
+                    continue
         if not subheads:
             content = "\n".join(chapter_lines).strip()
             return [{
@@ -352,6 +409,7 @@ class HeadingsSplitter(Splitter):
             }] if content else []
 
         start_to_sub = {h["index"]: (h.get("number", ""), h.get("title", "")) for h in subheads}
+        # 说明：记录每个子标题起点对应的 (编号, 标题)，用于在切分时填充元数据
         boundaries = [0] + [h["index"] for h in subheads]
         chunks: List[Dict[str, Any]] = []
         for k, start in enumerate(boundaries):
@@ -376,6 +434,9 @@ class HeadingsSplitter(Splitter):
         return self._merge_small_chunks(chunks)
 
     def split(self, text: str) -> List[Dict[str, Any]]:
+        # 主入口：
+        # - 若未提供 allowed_headings，则按 Markdown 标题的最低层级拆分
+        # - 若提供了 allowed_headings，则按白名单顺序扫描并拆分
         lines = (text or "").splitlines()
         if not lines:
             return [{"content": "", "metadata": {"number": "", "title": "", "path": []}}]

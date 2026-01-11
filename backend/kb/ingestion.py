@@ -2,6 +2,7 @@ from typing import List, Dict, Any, Optional
 import os
 import re
 import html
+from sqlalchemy import false
 from .splitters import (
     NormalSplitter,
     AdaptiveSplitter,
@@ -60,7 +61,7 @@ def read_pdf_markdown_with_images(pdf_path: str, image_dir: str) -> str:
     try:
         import pymupdf4llm  # type: ignore
     except Exception:
-        raise RuntimeError(
+        raise RuntimeError( 
             "缺少依赖：请安装 pymupdf 与 pymupdf4llm。\n"
             "pip install pymupdf pymupdf4llm"
         )
@@ -69,17 +70,19 @@ def read_pdf_markdown_with_images(pdf_path: str, image_dir: str) -> str:
     md = pymupdf4llm.to_markdown(
         pdf_path,
         write_images=True,
-        embed_images=False,
         image_path=image_dir,
-        dpi=150,
-        force_text=True,
-        page_chunks=False,
-        show_progress=False,
+        use_ocr=False,
+        #dpi=500,
+        #show_progress=False,
     )
+    # llama_reader = pymupdf4llm.LlamaMarkdownReader()
+    # llama_docs = llama_reader.load_data(pdf_path)
+    # loader = PyMuPDFLoader(pdf_path)
+    # data = loader.load()
     if isinstance(md, list):
         page_texts: List[str] = []
         for page in md:
-            page_texts.append(str(page.get("text", "")).strip())
+            page_texts.append(str(page.get("text") ).strip())
         return "\n\n".join(t for t in page_texts if t).strip()
     return str(md).strip()
 

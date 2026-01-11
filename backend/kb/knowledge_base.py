@@ -2,7 +2,6 @@ from typing import List, Dict, Tuple, Any, Optional
 import numpy as np
 from .embeddings import get_default_embedder
 from .rerank import get_default_reranker, Reranker
-from .vector_store import LocalVectorStore, MilvusLiteVectorStore
 from .types import (
     FileInfo,
     FileChunk,
@@ -24,7 +23,10 @@ from sqlalchemy import select
 from backend.database.sqlite import SqliteSessionManager, get_default_sqlite_manager, init_sqlite_database
 from backend.kb.knowledge_models import KnowledgeChunkORM
 from backend.kb.knowledge_repository import KnowledgeNotFoundError, SqlAlchemyKnowledgeRepository
-from backend.kb.vector_store import MilvusLiteVectorStore, LocalVectorStore
+from backend.kb.vector_store import ChromaVectorStore
+
+
+
 class PersistentKnowledgeBaseController:
     """持久化知识库控制器：元数据与片段持久化到 SQLite，向量索引保留原实现。"""
 
@@ -40,10 +42,9 @@ class PersistentKnowledgeBaseController:
         self.base_dir = base_dir
         os.makedirs(self.base_dir, exist_ok=True)
         self._embedder = embedder or get_default_embedder()
-        try:
-            self._vstore = MilvusLiteVectorStore(base_dir=self.base_dir)
-        except Exception:
-            self._vstore = LocalVectorStore(base_dir=self.base_dir)
+       
+        self._vstore = ChromaVectorStore(base_dir=self.base_dir)
+       
         self._manager = manager or get_default_sqlite_manager()
         init_sqlite_database(manager=self._manager)
         self._repository = repo or SqlAlchemyKnowledgeRepository(manager=self._manager)
@@ -183,8 +184,7 @@ class PersistentKnowledgeBaseController:
                     normalized[i]["embedding"] = embs[k].tolist()
                     vitems[i]["embedding"] = embs[k].tolist()
         except Exception:
-            # 失败时跳过嵌入，不影响片段持久化
-            pass
+            raise
         now_ms = int(time.time() * 1000)
         payload: List[KnowledgeChunkUpsert] = []
         for r in normalized:
@@ -225,7 +225,7 @@ class PersistentKnowledgeBaseController:
                     ),
                 )
         except Exception:
-            pass
+            raise
 
     def _filename_of(self, kb_id: int, file_id: int) -> str:
         """根据文件ID获取文件名"""

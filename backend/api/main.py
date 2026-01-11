@@ -31,8 +31,10 @@ def create_app() -> FastAPI:
     # 路由注册
     from backend.api.routers.chat import router as chat_router
     from backend.api.routers.kb import router as kb_router
+    from backend.api.routers.docx import router as docx_router
     app.include_router(chat_router)
     app.include_router(kb_router)
+    app.include_router(docx_router)
 
     # 静态资源挂载：暴露 data/kb 目录用于图片访问
     # 访问示例：/assets/{kbId}/assets/images/{fileId}/{imageName}

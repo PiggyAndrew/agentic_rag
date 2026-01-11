@@ -5,6 +5,12 @@ export type AiConfigState = {
   llmApiKey: string
   llmBaseUrl: string
   llmModel: string
+  embeddingApiKey: string
+  embeddingBaseUrl: string
+  embeddingModel: string
+  rerankerApiKey: string
+  rerankerBaseUrl: string
+  rerankerModel: string
 }
 
 function defaultApiBaseUrl(): string {
@@ -21,6 +27,12 @@ export const useAiStore = defineStore('ai', {
     llmApiKey: '',
     llmBaseUrl: '',
     llmModel: '',
+    embeddingApiKey: '',
+    embeddingBaseUrl: '',
+    embeddingModel: '',
+    rerankerApiKey: '',
+    rerankerBaseUrl: '',
+    rerankerModel: '',
   }),
   persist: true,
   getters: {
@@ -30,4 +42,3 @@ export const useAiStore = defineStore('ai', {
     },
   },
 })
-

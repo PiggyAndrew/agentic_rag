@@ -6,7 +6,6 @@ import urllib.request
 import logging
 from langchain_community.embeddings import DashScopeEmbeddings
 from backend.config.settings import resolve_embedding_backend, get_settings, EmbeddingBackend
-
 logger = logging.getLogger(__name__)
 
 class OllamaEmbeddingProvider:
@@ -56,11 +55,11 @@ class OllamaEmbeddingProvider:
 
 
 def get_default_embedder():
-    backend = resolve_embedding_backend()
-    if backend == EmbeddingBackend.dashscope:
-        logger.info("Embedding backend selected: dashscope (env=%s)", getattr(get_settings().APP_ENV, "value", get_settings().APP_ENV))
-        return AliyunDashScopeEmbeddingProvider()
-    logger.info("Embedding backend selected: ollama (env=%s)", getattr(get_settings().APP_ENV, "value", get_settings().APP_ENV))
+    # backend = resolve_embedding_backend()
+    # if backend == EmbeddingBackend.dashscope:
+    #     logger.info("Embedding backend selected: dashscope (env=%s)", getattr(get_settings().APP_ENV, "value", get_settings().APP_ENV))
+    #     return AliyunDashScopeEmbeddingProvider()
+    # logger.info("Embedding backend selected: ollama (env=%s)", getattr(get_settings().APP_ENV, "value", get_settings().APP_ENV))
     return OllamaEmbeddingProvider()
 
 
