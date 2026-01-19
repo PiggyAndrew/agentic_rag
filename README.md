@@ -119,6 +119,11 @@ To build the standalone Windows application (installer):
 | `EMBEDDING_BASE_URL`| Base URL for embeddings | `http://localhost:11434` |
 | `LOG_LEVEL` | Logging level | `INFO` |
 
-## 📄 License
+## � Roadmap
+
+- [ ] **Advanced Chunking**: Support for more sophisticated document splitting strategies.
+- [ ] **Chat History**: Persistence and management of chat sessions to resume previous conversations.
+
+## �📄 License
 
 [MIT](LICENSE)

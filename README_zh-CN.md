@@ -119,6 +119,11 @@ Agentic RAG 是一个全功能的检索增强生成 (RAG) 应用程序，结合�
 | `EMBEDDING_BASE_URL`| Embedding 基础 URL | `http://localhost:11434` |
 | `LOG_LEVEL` | 日志级别 | `INFO` |
 
+## 📅 开发计划
+
+- [ ] **高级分块模式**：支持更多文档切分策略（如语义分块、层级分块等）。
+- [ ] **聊天历史记录**：支持聊天会话的持久化保存与管理，方便回顾历史对话。
+
 ## 📄 许可证
 
 [MIT](LICENSE)
