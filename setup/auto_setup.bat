@@ -74,6 +74,7 @@ if not errorlevel 1 (
     )
   )
 )
+:skip_venv
 where python >nul 2>&1
 if errorlevel 1 (
   where py >nul 2>&1

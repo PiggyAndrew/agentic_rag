@@ -34,6 +34,12 @@ jobs:
         python-version: '3.11'
         cache: 'pip'
         
+    - name: Install uv
+      uses: astral-sh/setup-uv@v5
+      with:
+        enable-cache: true
+        cache-dependency-glob: "uv.lock"
+
     - name: Install Inno Setup
       run: |
         choco install innosetup --no-progress
@@ -44,8 +50,8 @@ jobs:
       
     - name: Install Backend Dependencies
       run: |
-        pip install .
-        pip install cx_Freeze
+        uv pip install --system .
+        uv pip install --system cx_Freeze
         
     - name: Run Build Script
       run: .\setup\auto_setup.bat

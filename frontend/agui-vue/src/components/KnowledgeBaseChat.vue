@@ -58,12 +58,12 @@ import {
   SourcesTrigger,
 } from "@/components/ai-elements/sources";
 import { Suggestion, Suggestions } from "@/components/ai-elements/suggestion";
-import { CheckIcon, GlobeIcon } from "lucide-vue-next";
+import { CheckIcon, GlobeIcon, PencilIcon, XIcon, SaveIcon } from "lucide-vue-next";
 import { streamChat } from "@/api/chat";
-import { computed, ref, onMounted, watch } from "vue";
+import { computed, ref, onMounted, watch, nextTick } from "vue";
 import { useKbStore } from "@/stores/kb";
 import { useAiStore } from "@/stores/ai";
-import { ElRadioGroup, ElRadio, ElDialog, ElButton } from "element-plus";
+import { ElRadioGroup, ElRadio, ElDialog, ElButton, ElInput } from "element-plus";
 import {
   Tool,
   ToolContent,
@@ -738,21 +738,10 @@ function extractText(obj: any): string {
   return String(obj);
 }
 
-function addUserMessage(content: string) {
-  const timestamp = Date.now();
-  const userMessage: MessageType = {
-    key: `user-${timestamp}`,
-    from: "user",
-    versions: [
-      {
-        id: `user-${timestamp}`,
-        content,
-      },
-    ],
-  };
+const editingMessageKey = ref<string | null>(null);
+const editingContent = ref<string>("");
 
-  messages.value = [...messages.value, userMessage];
-
+function triggerAssistantResponse() {
   setTimeout(() => {
     const assistantVersionId = `assistant-${Date.now()}`;
     const assistantMessage: MessageType = {
@@ -769,6 +758,58 @@ function addUserMessage(content: string) {
     messages.value = [...messages.value, assistantMessage];
     streamResponse(assistantVersionId);
   }, 200);
+}
+
+function startEditing(message: MessageType) {
+  editingMessageKey.value = message.key;
+  editingContent.value = latestContent(message);
+}
+
+function cancelEditing() {
+  editingMessageKey.value = null;
+  editingContent.value = "";
+}
+
+function submitEdit(key: string) {
+  stopGeneration();
+  const index = messages.value.findIndex((m) => m.key === key);
+  if (index === -1) return;
+
+  const msg = messages.value[index];
+  const newContent = editingContent.value.trim();
+  
+  if (!newContent) return;
+
+  // Add new version
+  const newVersionId = `user-${Date.now()}`;
+  msg.versions.push({
+    id: newVersionId,
+    content: newContent,
+  });
+
+  // Truncate subsequent messages
+  messages.value = messages.value.slice(0, index + 1);
+
+  cancelEditing();
+  triggerAssistantResponse();
+}
+
+function addUserMessage(content: string) {
+  const timestamp = Date.now();
+  const userMessage: MessageType = {
+    key: `user-${timestamp}`,
+    from: "user",
+    versions: [
+      {
+        id: `user-${timestamp}`,
+        content,
+      },
+    ],
+  };
+
+  messages.value = [...messages.value, userMessage];
+
+  triggerAssistantResponse();
 }
 
 function handleSubmit(message: PromptInputMessage) {
@@ -875,12 +916,37 @@ watch(
                     </ToolContent>
                   </Tool>
 
-                  <MessageContent>
-                    <div v-if="message.from === 'user'">
-                      {{ latestContent(message) }}
+                  <template v-if="message.from === 'user'">
+                    <div v-if="editingMessageKey === message.key" class="w-full max-w-xl self-end bg-white p-3 rounded-xl border shadow-sm">
+                      <ElInput
+                        v-model="editingContent"
+                        type="textarea"
+                        :autosize="{ minRows: 2, maxRows: 10 }"
+                        class="mb-2"
+                        resize="none"
+                      />
+                      <div class="flex justify-end gap-2">
+                        <ElButton size="small" @click="cancelEditing">取消</ElButton>
+                        <ElButton type="primary" size="small" @click="submitEdit(message.key)">发送</ElButton>
+                      </div>
                     </div>
+                    <div v-else class="flex items-start gap-2 flex-row-reverse group is-user">
+                      <button
+                        class="mt-2 p-1 text-gray-400 hover:text-gray-600 opacity-0 group-hover:opacity-100 transition-opacity"
+                        @click="startEditing(message)"
+                        title="Edit message"
+                      >
+                        <PencilIcon class="size-4" />
+                      </button>
+                      <MessageContent>
+                        <div class="whitespace-pre-wrap">{{ latestContent(message) }}</div>
+                      </MessageContent>
+                    </div>
+                  </template>
+
+                  <MessageContent v-else>
                     <template
-                      v-else-if="
+                      v-if="
                         message.from === 'assistant' &&
                         latestContent(message).includes('〔cite:')
                       "
