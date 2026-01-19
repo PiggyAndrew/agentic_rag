@@ -1,11 +1,31 @@
 # Agentic RAG
 
+[![中文文档](https://img.shields.io/badge/文档-中文版-blue.svg)](README_zh-CN.md)
+
 Agentic RAG is a comprehensive Retrieval-Augmented Generation (RAG) application that combines a powerful Python backend with a modern Vue.js frontend. It features intelligent agents, a knowledge base system, and document processing capabilities, all wrapped in a user-friendly interface.
 
-It can be run as a local web application or packaged as a standalone Windows desktop application.
+It is designed for **Local Deployment**, ensuring your data remains private with a local vector store and database.
+
+## 📸 Screenshots
+
+<div align="center">
+  <img src="assets/photos/chat_view.png" alt="Chat Interface" width="800"/>
+  <p><em>Intelligent Chat Interface with RAG Support</em></p>
+</div>
+
+<div align="center">
+  <img src="assets/photos/repositoy.png" alt="Knowledge Base" width="800"/>
+  <p><em>Knowledge Base Management</em></p>
+</div>
+
+<div align="center">
+  <img src="assets/photos/ai_provider_settings.png" alt="AI Settings" width="800"/>
+  <p><em>Flexible AI Provider Configuration</em></p>
+</div>
 
 ## ✨ Key Features
 
+- **🔒 Local & Private**: Built with privacy in mind. Runs entirely locally with **Local Vector Store (ChromaDB)** and **Local Database (SQLite)**. Your data stays on your machine.
 - **🤖 Intelligent Agents**: Utilizes LangChain and LangGraph for complex reasoning and retrieval tasks.
 - **📚 Knowledge Base**: Upload and manage documents (PDF, Word, etc.) to provide context for AI.
 - **🔌 Multi-Model Support**: Seamless integration with OpenAI, DeepSeek, Ollama, DashScope, and more.
