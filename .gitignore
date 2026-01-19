@@ -74,3 +74,6 @@ tests/outputs/
 
 /setup/Output
 /web/agui-vue/dist
+
+.shared/
+.trae/

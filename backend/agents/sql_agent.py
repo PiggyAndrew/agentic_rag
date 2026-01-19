@@ -7,7 +7,12 @@ from langchain.agents import create_agent
 
 from backend.tools.sql import build_sql_tools
 from backend.config.settings import get_settings
-
+from backend.config.settings_constants import (
+    CONFIG_KEY_RERANKER_BASE_URL,
+    CONFIG_KEY_RERANKER_MODEL,
+    CONFIG_KEY_RERANKER_API_KEY,
+    CONFIG_KEY_RERANKER_PRE_K,
+)
 
 def _system_prompt() -> str:
     """返回 SQL Agent 的系统提示词"""
@@ -26,9 +31,9 @@ def _build_model():
     """构建 LLM 模型实例"""
     load_dotenv()
     settings = get_settings()
-    api_key = settings.DEEPSEEK_API_KEY or os.getenv("OPENAI_API_KEY")
-    base_url = os.getenv("LLM_BASE_URL", "https://api.deepseek.com/v1")
-    model = os.getenv("LLM_MODEL", "deepseek-chat")
+    api_key = settings.get_llm_api_key(CONFIG_KEY_RERANKER_API_KEY)
+    base_url = settings.get_llm_base_url(CONFIG_KEY_RERANKER_BASE_URL)
+    model = settings.get_llm_model(CONFIG_KEY_RERANKER_MODEL)
     return ChatOpenAI(
         temperature=0,
         max_retries=3,

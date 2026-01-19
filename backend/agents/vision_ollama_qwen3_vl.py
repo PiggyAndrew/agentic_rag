@@ -7,8 +7,9 @@ from typing import Any, List, Union
 
 class OllamaVisionAgent:
     def __init__(self, base_url: str | None = None, model_name: str | None = None, timeout: int = 60):
-        self._base_url = base_url or os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
-        self._model_name = model_name or os.getenv("OLLAMA_VISION_MODEL", "qwen3-vl")
+        settings = get_settings()
+        self._base_url = base_url or settings.get_ollama_base_url("ollama.baseUrl")
+        self._model_name = model_name or settings.get_ollama_vision_model("ollama.visionModel")
         self._timeout = timeout
         self._llm = ChatOllama(base_url=self._base_url, model=self._model_name)
 

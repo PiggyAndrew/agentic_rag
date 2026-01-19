@@ -1,4 +1,5 @@
 import os
+import sys
 from fastapi import FastAPI
 import uvicorn
 from backend.api.main import create_app as create_api_app
@@ -53,12 +54,25 @@ def main():
     """启动 uvicorn 服务入口"""
     s = get_settings()
     is_dev = s.APP_ENV == AppEnv.development
+    
+    # 如果是打包后的环境，强制禁用 reload，避免无限重启
+    if getattr(sys, 'frozen', False):
+        is_dev = False
+        
     port = int(os.getenv("PORT", "8000"))
     uv_level = "info" if is_dev else "warning"
     access_level = "info" if is_dev else "warning"
     log_config = _uvicorn_logging_config(uv_level, access_level)
+
+    if is_dev:
+        # 开发模式：使用字符串以支持 reload
+        app_target = "backend.entrypoints.server:app"
+    else:
+        # 生产/打包模式：直接使用 app 实例，避免 import 路径问题
+        app_target = app
+
     uvicorn.run(
-        "backend.entrypoints.server:app",
+        app_target,
         host="0.0.0.0",
         port=port,
         reload=is_dev,

@@ -50,7 +50,7 @@ const { status, size, variant, class: _, ...restProps } = props
     :class="cn(props.class)"
     :size="size"
     :variant="variant"
-    type="submit"
+    :type="props.status === 'streaming' ? 'button' : 'submit'"
     v-bind="restProps"
   >
     <slot>

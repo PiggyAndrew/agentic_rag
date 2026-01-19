@@ -5,15 +5,31 @@ import json
 import urllib.request
 import logging
 from langchain_community.embeddings import DashScopeEmbeddings
-from backend.config.settings import resolve_embedding_backend, get_settings, EmbeddingBackend
+from backend.config.settings import get_settings
+from backend.config.settings_constants import (
+    CONFIG_KEY_EMBEDDING_BASE_URL,
+    CONFIG_KEY_EMBEDDING_MODEL,
+    CONFIG_KEY_EMBEDDING_API_KEY,
+)
+from backend.config.llm_config_repository import LLMConfigRepository
+from backend.config.llm_config import ModelCategory, LLMProviderType
 logger = logging.getLogger(__name__)
 
 class OllamaEmbeddingProvider:
     """基于 Ollama 的嵌入向量生成器（例如 qwen3-embedding）"""
 
     def __init__(self, base_url: str | None = None, model_name: str | None = None, timeout: int = 30):
-        self._base_url = base_url or os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
-        self._model_name = model_name or os.getenv("OLLAMA_EMBED_MODEL", "qwen3-embedding")
+        settings = get_settings()
+        self._base_url = (
+            base_url
+            or settings.get_config(CONFIG_KEY_EMBEDDING_BASE_URL)
+            or os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
+        )
+        self._model_name = (
+            model_name
+            or settings.get_config(CONFIG_KEY_EMBEDDING_MODEL)
+            or os.getenv("OLLAMA_EMBED_MODEL", "qwen3-embedding")
+        )
         self._timeout = timeout
 
     def _post_embed(self, inputs: List[str]) -> List[List[float]]:
@@ -54,13 +70,27 @@ class OllamaEmbeddingProvider:
         return v / n if n != 0 else v
 
 
-def get_default_embedder():
-    # backend = resolve_embedding_backend()
-    # if backend == EmbeddingBackend.dashscope:
-    #     logger.info("Embedding backend selected: dashscope (env=%s)", getattr(get_settings().APP_ENV, "value", get_settings().APP_ENV))
-    #     return AliyunDashScopeEmbeddingProvider()
-    # logger.info("Embedding backend selected: ollama (env=%s)", getattr(get_settings().APP_ENV, "value", get_settings().APP_ENV))
-    return OllamaEmbeddingProvider()
+
+
+def get_configured_embedder():
+    """从数据库获取当前激活的嵌入模型配置"""
+    repo = LLMConfigRepository()
+    provider = repo.get_default_by_category(ModelCategory.embedding.value)
+    if not provider:
+        raise RuntimeError("未找到激活的嵌入模型配置（请在提供商库中设置默认项）")
+    logger.info("Initializing configured embedder: %s (type=%s)", provider.name, provider.provider_type)
+    if provider.provider_type == LLMProviderType.dashscope:
+        return AliyunDashScopeEmbeddingProvider(
+            base_url=provider.base_url,
+            api_key=provider.api_key,
+            model_name=provider.model_name,
+        )
+    if provider.provider_type == LLMProviderType.ollama:
+        return OllamaEmbeddingProvider(
+            base_url=provider.base_url,
+            model_name=provider.model_name,
+        )
+    raise RuntimeError(f"不支持的嵌入模型类型: {provider.provider_type}")
 
 
 class AliyunDashScopeEmbeddingProvider:

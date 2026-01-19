@@ -38,6 +38,57 @@ class ChromaVectorStore(BaseVectorStore):
         super().__init__(base_dir=base_dir)
         self._persist_dir = persist_dir or os.path.join(self.base_dir, "chroma")
         self._client = chromadb.PersistentClient(path=self.base_dir)
+        self._target_cache: Dict[int, int] = {}
+
+    def _target_dim_path(self, kb_id: int) -> str:
+        return os.path.join(self.base_dir, str(int(kb_id)), "vector_dim.txt")
+
+    def _read_target_dim(self, kb_id: int) -> Optional[int]:
+        if int(kb_id) in self._target_cache:
+            return self._target_cache[int(kb_id)]
+        env_val = os.getenv("EMBEDDING_TARGET_DIM", "").strip()
+        if env_val.isdigit() and int(env_val) > 0:
+            self._target_cache[int(kb_id)] = int(env_val)
+            return int(env_val)
+        p = self._target_dim_path(kb_id)
+        try:
+            if os.path.isfile(p):
+                with open(p, "r", encoding="utf-8") as f:
+                    s = f.read().strip()
+                    if s.isdigit():
+                        d = int(s)
+                        if d > 0:
+                            self._target_cache[int(kb_id)] = d
+                            return d
+        except Exception:
+            pass
+        return None
+
+    def _write_target_dim(self, kb_id: int, dim: int) -> None:
+        try:
+            os.makedirs(os.path.join(self.base_dir, str(int(kb_id))), exist_ok=True)
+            with open(self._target_dim_path(kb_id), "w", encoding="utf-8") as f:
+                f.write(str(int(dim)))
+            self._target_cache[int(kb_id)] = int(dim)
+        except Exception:
+            pass
+
+    def _ensure_target_dim(self, kb_id: int, incoming_dim: int) -> int:
+        if incoming_dim <= 0:
+            return incoming_dim
+        cur = self._read_target_dim(kb_id)
+        if cur and cur > 0:
+            return cur
+        self._write_target_dim(kb_id, incoming_dim)
+        return incoming_dim
+
+    def _coerce_vec_dim(self, vec: List[float], target_dim: int) -> List[float]:
+        n = len(vec)
+        if target_dim <= 0 or n == target_dim:
+            return vec
+        if n > target_dim:
+            return vec[:target_dim]
+        return vec + [0.0] * (target_dim - n)
 
     def _get_client(self):
         if self._client is not None:
@@ -46,12 +97,14 @@ class ChromaVectorStore(BaseVectorStore):
         self._client = chromadb.Client()
         return self._client
 
-    def _collection_name(self, kb_id: int) -> str:
+    def _collection_name(self, kb_id: int, dim: Optional[int] = None) -> str:
+        if dim and int(dim) > 0:
+            return f"kb_{int(kb_id)}_dim_{int(dim)}"
         return f"kb_{int(kb_id)}"
 
-    def _get_collection(self, kb_id: int):
+    def _get_collection(self, kb_id: int, dim: Optional[int] = None):
         client = self._get_client()
-        name = self._collection_name(kb_id)
+        name = self._collection_name(kb_id, dim=dim)
         try:
             col = client.get_or_create_collection(name=name)
         except Exception:
@@ -61,7 +114,6 @@ class ChromaVectorStore(BaseVectorStore):
     def add_items(self, kb_id: int, items: List[Dict[str, Any]]) -> None:
         if not items:
             return
-        col = self._get_collection(kb_id)
         ids: List[str] = []
         embeddings: List[List[float]] = []
         documents: List[str] = []
@@ -91,6 +143,15 @@ class ChromaVectorStore(BaseVectorStore):
                 except Exception:
                     md["metadata"] = str(val)
             metadatas.append(md)
+        incoming_dim = 0
+        for e in embeddings:
+            if e:
+                incoming_dim = len(e)
+                break
+        target_dim = self._ensure_target_dim(kb_id, incoming_dim)
+        if target_dim and target_dim > 0:
+            embeddings = [self._coerce_vec_dim(e, target_dim) for e in embeddings]
+        col = self._get_collection(kb_id, dim=target_dim if target_dim and target_dim > 0 else None)
         try:
             col.upsert(ids=ids, embeddings=embeddings, documents=documents, metadatas=metadatas)
         except Exception as e:
@@ -98,8 +159,12 @@ class ChromaVectorStore(BaseVectorStore):
             raise e
 
     def query_embeddings(self, kb_id: int, query_vec: np.ndarray, top_k: int = 5) -> List[Dict[str, Any]]:
-        col = self._get_collection(kb_id)
+        incoming_dim = int(query_vec.shape[-1]) if hasattr(query_vec, "shape") and query_vec.ndim >= 1 else 0
+        target_dim = self._ensure_target_dim(kb_id, incoming_dim)
+        col = self._get_collection(kb_id, dim=target_dim if target_dim and target_dim > 0 else None)
         q = query_vec.astype(float).tolist()
+        if target_dim and target_dim > 0:
+            q = self._coerce_vec_dim(q, target_dim)
         res = col.query(query_embeddings=[q], n_results=int(top_k))
         out: List[Dict[str, Any]] = []
         ids = res.get("ids") or [[]]
@@ -124,7 +189,8 @@ class ChromaVectorStore(BaseVectorStore):
         return out
 
     def delete_items(self, kb_id: int, filter: Dict[str, Any]) -> int:
-        col = self._get_collection(kb_id)
+        target_dim = self._read_target_dim(kb_id)
+        col = self._get_collection(kb_id, dim=target_dim if target_dim and target_dim > 0 else None)
         where: Dict[str, Any] = {}
         if filter.get("file_id") is not None:
             where["file_id"] = int(filter.get("file_id"))

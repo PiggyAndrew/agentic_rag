@@ -1,7 +1,7 @@
 from typing import List, Dict, Tuple, Any, Optional
 import numpy as np
-from .embeddings import get_default_embedder
-from .rerank import get_default_reranker, Reranker
+from .embeddings import get_configured_embedder
+from .rerank import get_configured_reranker, Reranker
 from .types import (
     FileInfo,
     FileChunk,
@@ -35,6 +35,7 @@ class PersistentKnowledgeBaseController:
         self,
         base_dir: str = "data/kb",
         embedder: Optional[Any] = None,
+        reranker: Optional[Reranker] = None,
         *,
         manager: Optional[SqliteSessionManager] = None,
         repo: Optional[SqlAlchemyKnowledgeRepository] = None,
@@ -42,10 +43,8 @@ class PersistentKnowledgeBaseController:
         """初始化控制器并确保基础目录存在"""
         self.base_dir = base_dir
         os.makedirs(self.base_dir, exist_ok=True)
-        self._embedder = embedder or get_default_embedder()
-       
+        # 不缓存嵌入与重排器，避免配置更新后不生效
         self._vstore = ChromaVectorStore(base_dir=self.base_dir)
-       
         self._manager = manager or get_default_sqlite_manager()
         init_sqlite_database(manager=self._manager)
         self._repository = repo or SqlAlchemyKnowledgeRepository(manager=self._manager)
@@ -147,7 +146,8 @@ class PersistentKnowledgeBaseController:
             if non_empty_indices:
                 # 仅对非空文本进行嵌入，避免服务端拒绝空字符串导致失败
                 to_embed = [texts[i] for i in non_empty_indices]
-                embs = self._embedder.embed_texts(to_embed)
+                embedder = get_configured_embedder()
+                embs = embedder.embed_texts(to_embed)
                 for k, i in enumerate(non_empty_indices):
                     vitems[i]["embedding"] = embs[k].tolist()
         except Exception:
@@ -324,15 +324,15 @@ class PersistentKnowledgeBaseController:
         q = (query or "").strip()
         if not q:
             return []
-        q_vec = self._embedder.embed_text(q)
-
-        reranker: Reranker = get_default_reranker()
+        embedder = get_configured_embedder()
+        q_vec = embedder.embed_text(q)
         semantic = self._vstore.query_embeddings(kb_id, q_vec, top_k=5)
         seen_pairs = {(int(r["file_id"]), int(r["chunk_index"])) for r in semantic}
         keyword = self._keyword_search(kb_id, q, top_k=5, exclude=seen_pairs)
 
         combined: List[Dict[str, Any]] = []
         combined.extend(semantic)
+        combined.extend(keyword)
         if not combined:
             return []
 
@@ -349,6 +349,7 @@ class PersistentKnowledgeBaseController:
 
         def _load_content(fid: int, idx: int) -> str:
             return content_map.get((fid, idx), "")
+        reranker: Reranker = get_configured_reranker()
         ranked = reranker.rerank(q, combined, _load_content, top_k=5)
 
         def _order_key_of(item: Dict[str, Any]) -> tuple:

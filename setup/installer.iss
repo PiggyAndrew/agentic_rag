@@ -23,9 +23,9 @@ SetupIconFile=..\assets\icons\appIcon.ico
 Source: "..\frontend\agui-wpf\AGUI.WPF\bin\Release\net8.0-windows\*"; DestDir: "{app}"; Flags: recursesubdirs createallsubdirs ignoreversion
 Source: "..\assets\icons\appIcon.ico"; DestDir: "{app}"; Flags: ignoreversion
 [Icons]
-Name: "{commondesktop}\Agentic RAG"; Filename: "{app}\agent_api.exe"; WorkingDir: "{app}"; Check: IsAdminInstallMode
-Name: "{userdesktop}\Agentic RAG"; Filename: "{app}\agent_api.exe"; WorkingDir: "{app}"; Check: not IsAdminInstallMode
-Name: "{group}\Agentic RAG"; Filename: "{app}\agent_api.exe"; WorkingDir: "{app}"
+Name: "{commondesktop}\Agentic RAG"; Filename: "{app}\AGUI.WPF.exe"; WorkingDir: "{app}"; IconFilename: "{app}\appIcon.ico"; Check: IsAdminInstallMode
+Name: "{userdesktop}\Agentic RAG"; Filename: "{app}\AGUI.WPF.exe"; WorkingDir: "{app}"; IconFilename: "{app}\appIcon.ico"; Check: not IsAdminInstallMode
+Name: "{group}\Agentic RAG"; Filename: "{app}\AGUI.WPF.exe"; WorkingDir: "{app}"; IconFilename: "{app}\appIcon.ico"
 
 
 [Code]
@@ -47,8 +47,8 @@ begin
   Result := (Pos(pf, Dir) = 1) or (Pos(pf32, Dir) = 1) or (Pos(pf64, Dir) = 1) or (Pos(windir, Dir) = 1);
 end;
 
-// 函数：根据当前安装模式返回默认安装目�?
-// 说明：作�?{code:GetDefaultDirForMode} 的实现，必须接受一�?string 参数（可忽略�?
+// 函数：根据当前安装模式返回默认安装目�?
+// 说明：作�?{code:GetDefaultDirForMode} 的实现，必须接受一�?string 参数（可忽略�?
 function GetDefaultDirForMode(Param: string): string;
 begin
   if IsAdminInstallMode then
@@ -81,13 +81,13 @@ begin
 end;
 
 // 鍑芥暟锛氬畨瑁呭垵濮嬪寲鏃惰缃粯璁ょ洰褰曪紙淇濋殰榛樿瀹夎鏃犳潈闄愭彁绀猴級
-// 浣滅敤锛氬皢榛樿瀹夎鐩綍璁句负鐢ㄦ埛鐩綍锛屼互瑙勯�?UAC
+// 浣滅敤锛氬皢榛樿瀹夎鐩綍璁句负鐢ㄦ埛鐩綍锛屼互瑙勯�?UAC
 function InitializeSetup(): Boolean;
 begin
   Result := True;
 end;
 
-// 鏃х増鏈嵏杞芥敮�?
+// 鏃х増鏈嵏杞芥敮�?
 // 璇存槑锛氬湪瀹夎寮€濮嬪墠锛岃嫢妫€娴嬪埌鏃х増鏈紝闈欓粯鍗歌浇浠ラ伩鍏嶉噸澶嶅畨瑁呴€犳垚鐨勬枃浠舵畫锟?
 const UninstKeyCU = 'Software\Microsoft\Windows\CurrentVersion\Uninstall\AgenticRAG_is1';
 const UninstKeyLM = 'Software\Microsoft\Windows\CurrentVersion\Uninstall\AgenticRAG_is1';
@@ -106,7 +106,7 @@ begin
   Result := False;
 end;
 
-// �?UninstallString 鎻愬彇鍙墽琛屾枃浠惰矾�?
+// �?UninstallString 鎻愬彇鍙墽琛屾枃浠惰矾�?
 function ExtractUninstExe(UninstStr: string): string;
 var p: Integer;
 begin
@@ -130,11 +130,11 @@ begin
   end;
 end;
 
-// 璇㈤棶鐢ㄦ埛鏄惁鍗歌浇鏃х増鏈紙闈為潤榛橈�?
+// 璇㈤棶鐢ㄦ埛鏄惁鍗歌浇鏃х増鏈紙闈為潤榛橈�?
 procedure InitializeWizard();
 var UninstStr, UninstExe: string; Code: Integer;
 begin
-  // 鏍规嵁瀹夎妯″紡璁剧疆榛樿鐩綍锛氱鐞嗗憳妯″紡涓烘墍鏈変汉瀹夎锛屾櫘閫氭ā寮忎负褰撳墠鐢ㄦ埛瀹夎�?
+  // 鏍规嵁瀹夎妯″紡璁剧疆榛樿鐩綍锛氱鐞嗗憳妯″紡涓烘墍鏈変汉瀹夎锛屾櫘閫氭ā寮忎负褰撳墠鐢ㄦ埛瀹夎�?
   WizardForm.DirEdit.Text := GetDefaultDirForMode('');
 
   if GetUninstallString(UninstStr) then

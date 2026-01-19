@@ -240,6 +240,15 @@ const kbStore = useKbStore();
 const aiStore = useAiStore();
 const kbSelectorOpen = ref(false);
 const selectedKbId = ref<string>("");
+const abortController = ref<AbortController | null>(null);
+
+function stopGeneration() {
+  if (abortController.value) {
+    abortController.value.abort();
+    abortController.value = null;
+    status.value = "ready";
+  }
+}
 
 const apiBase = computed<string>(() => {
   const raw =
@@ -582,6 +591,7 @@ function updateStreamingTool(versionId: string, toolEvent: any) {
  */
 async function streamResponse(versionId: string) {
   status.value = "streaming";
+  abortController.value = new AbortController();
   const history = messages.value.map((m) => ({
     role: m.from,
     content: m.versions[m.versions.length - 1]?.content || "",
@@ -595,6 +605,7 @@ async function streamResponse(versionId: string) {
         llmApiKey: aiStore.llmApiKey,
         llmBaseUrl: aiStore.llmBaseUrl,
         llmModel: aiStore.llmModel,
+        signal: abortController.value.signal,
       }
     );
     let acc = "";
@@ -645,9 +656,14 @@ async function streamResponse(versionId: string) {
       }
     }
   } catch (e: any) {
+    if (e.name === 'AbortError') {
+      // User aborted
+      return;
+    }
     updateStreamingContent(versionId, `请求失败: ${e?.message || e}`);
   } finally {
     status.value = "ready";
+    abortController.value = null;
   }
 }
 
@@ -799,15 +815,16 @@ watch(
 </script>
 
 <template>
-  <div class="relative flex h-full w-full flex-col overflow-hidden">
+  <div class="relative flex h-full w-full flex-col overflow-hidden bg-gray-50">
     <div class="flex-1 min-h-0 relative">
       <Conversation class="h-full">
-        <ConversationContent class="h-full overflow-y-auto px-4">
-          <MessageBranch
-            v-for="message in messages"
-            :key="message.key"
-            :default-branch="0"
-          >
+        <ConversationContent class="h-full overflow-y-auto px-4 md:px-8 pt-6 pb-4 scroll-smooth">
+          <div class="w-full space-y-8 pb-8">
+            <MessageBranch
+              v-for="message in messages"
+              :key="message.key"
+              :default-branch="0"
+            >
             <MessageBranchContent>
               <Message
                 v-if="message.versions.length > 0"
@@ -815,8 +832,9 @@ watch(
                   message.versions[message.versions.length - 1]?.id || ''
                 }`"
                 :from="message.from"
+                class="gap-4"
               >
-                <div>
+                <div :class="message.from === 'user' ? 'w-full flex flex-col items-end' : 'w-full min-w-0'">
                   <Sources v-if="message.sources?.length">
                     <SourcesTrigger :count="message.sources.length" />
                     <SourcesContent>
@@ -858,8 +876,11 @@ watch(
                   </Tool>
 
                   <MessageContent>
+                    <div v-if="message.from === 'user'">
+                      {{ latestContent(message) }}
+                    </div>
                     <template
-                      v-if="
+                      v-else-if="
                         message.from === 'assistant' &&
                         latestContent(message).includes('〔cite:')
                       "
@@ -951,23 +972,25 @@ watch(
               </MessageActions>
             </MessageToolbar>
           </MessageBranch>
+          </div>
         </ConversationContent>
         <ConversationScrollButton />
       </Conversation>
     </div>
 
-    <div class="shrink-0 border-t bg-background pt-4">
-      <Suggestions class="px-4 pb-2">
-        <Suggestion
-          v-for="suggestion in suggestions"
-          :key="suggestion"
-          :suggestion="suggestion"
-          @click="handleSuggestionClick"
-        />
-      </Suggestions>
+    <div class="shrink-0 border-t border-gray-100 bg-white/80 backdrop-blur-md py-4 z-10">
+      <div class="w-full px-4 md:px-8">
+        <Suggestions class="mb-3 px-1">
+          <Suggestion
+            v-for="suggestion in suggestions"
+            :key="suggestion"
+            :suggestion="suggestion"
+            @click="handleSuggestionClick"
+          />
+        </Suggestions>
 
-      <div class="w-full px-4 pb-4">
-        <PromptInput class="w-full" multiple global-drop @submit="handleSubmit">
+        <div class="w-full">
+          <PromptInput class="w-full shadow-lg rounded-2xl border border-gray-200 bg-white ring-1 ring-black/5 transition-shadow hover:shadow-xl" multiple global-drop @submit="handleSubmit">
           <PromptInputHeader>
             <PromptInputAttachments>
               <template #default="{ file }">
@@ -1063,8 +1086,9 @@ watch(
             </PromptInputTools>
 
             <PromptInputSubmit
-              :disabled="status === 'streaming'"
+              :disabled="false"
               :status="status"
+              @click="status === 'streaming' ? stopGeneration() : undefined"
             />
           </PromptInputFooter>
         </PromptInput>
@@ -1091,6 +1115,7 @@ watch(
             </div>
           </template>
         </ElDialog>
+      </div>
       </div>
     </div>
   </div>

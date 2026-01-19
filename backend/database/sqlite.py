@@ -87,12 +87,14 @@ def init_sqlite_database(
 
     from backend.database.migrations.runner import apply_sql_migrations
     from backend.kb.knowledge_models import Base
+    from backend.config.config_models import ConfigBase
 
     apply_sql_migrations(
         mgr.engine,
         migrations_dir=migrations_dir or _default_migrations_dir(),
     )
     Base.metadata.create_all(bind=mgr.engine)
+    ConfigBase.metadata.create_all(bind=mgr.engine)
 
 
 def _default_migrations_dir() -> str:

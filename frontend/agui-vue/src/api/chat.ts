@@ -8,6 +8,7 @@ export type StreamChatOptions = {
   llmApiKey?: string
   llmBaseUrl?: string
   llmModel?: string
+  signal?: AbortSignal
 }
 
 function resolveChatUrl(raw?: string): string {
@@ -36,6 +37,7 @@ export async function streamChat(
     method: 'POST',
     headers,
     body: JSON.stringify({ messages, kbId }),
+    signal: options?.signal,
   })
   if (!res.body || !res.ok) {
     throw new Error(await res.text());

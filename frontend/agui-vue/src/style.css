@@ -1,66 +1,78 @@
-
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap');
 @import "tailwindcss";
 
 @plugin "tailwindcss-animate";
 
+.font-heading {
+  font-family: 'Poppins', system-ui, sans-serif;
+}
+
+.font-sans {
+  font-family: 'Open Sans', system-ui, sans-serif;
+}
+
 :root {
-  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
+  font-family: 'Open Sans', system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.6;
   font-weight: 400;
 
   color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
-  --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
+  color: rgba(30, 41, 59, 1); /* Slate 800 */
+  background-color: #F8FAFC; /* Slate 50 */
+  --radius: 0.75rem; /* Slightly larger radius for modern look */
+  
+  /* Light Mode - Slate & Blue Theme */
+  --background: oklch(0.978 0.004 256.665); /* #F8FAFC */
+  --foreground: oklch(0.279 0.04 256.848); /* #1E293B */
+  --card: oklch(1 0 0); /* White */
+  --card-foreground: oklch(0.279 0.04 256.848); /* #1E293B */
+  --popover: oklch(1 0 0); /* White */
+  --popover-foreground: oklch(0.279 0.04 256.848); /* #1E293B */
+  --primary: oklch(0.593 0.176 257.625); /* #3B82F6 */
+  --primary-foreground: oklch(1 0 0); /* White */
+  --secondary: oklch(0.967 0.003 264.542); /* Slate 100 */
+  --secondary-foreground: oklch(0.279 0.04 256.848); /* #1E293B */
+  --muted: oklch(0.967 0.003 264.542); /* Slate 100 */
+  --muted-foreground: oklch(0.552 0.016 285.938); /* Slate 500 */
+  --accent: oklch(0.967 0.003 264.542); /* Slate 100 */
+  --accent-foreground: oklch(0.279 0.04 256.848); /* #1E293B */
   --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
+  --border: oklch(0.896 0.01 285.938); /* Slate 200 */
+  --input: oklch(0.896 0.01 285.938); /* Slate 200 */
+  --ring: oklch(0.593 0.176 257.625); /* Primary Blue */
+  
+  --chart-1: oklch(0.593 0.176 257.625); /* Blue */
+  --chart-2: oklch(0.646 0.222 41.116); /* Orange */
   --chart-3: oklch(0.398 0.07 227.392);
   --chart-4: oklch(0.828 0.189 84.429);
   --chart-5: oklch(0.769 0.188 70.08);
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  
+  --sidebar: oklch(1 0 0);
+  --sidebar-foreground: oklch(0.279 0.04 256.848);
+  --sidebar-primary: oklch(0.593 0.176 257.625);
+  --sidebar-primary-foreground: oklch(1 0 0);
+  --sidebar-accent: oklch(0.967 0.003 264.542);
+  --sidebar-accent-foreground: oklch(0.279 0.04 256.848);
+  --sidebar-border: oklch(0.896 0.01 285.938);
+  --sidebar-ring: oklch(0.593 0.176 257.625);
 
-  /* Element Plus 黑白主题（亮色） */
-  --el-bg-color: #ffffff;
+  /* Element Plus Theme (Light) */
+  --el-bg-color: #F8FAFC;
   --el-bg-color-overlay: #ffffff;
-  --el-text-color-primary: #111111;
-  --el-text-color-regular: #222222;
-  --el-text-color-secondary: #444444;
-  --el-border-color: #e5e7eb;
-  --el-border-color-light: #eceef1;
-  --el-border-color-lighter: #f2f2f2;
-  --el-color-primary: #000000;
-  --el-color-success: #222222;
-  --el-color-warning: #222222;
-  --el-color-danger: #000000;
-  --el-color-info: #333333;
-  --el-fill-color: #f9fafb;
-  --el-fill-color-light: #f3f4f6;
-  --el-mask-color: rgba(0,0,0,0.5);
+  --el-text-color-primary: #1E293B;
+  --el-text-color-regular: #334155;
+  --el-text-color-secondary: #64748B;
+  --el-border-color: #E2E8F0;
+  --el-border-color-light: #F1F5F9;
+  --el-border-color-lighter: #F8FAFC;
+  --el-color-primary: #3B82F6;
+  --el-color-success: #22C55E;
+  --el-color-warning: #F59E0B;
+  --el-color-danger: #EF4444;
+  --el-color-info: #64748B;
+  --el-fill-color: #F1F5F9;
+  --el-fill-color-light: #F8FAFC;
+  --el-mask-color: rgba(255,255,255,0.9);
 }
 
 body {
@@ -108,55 +120,58 @@ body {
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
+  /* Dark Mode - Slate & Blue Theme */
+  --background: oklch(0.208 0.042 265.755); /* #0F172A Slate 900 */
+  --foreground: oklch(0.978 0.004 256.665); /* #F8FAFC Slate 50 */
+  --card: oklch(0.279 0.04 256.848); /* #1E293B Slate 800 */
+  --card-foreground: oklch(0.978 0.004 256.665); /* #F8FAFC */
+  --popover: oklch(0.279 0.04 256.848); /* #1E293B */
+  --popover-foreground: oklch(0.978 0.004 256.665); /* #F8FAFC */
+  --primary: oklch(0.593 0.176 257.625); /* #3B82F6 */
+  --primary-foreground: oklch(1 0 0); /* White */
+  --secondary: oklch(0.35 0.035 256.848); /* Slate 700ish */
+  --secondary-foreground: oklch(0.978 0.004 256.665);
+  --muted: oklch(0.35 0.035 256.848);
+  --muted-foreground: oklch(0.704 0.04 256.848); /* Slate 400 */
+  --accent: oklch(0.35 0.035 256.848);
+  --accent-foreground: oklch(0.978 0.004 256.665);
+  --destructive: oklch(0.577 0.245 27.325);
+  --border: oklch(0.35 0.035 256.848);
+  --input: oklch(0.35 0.035 256.848);
+  --ring: oklch(0.593 0.176 257.625);
+  
+  --chart-1: oklch(0.593 0.176 257.625);
+  --chart-2: oklch(0.646 0.222 41.116);
   --chart-3: oklch(0.769 0.188 70.08);
   --chart-4: oklch(0.627 0.265 303.9);
   --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  
+  --sidebar: oklch(0.279 0.04 256.848); /* Slate 800 */
+  --sidebar-foreground: oklch(0.978 0.004 256.665);
+  --sidebar-primary: oklch(0.593 0.176 257.625);
+  --sidebar-primary-foreground: oklch(1 0 0);
+  --sidebar-accent: oklch(0.35 0.035 256.848);
+  --sidebar-accent-foreground: oklch(0.978 0.004 256.665);
+  --sidebar-border: oklch(0.35 0.035 256.848);
+  --sidebar-ring: oklch(0.593 0.176 257.625);
 
-  /* Element Plus 黑白主题（暗色） */
-  --el-bg-color: #0a0a0a;
-  --el-bg-color-overlay: #0f0f0f;
-  --el-text-color-primary: #f8fafc;
-  --el-text-color-regular: #e5e7eb;
-  --el-text-color-secondary: #cbd5e1;
-  --el-border-color: #1f2937;
-  --el-border-color-light: #111827;
-  --el-border-color-lighter: #0f172a;
-  --el-color-primary: #ffffff;
-  --el-color-success: #cccccc;
-  --el-color-warning: #cccccc;
-  --el-color-danger: #ffffff;
-  --el-color-info: #e5e7eb;
-  --el-fill-color: #111111;
-  --el-fill-color-light: #141414;
-  --el-mask-color: rgba(255,255,255,0.35);
+  /* Element Plus Theme (Dark) */
+  --el-bg-color: #0F172A;
+  --el-bg-color-overlay: #1E293B;
+  --el-text-color-primary: #F8FAFC;
+  --el-text-color-regular: #CBD5E1;
+  --el-text-color-secondary: #94A3B8;
+  --el-border-color: #334155;
+  --el-border-color-light: #1E293B;
+  --el-border-color-lighter: #0F172A;
+  --el-color-primary: #3B82F6;
+  --el-color-success: #22C55E;
+  --el-color-warning: #F59E0B;
+  --el-color-danger: #EF4444;
+  --el-color-info: #64748B;
+  --el-fill-color: #1E293B;
+  --el-fill-color-light: #334155;
+  --el-mask-color: rgba(0,0,0,0.5);
 }
 
 @layer base {

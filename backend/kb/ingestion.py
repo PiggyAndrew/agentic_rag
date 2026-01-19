@@ -10,6 +10,7 @@ from .splitters import (
 from .splitters.splitter_table import TableSplitter
 from .types import FileInfo
 
+
 def _server_base() -> str:
     port = int(os.getenv("PORT", "8000"))
     return f"http://localhost:{port}"

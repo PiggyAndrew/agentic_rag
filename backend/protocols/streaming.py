@@ -11,11 +11,11 @@ def convert_messages(messages):
         role = None
         content = None
         if isinstance(msg, dict):
-            role = msg.get('role')
-            content = msg.get('content')
+            role = msg.get("role")
+            content = msg.get("content")
         else:
-            role = getattr(msg, 'role', None)
-            content = getattr(msg, 'content', None)
+            role = getattr(msg, "role", None)
+            content = getattr(msg, "content", None)
 
         text = content or ""
         if role == "user":
@@ -75,13 +75,19 @@ def _to_jsonable(obj):
             pass
     if hasattr(obj, "__dict__"):
         try:
-            return {k: _to_jsonable(v) for k, v in obj.__dict__.items() if not str(k).startswith("_")}
+            return {
+                k: _to_jsonable(v)
+                for k, v in obj.__dict__.items()
+                if not str(k).startswith("_")
+            }
         except Exception:
             pass
     return str(obj)
 
 
-def _log_event_json(event, path: str = os.path.join("data", "logs", "stream_events.json")):
+def _log_event_json(
+    event, path: str = os.path.join("data", "logs", "stream_events.json")
+):
     """追加保存单条事件为 JSON 行"""
     try:
         os.makedirs(os.path.dirname(path), exist_ok=True)
@@ -103,6 +109,7 @@ async def stream_generator(messages, kb_id=None, *, llm_config=None):
     os.environ.setdefault("OTEL_PYTHON_DISABLED", "true")
     os.environ.setdefault("LANGCHAIN_TRACING_V2", "false")
     from backend.agents.rag_agent import agent as rag_agent, create_agentic_rag_system
+
     active_agent = rag_agent
     kb_int = None
     if kb_id:
@@ -115,12 +122,7 @@ async def stream_generator(messages, kb_id=None, *, llm_config=None):
     if llm_config is not None:
         target_kb = kb_int if kb_int is not None else 1
         try:
-            active_agent = create_agentic_rag_system(
-                target_kb,
-                llm_api_key=(llm_config.get("api_key") or None),
-                llm_base_url=(llm_config.get("base_url") or None),
-                llm_model=(llm_config.get("model") or None),
-            )
+            active_agent = create_agentic_rag_system(target_kb, llm_config=llm_config)
         except Exception:
             active_agent = None
     elif kb_int is not None:

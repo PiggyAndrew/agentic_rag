@@ -1,0 +1,60 @@
+name: Build and Release
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  pull_request:
+    branches: [ "main", "master" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build Installer on Windows
+    runs-on: windows-latest
+    
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+    
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 8.0.x
+        
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+        cache-dependency-path: frontend/agui-vue/package-lock.json
+        
+    - name: Setup Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+        cache: 'pip'
+        
+    - name: Install Inno Setup
+      run: |
+        choco install innosetup --no-progress
+        
+    - name: Install Frontend Dependencies
+      working-directory: frontend/agui-vue
+      run: npm ci
+      
+    - name: Install Backend Dependencies
+      run: |
+        pip install .
+        pip install cx_Freeze
+        
+    - name: Run Build Script
+      run: .\setup\auto_setup.bat
+      env:
+        CI: true
+        
+    - name: Upload Installer Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: Agentic_RAG_Installer
+        path: setup/Output/*.exe
+        if-no-files-found: error

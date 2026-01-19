@@ -67,3 +67,16 @@ class ApiResponse(BaseModel):
     data: Optional[Any] = None
     error: Optional[ApiError] = None
 
+
+class ConfigItem(BaseModel):
+    key: str
+    value: Any
+    description: Optional[str] = None
+    createdAt: int
+    updatedAt: int
+
+
+class ConfigSetRequest(BaseModel):
+    value: Any
+    description: Optional[str] = None
+

@@ -18,8 +18,10 @@ def create_app() -> FastAPI:
     @asynccontextmanager
     async def lifespan(_: FastAPI):
         from backend.database.sqlite import init_sqlite_database
+        from backend.config.init_providers import seed_providers
 
         init_sqlite_database()
+        seed_providers()
         yield
 
     app = FastAPI(lifespan=lifespan)
@@ -36,24 +38,47 @@ def create_app() -> FastAPI:
 
     @app.exception_handler(ValueError)
     async def handle_value_error(_: Request, exc: ValueError):
-        return JSONResponse(status_code=400, content=ApiResponse(ok=False, error=ApiError(code=400, message=str(exc))).dict())
+        return JSONResponse(
+            status_code=400,
+            content=ApiResponse(
+                ok=False, error=ApiError(code=400, message=str(exc))
+            ).dict(),
+        )
 
     @app.exception_handler(FileNotFoundError)
     async def handle_not_found(_: Request, exc: FileNotFoundError):
-        return JSONResponse(status_code=404, content=ApiResponse(ok=False, error=ApiError(code=404, message=str(exc))).dict())
+        return JSONResponse(
+            status_code=404,
+            content=ApiResponse(
+                ok=False, error=ApiError(code=404, message=str(exc))
+            ).dict(),
+        )
 
     @app.exception_handler(Exception)
     async def handle_generic_error(req: Request, exc: Exception):
         logger.exception("API error: path=%s", req.url.path)
-        return JSONResponse(status_code=500, content=ApiResponse(ok=False, error=ApiError(code=500, message=f"服务错误: {type(exc).__name__}: {exc}")).dict())
+        return JSONResponse(
+            status_code=500,
+            content=ApiResponse(
+                ok=False,
+                error=ApiError(
+                    code=500, message=f"服务错误: {type(exc).__name__}: {exc}"
+                ),
+            ).dict(),
+        )
 
     # 路由注册
     from backend.api.routers.chat import router as chat_router
     from backend.api.routers.kb import router as kb_router
     from backend.api.routers.docx import router as docx_router
+    from backend.api.routers.config import router as config_router
+    from backend.api.routers.llm_config import router as llm_config_router
+
     app.include_router(chat_router)
     app.include_router(kb_router)
     app.include_router(docx_router)
+    app.include_router(config_router)
+    app.include_router(llm_config_router)
 
     # 静态资源挂载：暴露 data/kb 目录用于图片访问
     # 访问示例：/assets/{kbId}/assets/images/{fileId}/{imageName}

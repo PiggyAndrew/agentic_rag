@@ -106,9 +106,10 @@ async function checkAndInstallUpdate(): Promise<void> {
 </script>
 
 <template>
-  <el-container class="h-screen w-screen">
-    <el-header height="56px" class="border-b px-4 flex items-center justify-between">
-      <div class="text-sm font-medium text-foreground">
+  <el-container class="h-screen w-screen font-sans">
+    <el-header height="64px" class="border-b px-6 flex items-center justify-between bg-background/80 backdrop-blur-sm sticky top-0 z-50">
+      <div class="text-xl font-bold font-heading text-primary flex items-center gap-2">
+        <el-icon class="text-2xl"><ChatLineSquare /></el-icon>
         Agentic RAG
       </div>
       <div class="flex items-center gap-4">
@@ -126,13 +127,14 @@ async function checkAndInstallUpdate(): Promise<void> {
             <el-icon class="mr-1"><FolderOpened /></el-icon>
             知识库
           </el-menu-item>
-          <el-menu-item index="/about">
-            <el-icon class="mr-1"><User /></el-icon>
-            关于作者
-          </el-menu-item>
+      
           <el-menu-item index="/settings">
             <el-icon class="mr-1"><Setting /></el-icon>
             AI配置
+          </el-menu-item>
+              <el-menu-item index="/about">
+            <el-icon class="mr-1"><User /></el-icon>
+            关于作者
           </el-menu-item>
         </el-menu>
         <el-button size="small" type="primary" plain @click="checkAndInstallUpdate">
