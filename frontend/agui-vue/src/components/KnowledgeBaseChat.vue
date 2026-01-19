@@ -58,9 +58,9 @@ import {
   SourcesTrigger,
 } from "@/components/ai-elements/sources";
 import { Suggestion, Suggestions } from "@/components/ai-elements/suggestion";
-import { CheckIcon, GlobeIcon, PencilIcon, XIcon, SaveIcon } from "lucide-vue-next";
+import { CheckIcon, GlobeIcon, PencilIcon } from "lucide-vue-next";
 import { streamChat } from "@/api/chat";
-import { computed, ref, onMounted, watch, nextTick } from "vue";
+import { computed, ref, onMounted, watch } from "vue";
 import { useKbStore } from "@/stores/kb";
 import { useAiStore } from "@/stores/ai";
 import { ElRadioGroup, ElRadio, ElDialog, ElButton, ElInput } from "element-plus";
@@ -776,6 +776,8 @@ function submitEdit(key: string) {
   if (index === -1) return;
 
   const msg = messages.value[index];
+  if (!msg) return;
+
   const newContent = editingContent.value.trim();
   
   if (!newContent) return;
@@ -917,27 +919,35 @@ watch(
                   </Tool>
 
                   <template v-if="message.from === 'user'">
-                    <div v-if="editingMessageKey === message.key" class="w-full max-w-xl self-end bg-white p-3 rounded-xl border shadow-sm">
+                    <div 
+                      v-if="editingMessageKey === message.key" 
+                      class="w-full max-w-2xl self-end bg-white dark:bg-zinc-900 p-4 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm transition-all"
+                    >
                       <ElInput
                         v-model="editingContent"
                         type="textarea"
-                        :autosize="{ minRows: 2, maxRows: 10 }"
-                        class="mb-2"
+                        :autosize="{ minRows: 2, maxRows: 8 }"
+                        class="mb-3 font-normal"
                         resize="none"
+                        placeholder="输入修改后的内容..."
                       />
                       <div class="flex justify-end gap-2">
-                        <ElButton size="small" @click="cancelEditing">取消</ElButton>
-                        <ElButton type="primary" size="small" @click="submitEdit(message.key)">发送</ElButton>
+                        <ElButton size="small" round @click="cancelEditing">取消</ElButton>
+                        <ElButton type="primary" size="small" round @click="submitEdit(message.key)">
+                          发送
+                        </ElButton>
                       </div>
                     </div>
-                    <div v-else class="flex items-start gap-2 flex-row-reverse group is-user">
-                      <button
-                        class="mt-2 p-1 text-gray-400 hover:text-gray-600 opacity-0 group-hover:opacity-100 transition-opacity"
-                        @click="startEditing(message)"
-                        title="Edit message"
-                      >
-                        <PencilIcon class="size-4" />
-                      </button>
+                    <div v-else class="flex items-start gap-3 flex-row-reverse group is-user pl-10">
+                      <div class="flex flex-col pt-1 opacity-0 group-hover:opacity-100 transition-all duration-200">
+                        <button
+                          class="p-2 rounded-full text-gray-400 hover:text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 dark:hover:text-gray-200 transition-colors"
+                          @click="startEditing(message)"
+                          title="编辑消息"
+                        >
+                          <PencilIcon class="size-3.5" />
+                        </button>
+                      </div>
                       <MessageContent>
                         <div class="whitespace-pre-wrap">{{ latestContent(message) }}</div>
                       </MessageContent>
