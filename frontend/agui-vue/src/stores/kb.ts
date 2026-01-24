@@ -185,6 +185,7 @@ export const useKbStore = defineStore('kb', {
       await apiRequest<unknown>(`/api/files/${fileId}`, { method: 'DELETE' })
       const list = this.filesByKb[kbId] || []
       this.filesByKb[kbId] = list.filter(f => f.id !== fileId)
+      await this.fetchFiles(kbId)
     },
   },
 })

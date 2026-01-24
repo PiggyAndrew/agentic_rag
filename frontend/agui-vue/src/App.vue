@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, watch, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import { ChatLineSquare, FolderOpened, Download, User, Setting } from '@element-plus/icons-vue'
+import { ChatLineSquare, FolderOpened, Download, User, Setting, Moon, Sunny } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import UpdateFloating from '@/components/UpdateFloating.vue'
 import { useUpdateStore } from '@/stores/update'
@@ -106,54 +106,96 @@ async function checkAndInstallUpdate(): Promise<void> {
 </script>
 
 <template>
-  <el-container class="h-screen w-screen font-sans">
-    <el-header height="64px" class="border-b px-6 flex items-center justify-between bg-background/80 backdrop-blur-sm sticky top-0 z-50">
-      <div class="text-xl font-bold font-heading text-primary flex items-center gap-2">
-        <el-icon class="text-2xl"><ChatLineSquare /></el-icon>
-        Agentic RAG
+  <el-container class="h-screen w-screen font-sans bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
+    <el-header height="64px" class="border-b border-gray-200 dark:border-gray-800 px-6 flex items-center justify-between bg-white/80 dark:bg-gray-900/80 backdrop-blur-md sticky top-0 z-50 shadow-sm">
+      <!-- Logo Area -->
+      <div class="text-xl font-bold font-heading flex items-center gap-2 cursor-pointer transition-transform hover:scale-105" @click="navigateTo('/')">
+        <div class="p-1.5 bg-blue-500/10 rounded-lg">
+          <el-icon class="text-2xl text-blue-600 dark:text-blue-400"><ChatLineSquare /></el-icon>
+        </div>
+        <span class="bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent">Agentic RAG</span>
       </div>
+
+      <!-- Right Actions -->
       <div class="flex items-center gap-4">
+        <!-- Navigation Menu -->
         <el-menu
           mode="horizontal"
           :default-active="activePath"
           @select="navigateTo"
-          class="border-0"
+          :ellipsis="false"
+          class="!border-0 !bg-transparent min-w-[300px]"
+          :active-text-color="isDark ? '#60a5fa' : '#2563eb'"
+          :text-color="isDark ? '#9ca3af' : '#4b5563'"
         >
-          <el-menu-item index="/">
-            <el-icon class="mr-1"><ChatLineSquare /></el-icon>
-            聊天
+          <el-menu-item index="/" class="!rounded-lg hover:!bg-blue-50 dark:hover:!bg-blue-900/20 mx-1 !h-10 my-auto flex items-center">
+            <template #title>
+              <div class="flex items-center gap-2">
+                <el-icon><ChatLineSquare /></el-icon>
+                <span class="font-medium">聊天</span>
+              </div>
+            </template>
           </el-menu-item>
-          <el-menu-item index="/kb">
-            <el-icon class="mr-1"><FolderOpened /></el-icon>
-            知识库
+          <el-menu-item index="/kb" class="!rounded-lg hover:!bg-blue-50 dark:hover:!bg-blue-900/20 mx-1 !h-10 my-auto flex items-center">
+            <template #title>
+              <div class="flex items-center gap-2">
+                <el-icon><FolderOpened /></el-icon>
+                <span class="font-medium">知识库</span>
+              </div>
+            </template>
           </el-menu-item>
-      
-          <el-menu-item index="/settings">
-            <el-icon class="mr-1"><Setting /></el-icon>
-            AI配置
+          <el-menu-item index="/settings" class="!rounded-lg hover:!bg-blue-50 dark:hover:!bg-blue-900/20 mx-1 !h-10 my-auto flex items-center">
+            <template #title>
+              <div class="flex items-center gap-2">
+                <el-icon><Setting /></el-icon>
+                <span class="font-medium">配置</span>
+              </div>
+            </template>
           </el-menu-item>
-              <el-menu-item index="/about">
-            <el-icon class="mr-1"><User /></el-icon>
-            关于作者
+          <el-menu-item index="/about" class="!rounded-lg hover:!bg-blue-50 dark:hover:!bg-blue-900/20 mx-1 !h-10 my-auto flex items-center">
+             <template #title>
+              <div class="flex items-center gap-2">
+                <el-icon><User /></el-icon>
+                <span class="font-medium">关于</span>
+              </div>
+            </template>
           </el-menu-item>
         </el-menu>
-        <el-button size="small" type="primary" plain @click="checkAndInstallUpdate">
-          <el-icon class="mr-1"><Download /></el-icon>
-          检查更新
+
+        <div class="h-6 w-px bg-gray-200 dark:bg-gray-700 mx-2"></div>
+
+        <!-- Update Button -->
+        <el-button 
+          size="default" 
+          type="primary" 
+          plain 
+          round
+          @click="checkAndInstallUpdate"
+          class="!px-4 hover:!scale-105 transition-transform"
+        >
+          <el-icon class="mr-1.5"><Download /></el-icon>
+          更新
         </el-button>
+
+        <!-- Theme Switch -->
         <el-switch
           v-model="isDark"
           inline-prompt
-          active-text="暗黑"
-          inactive-text="白色"
+          :active-icon="Moon"
+          :inactive-icon="Sunny"
+          style="--el-switch-on-color: #374151; --el-switch-off-color: #e5e7eb; --el-switch-border-color: #d1d5db"
+          class="ml-2"
         />
       </div>
     </el-header>
-    <el-main class="p-0 bg-background text-foreground">
+
+    <el-main class="p-0 bg-gray-50 dark:bg-gray-900 text-foreground overflow-hidden relative">
       <RouterView v-slot="{ Component }">
-        <KeepAlive>
-          <component :is="Component" />
-        </KeepAlive>
+        <Transition name="fade" mode="out-in">
+          <KeepAlive>
+            <component :is="Component" />
+          </KeepAlive>
+        </Transition>
       </RouterView>
     </el-main>
   </el-container>
@@ -169,5 +211,21 @@ html, body, #app {
   padding: 0;
   overflow: hidden;
 }
-.border-b { border-bottom: 1px solid var(--el-border-color); }
+
+/* Transitions */
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.2s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
+/* Custom Menu Styles to override Element Plus defaults if needed */
+.el-menu--horizontal .el-menu-item:not(.is-disabled):focus, 
+.el-menu--horizontal .el-menu-item:not(.is-disabled):hover {
+  background-color: transparent;
+}
 </style>

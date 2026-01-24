@@ -12,6 +12,29 @@ class ChatRequest(BaseModel):
     """聊天请求载荷，支持可选知识库ID"""
     messages: List[Message]
     kbId: Optional[str] = None
+    sessionId: Optional[str] = None
+    skipSaveUser: Optional[bool] = None
+
+
+class ChatSession(BaseModel):
+    """聊天会话"""
+    id: str
+    title: str
+    createdAt: int
+    updatedAt: int
+
+
+class ChatMessageResponse(BaseModel):
+    """聊天消息响应"""
+    id: int
+    role: str
+    content: str
+    citations: Optional[List[Dict[str, Any]]] = None
+    createdAt: int
+
+
+class ChatMessageEditRequest(BaseModel):
+    content: str
 
 
 class KnowledgeBase(BaseModel):
@@ -79,4 +102,3 @@ class ConfigItem(BaseModel):
 class ConfigSetRequest(BaseModel):
     value: Any
     description: Optional[str] = None
-

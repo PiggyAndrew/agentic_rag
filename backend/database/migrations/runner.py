@@ -40,6 +40,13 @@ def _applied_versions(engine: Engine) -> set[str]:
     return {str(r[0]) for r in rows}
 
 
+def _should_ignore_migration_error(version: str, error: Exception) -> bool:
+    if version != "0002_add_llm_provider_category.sql":
+        return False
+    msg = str(error).lower()
+    return "no such table: llm_providers" in msg or "duplicate column name: category" in msg
+
+
 def apply_sql_migrations(engine: Engine, *, migrations_dir: str) -> None:
     """应用 migrations/sqlite 目录下的 SQL 脚本。
 
@@ -65,12 +72,12 @@ def apply_sql_migrations(engine: Engine, *, migrations_dir: str) -> None:
             raw = conn.connection
             try:
                 raw.executescript(sql)
-                conn.execute(
-                    text(
-                        "INSERT INTO schema_migrations(version, applied_at_ms) VALUES (:v, CAST(strftime('%s','now') AS INTEGER) * 1000)"
-                    ),
-                    {"v": version},
-                )
             except Exception as e:
-                raise MigrationError(f"迁移失败: {version}: {type(e).__name__}: {e}") from e
-
+                if not _should_ignore_migration_error(version, e):
+                    raise MigrationError(f"迁移失败: {version}: {type(e).__name__}: {e}") from e
+            conn.execute(
+                text(
+                    "INSERT INTO schema_migrations(version, applied_at_ms) VALUES (:v, CAST(strftime('%s','now') AS INTEGER) * 1000)"
+                ),
+                {"v": version},
+            )

@@ -8,6 +8,9 @@ import {
 } from "@/components/ai-elements/conversation";
 import {
   Message,
+  MessageAction,
+  MessageActions,
+  MessageToolbar,
   MessageBranch,
   MessageBranchContent,
   MessageBranchNext,
@@ -18,24 +21,7 @@ import {
   MessageResponse,
 } from "@/components/ai-elements/message";
 import {
-  ModelSelector,
-  ModelSelectorContent,
-  ModelSelectorEmpty,
-  ModelSelectorGroup,
-  ModelSelectorInput,
-  ModelSelectorItem,
-  ModelSelectorList,
-  ModelSelectorLogo,
-  ModelSelectorLogoGroup,
-  ModelSelectorName,
-  ModelSelectorTrigger,
-} from "@/components/ai-elements/model-selector";
-import {
   PromptInput,
-  PromptInputActionAddAttachments,
-  PromptInputActionMenu,
-  PromptInputActionMenuContent,
-  PromptInputActionMenuTrigger,
   PromptInputAttachment,
   PromptInputAttachments,
   PromptInputBody,
@@ -58,12 +44,15 @@ import {
   SourcesTrigger,
 } from "@/components/ai-elements/sources";
 import { Suggestion, Suggestions } from "@/components/ai-elements/suggestion";
-import { CheckIcon, GlobeIcon } from "lucide-vue-next";
+import { GlobeIcon, PlusIcon, TrashIcon, MessageSquareIcon, RefreshCcwIcon, ThumbsUpIcon, ThumbsDownIcon, CopyIcon, PencilIcon } from "lucide-vue-next";
 import { streamChat } from "@/api/chat";
 import { computed, ref, onMounted, watch } from "vue";
 import { useKbStore } from "@/stores/kb";
 import { useAiStore } from "@/stores/ai";
-import { ElRadioGroup, ElRadio, ElDialog, ElButton } from "element-plus";
+import { useChatStore } from "@/stores/chat";
+import { fetchMessages, editMessage } from "@/api/chat_history";
+import type { ChatMessage } from "@/api/chat_history";
+import { ElRadioGroup, ElRadio, ElDialog, ElButton, ElScrollbar, ElMessageBox, ElInput } from "element-plus";
 import {
   Tool,
   ToolContent,
@@ -211,44 +200,116 @@ interface MessageType {
   tools?: MessageTool[];
 }
 
-interface Model {
-  id: string;
-  name: string;
-  chef: string;
-  chefSlug: string;
-  providers: string[];
-}
-
-const models: Model[] = [
-  {
-    id: "deepseek",
-    name: "deepseek-chat",
-    chef: "Deepseek",
-    chefSlug: "deepseek",
-    providers: ["deepseek"],
-  },
-];
-
 const suggestions: string[] = [];
-
-const defaultModelId = models[0]?.id || "";
-const modelId = ref<string>(defaultModelId);
-const modelSelectorOpen = ref(false);
 const status = ref<ChatStatus>("ready");
 const messages = ref<MessageType[]>([]);
 const kbStore = useKbStore();
 const aiStore = useAiStore();
+const chatStore = useChatStore();
 const kbSelectorOpen = ref(false);
 const selectedKbId = ref<string>("");
-const abortController = ref<AbortController | null>(null);
+const abortControllersBySession = new Map<string, AbortController>();
+const editingMessageIndex = ref<number | null>(null);
+const editContent = ref<string>("");
+const savingEdit = ref(false);
 
-function stopGeneration() {
-  if (abortController.value) {
-    abortController.value.abort();
-    abortController.value = null;
-    status.value = "ready";
+function toUiMessages(list: ChatMessage[]): MessageType[] {
+  return list.map((msg) => ({
+    key: `${msg.role}-${msg.id}`,
+    from: (msg.role === "assistant" ? "assistant" : "user") as "user" | "assistant",
+    versions: [{ id: `${msg.role}-${msg.id}`, content: msg.content }],
+    citations: msg.citations,
+  }));
+}
+
+function getSessionUiMessages(sessionId: string): MessageType[] {
+  const cached = chatStore.getUiMessages(sessionId) as MessageType[] | undefined;
+  if (Array.isArray(cached)) return cached as MessageType[];
+  const base = toUiMessages(chatStore.getMessages(sessionId));
+  chatStore.setUiMessages(sessionId, base as any);
+  return base;
+}
+
+function setSessionUiMessages(sessionId: string, next: MessageType[]) {
+  chatStore.setUiMessages(sessionId, next as any);
+  if (chatStore.currentSessionId === sessionId) {
+    messages.value = next;
   }
 }
+
+function updateStoredMessageContent(
+  sessionId: string,
+  messageId: number,
+  content: string
+) {
+  const existing = chatStore.getMessages(sessionId);
+  const idx = existing.findIndex((m) => m.id === messageId);
+  if (idx < 0) return;
+  const current = existing[idx];
+  if (!current) return;
+  const next = existing.slice();
+  next[idx] = { ...current, content };
+  chatStore.setMessages(sessionId, next);
+}
+
+function updateStoredMessageCitations(
+  sessionId: string,
+  messageId: number,
+  citations: MessageCitation[]
+) {
+  const existing = chatStore.getMessages(sessionId);
+  const idx = existing.findIndex((m) => m.id === messageId);
+  if (idx < 0) return;
+  const current = existing[idx];
+  if (!current) return;
+  const next = existing.slice();
+  next[idx] = { ...current, citations };
+  chatStore.setMessages(sessionId, next);
+}
+
+function stopGeneration() {
+  const sessionId = chatStore.currentSessionId;
+  if (!sessionId) return;
+  const controller = abortControllersBySession.get(sessionId);
+  if (controller) {
+    controller.abort();
+    abortControllersBySession.delete(sessionId);
+  }
+  status.value = "ready";
+  chatStore.setStatus(sessionId, "ready");
+}
+
+async function createNewChat() {
+  const session = await chatStore.createNewSession();
+  chatStore.setMessages(session.id, []);
+  chatStore.setUiMessages(session.id, []);
+  chatStore.setStatus(session.id, "ready");
+  messages.value = [];
+  status.value = "ready";
+}
+
+async function handleDeleteSession(id: string) {
+  try {
+    await ElMessageBox.confirm(
+      "确定要删除该会话吗？此操作不可撤销。",
+      "删除确认",
+      {
+        confirmButtonText: "删除",
+        cancelButtonText: "取消",
+        type: "warning",
+      }
+    );
+    const controller = abortControllersBySession.get(id);
+    if (controller) {
+      controller.abort();
+      abortControllersBySession.delete(id);
+    }
+    await chatStore.removeSession(id);
+  } catch {
+    // 用户取消
+  }
+}
+
 
 const apiBase = computed<string>(() => {
   const raw =
@@ -261,9 +322,6 @@ const apiBase = computed<string>(() => {
   return s;
 });
 
-const selectedModelData = computed(() =>
-  models.find((m) => m.id === modelId.value)
-);
 
 type InlineCiteRef = { fileId: number; chunkIndex: number };
 
@@ -273,6 +331,70 @@ type InlinePart =
 
 function latestContent(message: MessageType): string {
   return message.versions[message.versions.length - 1]?.content || "";
+}
+
+function startEditing(index: number) {
+  const target = messages.value[index];
+  if (!target || target.from !== "user") return;
+  editingMessageIndex.value = index;
+  editContent.value = latestContent(target);
+}
+
+function cancelEditing() {
+  editingMessageIndex.value = null;
+  editContent.value = "";
+}
+
+async function saveEditing() {
+  const sessionId = chatStore.currentSessionId;
+  if (!sessionId) return;
+  const idx = editingMessageIndex.value;
+  if (idx === null) return;
+  const content = editContent.value.trim();
+  if (!content) return;
+  if (savingEdit.value) return;
+  savingEdit.value = true;
+  stopGeneration();
+  try {
+    const latest = await fetchMessages(sessionId);
+    if (latest.length > 0) {
+      chatStore.setMessages(sessionId, latest);
+      const uiLatest = toUiMessages(latest);
+      chatStore.setUiMessages(sessionId, uiLatest as any);
+      messages.value = uiLatest;
+    }
+    const current = chatStore.getMessages(sessionId);
+    const target = current[idx];
+    if (!target || target.role !== "user") {
+      return;
+    }
+    await editMessage(sessionId, target.id, content);
+    const updated = await fetchMessages(sessionId);
+    chatStore.setMessages(sessionId, updated);
+    const ui = toUiMessages(updated);
+    chatStore.setUiMessages(sessionId, ui as any);
+    messages.value = ui;
+    editingMessageIndex.value = null;
+    editContent.value = "";
+    const assistantId = Date.now();
+    const assistantVersionId = `assistant-${assistantId}`;
+    const assistantMessage: MessageType = {
+      key: `assistant-${assistantId}`,
+      from: "assistant",
+      versions: [{ id: assistantVersionId, content: "" }],
+    };
+    const nextMessages = [...messages.value, assistantMessage];
+    setSessionUiMessages(sessionId, nextMessages);
+    chatStore.appendMessage(sessionId, {
+      id: assistantId,
+      role: "assistant",
+      content: "",
+      createdAt: assistantId,
+    });
+    streamResponse(assistantVersionId, sessionId, assistantId, true);
+  } finally {
+    savingEdit.value = false;
+  }
 }
 
 function parseInlineCiteRef(s: string): InlineCiteRef | null {
@@ -413,18 +535,25 @@ function parseToolChunks(output: any): MessageCitation[] {
   return out;
 }
 
-function upsertMessageCitations(versionId: string, chunks: MessageCitation[]) {
-  if (!chunks || chunks.length === 0) return;
-  const target = messages.value.find((msg) =>
+function upsertMessageCitations(
+  sessionId: string,
+  versionId: string,
+  chunks: MessageCitation[]
+) {
+  if (!chunks || chunks.length === 0) return [];
+  const sessionMessages = getSessionUiMessages(sessionId);
+  const target = sessionMessages.find((msg) =>
     msg.versions.some((version) => version.id === versionId)
   );
-  if (!target) return;
+  if (!target) return [];
   const current = target.citations ? [...target.citations] : [];
   const map = new Map<string, MessageCitation>();
   for (const c of current) map.set(`${c.file_id}:${c.chunk_index}`, c);
   for (const c of chunks) map.set(`${c.file_id}:${c.chunk_index}`, c);
-  target.citations = Array.from(map.values());
-  messages.value = [...messages.value];
+  const nextCitations = Array.from(map.values());
+  target.citations = nextCitations;
+  setSessionUiMessages(sessionId, [...sessionMessages]);
+  return nextCitations;
 }
 
 /**
@@ -498,15 +627,20 @@ function parseEvent(raw: any): LangChainEvent | null {
   return null;
 }
 
-function updateStreamingContent(versionId: string, content: string) {
-  const target = messages.value.find((msg) =>
+function updateStreamingContent(
+  sessionId: string,
+  versionId: string,
+  content: string
+) {
+  const sessionMessages = getSessionUiMessages(sessionId);
+  const target = sessionMessages.find((msg) =>
     msg.versions.some((version) => version.id === versionId)
   );
   if (!target) return;
   const version = target.versions.find((v) => v.id === versionId);
   if (!version) return;
   version.content = content;
-  messages.value = [...messages.value];
+  setSessionUiMessages(sessionId, [...sessionMessages]);
 }
 
 // function updateStreamingReasoning(versionId: string, content: string) {
@@ -535,11 +669,16 @@ function normalizeToolOutput(value: any): any {
   return String(value);
 }
 
-function updateStreamingTool(versionId: string, toolEvent: any) {
+function updateStreamingTool(
+  sessionId: string,
+  versionId: string,
+  toolEvent: any
+) {
   /**
    * 将后端工具事件映射到前端工具列表，仅更新工具面板，不将工具结果注入消息文本
    */
-  const target = messages.value.find((msg) =>
+  const sessionMessages = getSessionUiMessages(sessionId);
+  const target = sessionMessages.find((msg) =>
     msg.versions.some((version) => version.id === versionId)
   );
   if (!target) return;
@@ -581,7 +720,7 @@ function updateStreamingTool(versionId: string, toolEvent: any) {
       target.tools = [...target.tools];
     }
   }
-  messages.value = [...messages.value];
+  setSessionUiMessages(sessionId, [...sessionMessages]);
 }
 
 /**
@@ -589,13 +728,32 @@ function updateStreamingTool(versionId: string, toolEvent: any) {
  * - 文本：on_chat_model_stream / on_llm_new_token / on_*_end 的 content
  * - 工具：on_tool_start / on_tool_end / on_tool_error
  */
-async function streamResponse(versionId: string) {
-  status.value = "streaming";
-  abortController.value = new AbortController();
-  const history = messages.value.map((m) => ({
-    role: m.from,
-    content: m.versions[m.versions.length - 1]?.content || "",
-  }));
+async function streamResponse(
+  versionId: string,
+  sessionId: string,
+  assistantMessageId: number,
+  skipSaveUser: boolean = false
+) {
+  chatStore.setStatus(sessionId, "streaming");
+  if (chatStore.currentSessionId === sessionId) {
+    status.value = "streaming";
+  }
+
+  const previous = abortControllersBySession.get(sessionId);
+  if (previous) {
+    previous.abort();
+    abortControllersBySession.delete(sessionId);
+  }
+
+  const controller = new AbortController();
+  abortControllersBySession.set(sessionId, controller);
+
+  const history = getSessionUiMessages(sessionId)
+    .map((m) => ({
+      role: m.from,
+      content: m.versions[m.versions.length - 1]?.content || "",
+    }))
+    .filter((m) => m.content.trim().length > 0);
   try {
     const iter = await streamChat(
       history,
@@ -605,7 +763,9 @@ async function streamResponse(versionId: string) {
         llmApiKey: aiStore.llmApiKey,
         llmBaseUrl: aiStore.llmBaseUrl,
         llmModel: aiStore.llmModel,
-        signal: abortController.value.signal,
+        signal: controller.signal,
+        sessionId,
+        skipSaveUser,
       }
     );
     let acc = "";
@@ -614,7 +774,8 @@ async function streamResponse(versionId: string) {
       if (!ev) continue;
       if (ev.kind === "on_chat_model_stream") {
         acc += normalizeTextChunk(ev.text);
-        updateStreamingContent(versionId, acc);
+        updateStreamingContent(sessionId, versionId, acc);
+        updateStoredMessageContent(sessionId, assistantMessageId, acc);
       }
       //  else if (ev.kind === "on_llm_new_token") {
       //   acc += String(ev.token);
@@ -625,14 +786,14 @@ async function streamResponse(versionId: string) {
       //   updateStreamingReasoning(versionId, acc);
       // } 
       else if (ev.kind === "on_tool_start") {
-        updateStreamingTool(versionId, {
+        updateStreamingTool(sessionId, versionId, {
           type: "tool_start",
           tool: ev.tool,
           input: ev.input || {},
           id: ev.id,
         });
       } else if (ev.kind === "on_tool_end") {
-        updateStreamingTool(versionId, {
+        updateStreamingTool(sessionId, versionId, {
           type: "tool_end",
           tool: ev.tool,
           output: ev.output,
@@ -640,10 +801,11 @@ async function streamResponse(versionId: string) {
         });
         if (ev.tool === "read_file_chunks" || ev.tool === "read_file_chunks_multi") {
           const chunks = parseToolChunks(ev.output);
-          upsertMessageCitations(versionId, chunks);
+          const nextCitations = upsertMessageCitations(sessionId, versionId, chunks);
+          updateStoredMessageCitations(sessionId, assistantMessageId, nextCitations);
         }
       } else if (ev.kind === "on_tool_error") {
-        updateStreamingTool(versionId, {
+        updateStreamingTool(sessionId, versionId, {
           type: "tool_end",
           tool: ev.tool,
           output: null,
@@ -652,18 +814,27 @@ async function streamResponse(versionId: string) {
         });
       } else if (ev.kind === "error") {
         acc += `\n[Error] ${ev.error}`;
-        updateStreamingContent(versionId, acc);
+        updateStreamingContent(sessionId, versionId, acc);
+        updateStoredMessageContent(sessionId, assistantMessageId, acc);
       }
     }
   } catch (e: any) {
-    if (e.name === 'AbortError') {
+    if (e.name === "AbortError") {
       // User aborted
       return;
     }
-    updateStreamingContent(versionId, `请求失败: ${e?.message || e}`);
+    const errText = `请求失败: ${e?.message || e}`;
+    updateStreamingContent(sessionId, versionId, errText);
+    updateStoredMessageContent(sessionId, assistantMessageId, errText);
   } finally {
-    status.value = "ready";
-    abortController.value = null;
+    chatStore.setStatus(sessionId, "ready");
+    const current = abortControllersBySession.get(sessionId);
+    if (current === controller) {
+      abortControllersBySession.delete(sessionId);
+    }
+    if (chatStore.currentSessionId === sessionId) {
+      status.value = "ready";
+    }
   }
 }
 
@@ -738,7 +909,19 @@ function extractText(obj: any): string {
   return String(obj);
 }
 
-function addUserMessage(content: string) {
+async function addUserMessage(content: string) {
+  if (!chatStore.currentSessionId) {
+    const title = content.slice(0, 20) || "New Chat";
+    const session = await chatStore.createNewSession(title);
+    chatStore.setMessages(session.id, []);
+    chatStore.setUiMessages(session.id, []);
+    chatStore.setStatus(session.id, "submitted");
+  } else {
+    chatStore.setStatus(chatStore.currentSessionId, "submitted");
+  }
+
+  const sessionId = chatStore.currentSessionId;
+  if (!sessionId) return;
   const timestamp = Date.now();
   const userMessage: MessageType = {
     key: `user-${timestamp}`,
@@ -752,11 +935,19 @@ function addUserMessage(content: string) {
   };
 
   messages.value = [...messages.value, userMessage];
+  setSessionUiMessages(sessionId, [...messages.value]);
+  chatStore.appendMessage(sessionId, {
+    id: timestamp,
+    role: "user",
+    content,
+    createdAt: timestamp,
+  });
 
   setTimeout(() => {
-    const assistantVersionId = `assistant-${Date.now()}`;
+    const assistantId = Date.now();
+    const assistantVersionId = `assistant-${assistantId}`;
     const assistantMessage: MessageType = {
-      key: `assistant-${Date.now()}`,
+      key: `assistant-${assistantId}`,
       from: "assistant",
       versions: [
         {
@@ -767,35 +958,72 @@ function addUserMessage(content: string) {
     };
 
     messages.value = [...messages.value, assistantMessage];
-    streamResponse(assistantVersionId);
+    setSessionUiMessages(sessionId, [...messages.value]);
+    chatStore.appendMessage(sessionId, {
+      id: assistantId,
+      role: "assistant",
+      content: "",
+      createdAt: assistantId,
+    });
+    streamResponse(assistantVersionId, sessionId, assistantId);
   }, 200);
 }
 
-function handleSubmit(message: PromptInputMessage) {
+async function handleSubmit(message: PromptInputMessage) {
   const text = message.text.trim();
   const hasText = text.length > 0;
-  const hasAttachments = message.files.length > 0;
+  const hasAttachments = Array.isArray(message.files) && message.files.length > 0;
 
   if (!hasText && !hasAttachments) return;
 
   status.value = "submitted";
 
-  addUserMessage(hasText ? text : "Sent with attachments");
+  await addUserMessage(hasText ? text : "Sent with attachments");
 }
 
-function handleSuggestionClick(suggestion: string) {
+async function handleSuggestionClick(suggestion: string) {
   status.value = "submitted";
-  addUserMessage(suggestion);
+  await addUserMessage(suggestion);
 }
 
-function handleModelSelect(id: string) {
-  modelId.value = id;
-  modelSelectorOpen.value = false;
-}
 
-onMounted(() => {
+onMounted(async () => {
   kbStore.fetchKnowledgeBases();
+  await chatStore.loadSessions();
 });
+
+watch(
+  () => chatStore.currentSessionId,
+  async (newId) => {
+    if (newId) {
+      status.value = chatStore.getStatus(newId) as ChatStatus;
+
+      const uiCached = chatStore.getUiMessages(newId) as MessageType[] | undefined;
+      if (Array.isArray(uiCached)) {
+        messages.value = uiCached;
+        return;
+      }
+
+      const cached = chatStore.getMessages(newId);
+      if (cached.length > 0) {
+        const ui = toUiMessages(cached);
+        chatStore.setUiMessages(newId, ui as any);
+        messages.value = ui;
+      }
+
+      const history = await fetchMessages(newId);
+      chatStore.setMessages(newId, history);
+      
+      const ui = toUiMessages(chatStore.getMessages(newId));
+      chatStore.setUiMessages(newId, ui as any);
+      messages.value = ui;
+    } else {
+      messages.value = [];
+      status.value = "ready";
+    }
+  },
+  { immediate: true }
+);
 
 /**
  * 默认选中第一个知识库：
@@ -812,16 +1040,49 @@ watch(
   },
   { immediate: true }
 );
+
 </script>
 
 <template>
-  <div class="relative flex h-full w-full flex-col overflow-hidden bg-gray-50">
-    <div class="flex-1 min-h-0 relative">
+  <div class="flex h-full w-full bg-white overflow-hidden">
+    <!-- Sidebar -->
+    <div class="w-64 flex-shrink-0 flex flex-col border-r bg-gray-50/50">
+      <div class="p-4 border-b">
+        <ElButton type="primary" class="w-full" @click="createNewChat">
+          <PlusIcon class="mr-2 size-4" /> New Chat
+        </ElButton>
+      </div>
+      <ElScrollbar class="flex-1">
+        <div class="p-2 space-y-1">
+          <div
+            v-for="session in chatStore.sessions"
+            :key="session.id"
+            class="group flex items-center justify-between p-2 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors"
+            :class="chatStore.currentSessionId === session.id ? 'bg-gray-200' : ''"
+            @click="chatStore.setCurrentSession(session.id)"
+          >
+            <div class="flex items-center gap-2 overflow-hidden">
+                <MessageSquareIcon class="size-4 shrink-0 text-gray-500" />
+                <span class="truncate text-sm text-gray-700">{{ session.title }}</span>
+            </div>
+            <button
+              class="opacity-0 group-hover:opacity-100 p-1 hover:bg-gray-300 rounded text-gray-500 hover:text-red-500 transition-all"
+              @click.stop="handleDeleteSession(session.id)"
+            >
+              <TrashIcon class="size-3" />
+            </button>
+          </div>
+        </div>
+      </ElScrollbar>
+    </div>
+
+    <div class="relative flex h-full flex-1 flex-col overflow-hidden bg-gray-50">
+      <div class="flex-1 min-h-0 relative">
       <Conversation class="h-full">
         <ConversationContent class="h-full overflow-y-auto px-4 md:px-8 pt-6 pb-4 scroll-smooth">
           <div class="w-full space-y-8 pb-8">
             <MessageBranch
-              v-for="message in messages"
+              v-for="(message, messageIndex) in messages"
               :key="message.key"
               :default-branch="0"
             >
@@ -877,7 +1138,30 @@ watch(
 
                   <MessageContent>
                     <div v-if="message.from === 'user'">
-                      {{ latestContent(message) }}
+                      <div v-if="editingMessageIndex === messageIndex">
+                        <ElInput
+                          class="w-full"
+                          v-model="editContent"
+                          type="textarea"
+                          :autosize="{ minRows: 2, maxRows: 6 }"
+                          :input-style="{
+                            backgroundColor: '#ffffff',
+                            border: '1px solid #3b82f6',
+                          }"
+                        />
+                        <div class="mt-2 flex gap-2 justify-end">
+                          <ElButton size="small" @click="cancelEditing">取消</ElButton>
+                          <ElButton
+                            size="small"
+                            :loading="savingEdit"
+                            :disabled="editContent.trim().length === 0"
+                            @click="saveEditing"
+                          >发送</ElButton>
+                        </div>
+                      </div>
+                      <div v-else>
+                        {{ latestContent(message) }}
+                      </div>
                     </div>
                     <template
                       v-else-if="
@@ -971,6 +1255,13 @@ watch(
                 </MessageAction>
               </MessageActions>
             </MessageToolbar>
+            <MessageToolbar v-if="message.from === 'user'" :class="message.from === 'user' ? 'w-full flex flex-col items-end' : 'w-full min-w-0'">
+              <MessageActions>
+                <MessageAction label="Edit" tooltip="Edit message" @click="startEditing(messageIndex)">
+                  <PencilIcon class="size-4" />
+                </MessageAction>
+              </MessageActions>
+            </MessageToolbar>
           </MessageBranch>
           </div>
         </ConversationContent>
@@ -1005,30 +1296,14 @@ watch(
 
           <PromptInputFooter>
             <PromptInputTools>
-              <PromptInputActionMenu>
+              <!-- <PromptInputActionMenu>
                 <PromptInputActionMenuTrigger />
                 <PromptInputActionMenuContent>
                   <PromptInputActionAddAttachments />
                 </PromptInputActionMenuContent>
-              </PromptInputActionMenu>
+              </PromptInputActionMenu> -->
 
-              <!-- <PromptInputButton
-                :variant="useMicrophone ? 'default' : 'ghost'"
-                @click="toggleMicrophone"
-              >
-                <MicIcon :size="16" />
-                <span class="sr-only">Microphone</span>
-              </PromptInputButton> -->
-
-              <!-- <PromptInputButton
-                :variant="useWebSearch ? 'default' : 'ghost'"
-                @click="toggleWebSearch"
-              >
-                <GlobeIcon :size="16" />
-                <span>Search</span>
-              </PromptInputButton> -->
-
-              <ModelSelector v-model:open="modelSelectorOpen">
+              <!-- <ModelSelector v-model:open="modelSelectorOpen">
                 <ModelSelectorTrigger as-child>
                   <PromptInputButton>
                     <ModelSelectorLogo
@@ -1077,11 +1352,11 @@ watch(
                     </ModelSelectorGroup>
                   </ModelSelectorList>
                 </ModelSelectorContent>
-              </ModelSelector>
+              </ModelSelector> -->
 
               <PromptInputButton @click="kbSelectorOpen = true">
                 <GlobeIcon :size="16" />
-                <span>Select Knowledge Base</span>
+                <span>选择知识库</span>
               </PromptInputButton>
             </PromptInputTools>
 
@@ -1092,7 +1367,13 @@ watch(
             />
           </PromptInputFooter>
         </PromptInput>
-        <ElDialog v-model="kbSelectorOpen" title="选择知识库" width="520px">
+        <ElDialog 
+          v-model="kbSelectorOpen" 
+          title="选择知识库" 
+          width="520px" 
+          append-to-body 
+          destroy-on-close
+        >
           <div class="px-2 py-2">
             <ElRadioGroup v-model="selectedKbId">
               <div class="grid grid-cols-2 gap-2">
@@ -1121,4 +1402,5 @@ watch(
   </div>
 
   <ChunkViewerDialog v-model="citationDialogOpen" :chunks="citationDialogChunks" />
+ </div>
 </template>

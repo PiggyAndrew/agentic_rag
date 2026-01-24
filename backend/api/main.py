@@ -69,12 +69,14 @@ def create_app() -> FastAPI:
 
     # 路由注册
     from backend.api.routers.chat import router as chat_router
+    from backend.api.routers.chat_history import router as chat_history_router
     from backend.api.routers.kb import router as kb_router
     from backend.api.routers.docx import router as docx_router
     from backend.api.routers.config import router as config_router
     from backend.api.routers.llm_config import router as llm_config_router
 
     app.include_router(chat_router)
+    app.include_router(chat_history_router, prefix="/api/chat")
     app.include_router(kb_router)
     app.include_router(docx_router)
     app.include_router(config_router)

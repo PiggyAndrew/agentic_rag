@@ -8,7 +8,9 @@ export type StreamChatOptions = {
   llmApiKey?: string
   llmBaseUrl?: string
   llmModel?: string
+  sessionId?: string
   signal?: AbortSignal
+  skipSaveUser?: boolean
 }
 
 function resolveChatUrl(raw?: string): string {
@@ -36,7 +38,7 @@ export async function streamChat(
   const res = await fetch(url, {
     method: 'POST',
     headers,
-    body: JSON.stringify({ messages, kbId }),
+    body: JSON.stringify({ messages, kbId, sessionId: options?.sessionId, skipSaveUser: options?.skipSaveUser }),
     signal: options?.signal,
   })
   if (!res.body || !res.ok) {

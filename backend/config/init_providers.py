@@ -8,7 +8,7 @@ def seed_providers():
     # for p in repo.list_providers():
     #      repo.delete(p.id)
     providers = repo.list_providers(enabled_only=False)
-    isDebug = True
+    isDebug = False
     if not providers:
         # 1. Ollama Embedding
         repo.create(LLMProviderCreate(

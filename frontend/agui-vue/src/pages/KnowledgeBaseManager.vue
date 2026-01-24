@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { Plus, Delete, Edit, Upload as UploadIcon, Document, FolderOpened} from '@element-plus/icons-vue'
+import { Plus, Delete, Edit, Upload as UploadIcon, Document, FolderOpened, Setting } from '@element-plus/icons-vue'
 import { useKbStore } from '@/stores/kb'
 import ChunkViewerDialog from '@/components/ChunkViewerDialog.vue'
+import FileParseSettingsDialog from '@/components/FileParseSettingsDialog.vue'
 
 interface KnowledgeBase {
   id: string
@@ -41,6 +42,10 @@ const newKbDesc = ref<string>('')
 const showChunkModal = ref<boolean>(false)
 const chunks = ref<any[]>([])
 const parsingFileIds = ref<Set<string>>(new Set())
+
+// Parsing Settings State
+const showSettingsDialog = ref(false)
+const currentSettingsFile = ref<FileItem | null>(null)
 
 /**
  * 将后端文件状态映射为中文文案与样式
@@ -190,7 +195,6 @@ async function removeFile(fileId: string): Promise<void> {
   )
 
   await kbStore.deleteFile(fileId, selectedKbId.value)
-  await kbStore.fetchFiles(selectedKbId.value)
   ElMessage.success('文件已删除')
 }
 
@@ -212,6 +216,23 @@ function onUploadChange(file: any): void {
   if (file?.raw) {
     handleFileUpload([file.raw as File])
   }
+}
+
+/**
+ * 打开解析设置弹窗
+ */
+function openSettings(file: FileItem) {
+  currentSettingsFile.value = file
+  showSettingsDialog.value = true
+}
+
+/**
+ * 保存解析设置（暂无后端接口，仅打印）
+ */
+function handleSaveSettings(config: any) {
+  console.log('保存解析配置:', config)
+  // TODO: 调用后端 API 保存配置，例如 await kbStore.updateFileSettings(config)
+  // 如果需要立即生效，也可以在这里触发重新解析
 }
 </script>
 
@@ -389,6 +410,7 @@ function onUploadChange(file: any): void {
               <el-table-column label="操作" width="220" fixed="right" align="right">
                 <template #default="{ row }">
                   <div class="flex items-center justify-end gap-2 pr-4 opacity-80 hover:opacity-100 transition-opacity">
+                    <el-button size="small" :icon="Setting" circle @click="openSettings(row)" class="!mr-1" title="解析设置" />
                     <el-button size="small" @click="viewChunks(row.id)" class="!rounded-md">查看</el-button>
                     <el-button 
                       type="primary" 
@@ -445,6 +467,12 @@ function onUploadChange(file: any): void {
   </el-dialog>
 
   <ChunkViewerDialog v-model="showChunkModal" :chunks="chunks" />
+
+  <FileParseSettingsDialog 
+    v-model="showSettingsDialog" 
+    :file="currentSettingsFile" 
+    @save="handleSaveSettings" 
+  />
 </template>
 
 <style scoped>
