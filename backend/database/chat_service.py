@@ -85,3 +85,13 @@ class ChatService:
             if chat_session:
                 chat_session.updated_at_ms = now
             return True
+
+    def update_session_title(self, session_id: str, title: str) -> bool:
+        """更新会话标题"""
+        with get_default_sqlite_manager().session_scope() as session:
+            chat_session = session.get(ChatSessionORM, session_id)
+            if not chat_session:
+                return False
+            chat_session.title = title
+            chat_session.updated_at_ms = int(time.time() * 1000)
+            return True

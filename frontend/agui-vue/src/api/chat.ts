@@ -58,11 +58,14 @@ export async function streamChat(
         const lines = buffer.split('\n');
         buffer = lines.pop() || '';
         for (const line of lines) {
+          const trimmed = line.trim();
+          if (!trimmed) continue;
           try {
-            const parsed = JSON.parse(line);
+            const parsed = JSON.parse(trimmed);
             yield parsed;
-          } catch {
-            // ignore
+          } catch (e) {
+            // 忽略无法解析的行（可能是空行或无效 JSON）
+            console.debug('Failed to parse stream line:', trimmed, e);
           }
         }
       }

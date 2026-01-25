@@ -19,7 +19,71 @@
   color-scheme: light dark;
   color: rgba(30, 41, 59, 1); /* Slate 800 */
   background-color: #F8FAFC; /* Slate 50 */
-  --radius: 0.75rem; /* Slightly larger radius for modern look */
+
+  /* ==================== Design System ==================== */
+
+  /* Border Radius */
+  --radius-sm: 0.375rem;   /* 6px */
+  --radius-md: 0.5rem;     /* 8px */
+  --radius-lg: 0.75rem;    /* 12px */
+  --radius-xl: 1rem;       /* 16px */
+  --radius-2xl: 1.25rem;  /* 20px */
+  --radius-3xl: 1.5rem;    /* 24px */
+  --radius-full: 9999px;
+
+  /* Spacing (scale: 4px base) */
+  --space-0: 0;
+  --space-1: 0.25rem;   /* 4px */
+  --space-2: 0.5rem;    /* 8px */
+  --space-3: 0.75rem;   /* 12px */
+  --space-4: 1rem;      /* 16px */
+  --space-5: 1.25rem;   /* 20px */
+  --space-6: 1.5rem;    /* 24px */
+  --space-8: 2rem;      /* 32px */
+  --space-10: 2.5rem;   /* 40px */
+  --space-12: 3rem;     /* 48px */
+  --space-16: 4rem;     /* 64px */
+  --space-20: 5rem;     /* 80px */
+  --space-24: 6rem;     /* 96px */
+  --space-32: 8rem;     /* 128px */
+
+  /* Shadows */
+  --shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+  --shadow-2xl: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+  --shadow-inner: inset 0 2px 4px 0 rgb(0 0 0 / 0.05);
+  --shadow-primary-sm: 0 2px 4px -1px rgb(59 130 246 / 0.3);
+  --shadow-primary-md: 0 4px 6px -1px rgb(59 130 246 / 0.4);
+
+  /* Animation Duration */
+  --duration-fast: 75ms;
+  --duration-faster: 100ms;
+  --duration-fastest: 150ms;
+  --duration-normal: 200ms;
+  --duration-slow: 300ms;
+  --duration-slower: 500ms;
+
+  /* Animation Easing */
+  --ease-linear: linear;
+  --ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* Z Index Scale */
+  --z-dropdown: 10;
+  --z-sticky: 20;
+  --z-fixed: 30;
+  --z-modal-backdrop: 40;
+  --z-modal: 50;
+  --z-popover: 60;
+  --z-tooltip: 70;
+
+  /* ==================== Legacy Support ==================== */
+  --radius: 0.75rem;
   
   /* Light Mode - Slate & Blue Theme */
   --background: oklch(0.978 0.004 256.665); /* #F8FAFC */
@@ -82,10 +146,16 @@ body {
 }
 
 @theme inline {
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
+  /* Radius tokens from design system */
+  --radius-sm: var(--radius-sm);
+  --radius-md: var(--radius-md);
+  --radius-lg: var(--radius-lg);
+  --radius-xl: var(--radius-xl);
+  --radius-2xl: var(--radius-2xl);
+  --radius-3xl: var(--radius-3xl);
+  --radius-full: var(--radius-full);
+
+  /* Color tokens */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -117,6 +187,41 @@ body {
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
+
+  /* Shadow tokens */
+  --shadow-xs: var(--shadow-xs);
+  --shadow-sm: var(--shadow-sm);
+  --shadow-md: var(--shadow-md);
+  --shadow-lg: var(--shadow-lg);
+  --shadow-xl: var(--shadow-xl);
+  --shadow-2xl: var(--shadow-2xl);
+  --shadow-inner: var(--shadow-inner);
+  --shadow-primary-sm: var(--shadow-primary-sm);
+  --shadow-primary-md: var(--shadow-primary-md);
+
+  /* Animation duration tokens */
+  --duration-fast: var(--duration-fast);
+  --duration-faster: var(--duration-faster);
+  --duration-fastest: var(--duration-fastest);
+  --duration-normal: var(--duration-normal);
+  --duration-slow: var(--duration-slow);
+  --duration-slower: var(--duration-slower);
+
+  /* Easing tokens */
+  --ease-linear: var(--ease-linear);
+  --ease-in: var(--ease-in);
+  --ease-out: var(--ease-out);
+  --ease-in-out: var(--ease-in-out);
+  --ease-bounce: var(--ease-bounce);
+
+  /* Z index tokens */
+  --z-dropdown: var(--z-dropdown);
+  --z-sticky: var(--z-sticky);
+  --z-fixed: var(--z-fixed);
+  --z-modal-backdrop: var(--z-modal-backdrop);
+  --z-modal: var(--z-modal);
+  --z-popover: var(--z-popover);
+  --z-tooltip: var(--z-tooltip);
 }
 
 .dark {
@@ -180,5 +285,143 @@ body {
   }
   body {
     @apply bg-background text-foreground;
+  }
+
+  /* Markdown 标题样式 */
+  .prose h1,
+  .prose h2,
+  .prose h3,
+  .prose h4,
+  .prose h5,
+  .prose h6 {
+    font-family: 'Poppins', system-ui, sans-serif;
+    font-weight: 600;
+    color: var(--color-foreground);
+    margin-top: 1.5em;
+    margin-bottom: 0.5em;
+  }
+
+  .prose h1 {
+    font-size: 1.5rem; /* text-2xl */
+    margin-top: 0;
+  }
+
+  .prose h2 {
+    font-size: 1.25rem; /* text-xl */
+  }
+
+  .prose h3 {
+    font-size: 1.125rem; /* text-lg */
+  }
+
+  .prose h4 {
+    font-size: 1rem; /* text-base */
+  }
+
+  .prose p {
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .prose ul,
+  .prose ol {
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+    margin-left: 1.5rem;
+  }
+
+  .prose ul {
+    list-style-type: disc;
+  }
+
+  .prose ol {
+    list-style-type: decimal;
+  }
+
+  .prose li {
+    margin-top: 0.25rem;
+    margin-bottom: 0.25rem;
+  }
+
+  .prose code {
+    background-color: var(--color-muted);
+    padding: 0.375rem 0.625rem;
+    border-radius: 0.375rem;
+    font-size: 0.875rem;
+    font-family: ui-monospace, monospace;
+    color: var(--color-foreground);
+  }
+
+  .prose pre {
+    background-color: var(--color-muted);
+    padding: 1rem;
+    border-radius: 0.5rem;
+    overflow-x: auto;
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .prose pre code {
+    background-color: transparent;
+    padding: 0;
+    font-size: 0.875rem;
+  }
+
+  .prose blockquote {
+    border-left-width: 4px;
+    border-color: var(--color-primary);
+    padding-left: 1rem;
+    font-style: italic;
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+    color: var(--color-muted-foreground);
+  }
+
+  .prose a {
+    color: var(--color-primary);
+    text-decoration: underline;
+  }
+
+  .prose a:hover {
+    text-decoration: underline;
+  }
+
+  .prose strong {
+    font-weight: 700;
+  }
+
+  .prose em {
+    font-style: italic;
+  }
+
+  /* 确保其他 markdown 渲染器的标题样式 */
+  [class*="markdown"] h1,
+  [class*="markdown"] h2,
+  [class*="markdown"] h3,
+  [class*="markdown"] h4,
+  [class*="markdown"] h5,
+  [class*="markdown"] h6 {
+    font-family: 'Poppins', system-ui, sans-serif;
+    font-weight: 600;
+    color: var(--color-foreground);
+    margin-top: 1.5em;
+    margin-bottom: 0.5em;
+  }
+
+  [class*="markdown"] h1 {
+    font-size: 1.5rem; /* text-2xl */
+    margin-top: 0;
+  }
+
+  [class*="markdown"] h2 {
+    font-size: 1.25rem; /* text-xl */
+  }
+
+  [class*="markdown"] h3 {
+    font-size: 1.125rem; /* text-lg */
+  }
+
+  [class*="markdown"] h4 {
+    font-size: 1rem; /* text-base */
   }
 }

@@ -69,3 +69,24 @@ async def edit_message(session_id: str, message_id: int, payload: ChatMessageEdi
     if not success:
         return ApiResponse(ok=False, error={"code": 404, "message": "Message not found"})
     return ApiResponse(ok=True, data={"ok": True})
+
+
+@router.put("/sessions/{session_id}", response_model=ApiResponse)
+async def update_session(session_id: str, title: str = ""):
+    """更新会话标题"""
+    title = (title or "").strip()
+    if not title:
+        return ApiResponse(ok=False, error={"code": 400, "message": "title 不能为空"})
+    success = chat_service.update_session_title(session_id, title)
+    if not success:
+        return ApiResponse(ok=False, error={"code": 404, "message": "Session not found"})
+    session = chat_service.get_session(session_id)
+    if session:
+        data = ChatSession(
+            id=session.id,
+            title=session.title,
+            createdAt=session.created_at_ms,
+            updatedAt=session.updated_at_ms
+        )
+        return ApiResponse(ok=True, data=data)
+    return ApiResponse(ok=False, error={"code": 404, "message": "Session not found"})

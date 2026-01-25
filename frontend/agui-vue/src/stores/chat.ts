@@ -84,6 +84,6 @@ export const useChatStore = defineStore('chat', () => {
   };
 }, {
   persist: {
-    paths: ['sessions', 'currentSessionId', 'messagesBySession', 'statusBySession']
+    paths: ['sessions', 'currentSessionId', 'messagesBySession', 'uiMessagesBySession', 'statusBySession']
   }
 });

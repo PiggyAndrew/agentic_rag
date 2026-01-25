@@ -40,72 +40,95 @@ async function copyText(text: string): Promise<void> {
 <template>
   <el-container class="h-full w-full bg-background">
     <el-main class="p-6">
-      <el-card class="max-w-2xl mx-auto">
-        <div class="flex items-center justify-between mb-4">
-          <div class="flex items-center gap-3">
-            <el-avatar size="large">A</el-avatar>
-            <div>
-              <div class="text-base font-semibold">{{ name }}</div>
-              <div class="text-xs text-muted-foreground">Full Stack Engineer</div>
+      <div class="max-w-2xl mx-auto space-y-4">
+        <!-- Author Card -->
+        <div class="bg-card rounded-xl border border-border shadow-sm overflow-hidden">
+          <div class="flex items-center justify-between p-6 border-b border-border">
+            <div class="flex items-center gap-4">
+              <div class="w-12 h-12 rounded-full bg-primary/10 text-primary flex items-center justify-center text-lg font-semibold">
+                A
+              </div>
+              <div>
+                <div class="text-base font-semibold text-foreground">{{ name }}</div>
+                <div class="text-xs text-muted-foreground">Full Stack Engineer</div>
+              </div>
+            </div>
+            <button
+              class="px-4 py-2 text-sm font-medium text-primary bg-primary/10 rounded-lg transition-all duration-normal ease-out hover:bg-primary/20"
+              @click="openLink(github)"
+            >
+              访问 GitHub
+            </button>
+          </div>
+
+          <!-- Author Info -->
+          <div class="p-6 space-y-4">
+            <div class="flex items-center justify-between py-3 border-b border-border">
+              <span class="text-sm text-muted-foreground w-20">姓名</span>
+              <span class="text-sm text-foreground font-medium">{{ name }}</span>
+            </div>
+            <div class="flex items-center justify-between py-3 border-b border-border">
+              <span class="text-sm text-muted-foreground w-20">GitHub</span>
+              <el-link :href="github" target="_blank" class="text-sm">{{ github }}</el-link>
+            </div>
+            <div class="flex items-center justify-between py-3 border-b border-border">
+              <span class="text-sm text-muted-foreground w-20">邮箱</span>
+              <div class="flex items-center gap-2">
+                <span class="text-sm text-foreground">{{ email }}</span>
+                <button
+                  class="px-2 py-1 text-xs font-medium text-foreground bg-muted rounded-lg hover:bg-muted/80 transition-colors"
+                  @click="copyText(email)"
+                >
+                  复制
+                </button>
+              </div>
+            </div>
+            <div class="flex items-center justify-between py-3">
+              <span class="text-sm text-muted-foreground w-20">微信</span>
+              <div class="flex items-center gap-2">
+                <span class="text-sm text-foreground">{{ wechat }}</span>
+                <button
+                  class="px-2 py-1 text-xs font-medium text-foreground bg-muted rounded-lg hover:bg-muted/80 transition-colors"
+                  @click="copyText(wechat)"
+                >
+                  复制
+                </button>
+              </div>
             </div>
           </div>
-          <el-button type="primary" plain @click="openLink(github)">访问 GitHub</el-button>
         </div>
 
-        <el-descriptions title="作者信息" :column="1" border>
-          <el-descriptions-item label="姓名">
-            <span class="text-foreground">{{ name }}</span>
-          </el-descriptions-item>
-          <el-descriptions-item label="GitHub">
-            <el-link :href="github" target="_blank">{{ github }}</el-link>
-          </el-descriptions-item>
-          <el-descriptions-item label="邮箱">
-            <div class="flex items-center gap-2">
-              <span class="text-foreground">{{ email }}</span>
-              <el-button size="small" @click="copyText(email)">复制</el-button>
-            </div>
-          </el-descriptions-item>
-          <el-descriptions-item label="微信">
-            <div class="flex items-center gap-2">
-              <span class="text-foreground">{{ wechat }}</span>
-              <el-button size="small" @click="copyText(wechat)">复制</el-button>
-            </div>
-          </el-descriptions-item>
-        </el-descriptions>
-      </el-card>
+        <!-- Divider -->
+        <div class="flex items-center gap-4 my-6">
+          <div class="flex-1 h-px bg-border"></div>
+          <span class="text-sm font-medium text-muted-foreground">反馈与建议</span>
+          <div class="flex-1 h-px bg-border"></div>
+        </div>
 
-      <el-divider class="max-w-2xl mx-auto mt-4">反馈与建议</el-divider>
-      <el-card class="max-w-2xl mx-auto" shadow="never">
-        <div class="flex items-center gap-3">
-          <el-icon><Link /></el-icon>
-          <div class="text-sm text-muted-foreground">如果你有问题或建议，欢迎：</div>
+        <!-- Feedback Card -->
+        <div class="bg-card rounded-xl border border-border shadow-sm p-6">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="w-10 h-10 rounded-lg bg-muted flex items-center justify-center text-muted-foreground">
+              <el-icon><Link /></el-icon>
+            </div>
+            <div class="text-sm text-muted-foreground">如果你有问题或建议，欢迎：</div>
+          </div>
+          <div class="flex items-center justify-between">
+            <el-link :href="REPO_URL" target="_blank" class="text-sm font-medium">{{ REPO_URL }}</el-link>
+            <button
+              class="flex items-center gap-2 px-4 py-2 text-sm font-medium text-primary bg-primary/10 rounded-lg transition-all duration-normal ease-out hover:bg-primary/20"
+              @click="openLink(REPO_URL + '/issues')"
+            >
+              <el-icon><EditPen /></el-icon>
+              提交 Issue
+            </button>
+          </div>
         </div>
-        <div class="flex items-center justify-between mt-3">
-          <el-link :href="REPO_URL" target="_blank">{{ REPO_URL }}</el-link>
-          <el-button size="small" type="primary" plain :icon="EditPen" @click="openLink(REPO_URL + '/issues')">提交 Issue</el-button>
-        </div>
-      </el-card>
+      </div>
     </el-main>
   </el-container>
 </template>
 
 <style scoped>
-.h-full { height: 100%; }
-.w-full { width: 100%; }
-.p-6 { padding: 1.5rem; }
-.max-w-2xl { max-width: 42rem; }
-.mx-auto { margin-left: auto; margin-right: auto; }
-.mt-4 { margin-top: 1rem; }
-.mt-2 { margin-top: 0.5rem; }
-.mb-4 { margin-bottom: 1rem; }
-.text-base { font-size: 1rem; }
-.font-semibold { font-weight: 600; }
-.text-xs { font-size: 0.75rem; }
-.text-muted-foreground { color: var(--el-text-color-secondary); }
-.text-foreground { color: var(--el-text-color-primary); }
-.flex { display: flex; }
-.items-center { align-items: center; }
-.justify-between { justify-content: space-between; }
-.gap-2 { gap: 0.5rem; }
-.gap-3 { gap: 0.75rem; }
+/* Remove scoped styles - use Tailwind classes instead */
 </style>

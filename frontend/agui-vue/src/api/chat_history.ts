@@ -66,3 +66,15 @@ export async function editMessage(sessionId: string, messageId: number, content:
     throw new Error(json.error?.message || "Failed to edit message");
   }
 }
+
+export async function updateSessionTitle(sessionId: string, title: string): Promise<void> {
+  const url = new URL(`${getApiBase()}/api/chat/sessions/${sessionId}`);
+  url.searchParams.append("title", encodeURIComponent(title));
+  const res = await fetch(url.toString(), {
+    method: "PUT",
+  });
+  const json = await res.json();
+  if (!json.ok) {
+    throw new Error(json.error?.message || "Failed to update session title");
+  }
+}
