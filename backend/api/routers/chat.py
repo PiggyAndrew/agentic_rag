@@ -1,12 +1,15 @@
 import json
 import re
 import time
-from fastapi import APIRouter, Request
+from fastapi import APIRouter, Depends, Request
 from fastapi.responses import StreamingResponse
 
 from backend.api.models import ChatRequest
-from backend.protocols.streaming import stream_generator as protocol_stream_generator
-from backend.database.chat_service import ChatService
+from backend.modules.agents.application.streaming import stream_generator as protocol_stream_generator
+from backend.api.deps import get_chat_usecase, get_kb_usecase, get_provider_service, get_llm_config_from_headers
+from backend.modules.chat.application.usecase import ChatUseCase
+from backend.modules.kb.application.usecase import KnowledgeBaseUseCase
+from backend.modules.providers.application.provider_service import ProviderService
 
 
 router = APIRouter()
@@ -31,12 +34,11 @@ def _extract_thinking_tags(text: str) -> tuple[str, str]:
     return thinking, remaining
 
 
-async def chat_stream_wrapper(generator, session_id: str, user_content: str, skip_save_user: bool):
-    chat_service = ChatService()
+async def chat_stream_wrapper(generator, session_id: str, user_content: str, skip_save_user: bool, chat: ChatUseCase):
 
     # Save user message
     if session_id and not skip_save_user:
-        chat_service.add_message(session_id, "user", user_content)
+        chat.add_message(session_id, "user", user_content)
 
     full_response = []
     citations = []
@@ -222,7 +224,7 @@ async def chat_stream_wrapper(generator, session_id: str, user_content: str, ski
 
     # Save assistant message
     if session_id and full_response:
-        chat_service.add_message(session_id, "assistant", "".join(full_response), citations=citations if citations else None)
+        chat.add_message(session_id, "assistant", "".join(full_response), citations=citations if citations else None)
 
 
 def _normalize_tool_output(output):
@@ -311,17 +313,24 @@ def _make_tool_call_event(tool_call_id: str, tool_name: str, args: dict, state: 
 
 
 @router.post("/api/chat")
-async def chat_endpoint(request: ChatRequest, raw_request: Request):
+async def chat_endpoint(
+    request: ChatRequest,
+    raw_request: Request,
+    chat: ChatUseCase = Depends(get_chat_usecase),
+    kb: KnowledgeBaseUseCase = Depends(get_kb_usecase),
+    providers: ProviderService = Depends(get_provider_service),
+):
     """聊天接口：支持指定单个参与检索的知识库ID"""
-    llm_config = {
-        "api_key": (raw_request.headers.get("x-llm-api-key") or "").strip(),
-        "base_url": (raw_request.headers.get("x-llm-base-url") or "").strip(),
-        "model": (raw_request.headers.get("x-llm-model") or "").strip(),
-    }
-    if not any(llm_config.values()):
-        llm_config = None
+    llm_config = get_llm_config_from_headers(raw_request)
     
-    generator = protocol_stream_generator(request.messages, request.kbId, llm_config=llm_config)
+    generator = protocol_stream_generator(
+        request.messages,
+        request.kbId,
+        llm_config=llm_config,
+        kb=kb,
+        providers=providers,
+        event_logger=getattr(getattr(raw_request, "app", None), "state", None) and getattr(raw_request.app.state, "stream_event_logger", None),
+    )
     
     # Get user content from the last message
     user_content = ""
@@ -332,6 +341,6 @@ async def chat_endpoint(request: ChatRequest, raw_request: Request):
                 break
 
     return StreamingResponse(
-        chat_stream_wrapper(generator, request.sessionId, user_content, bool(request.skipSaveUser)),
+        chat_stream_wrapper(generator, request.sessionId, user_content, bool(request.skipSaveUser), chat),
         media_type="text/plain; charset=utf-8",
     )

@@ -45,6 +45,7 @@ import {
   DatabaseIcon,
   XIcon,
   CornerDownLeftIcon,
+  MoreHorizontalIcon,
 } from "lucide-vue-next";
 import { streamChat } from "@/api/chat";
 import { computed, ref, onMounted, watch, provide, nextTick } from "vue";
@@ -53,7 +54,7 @@ import { useAiStore } from "@/stores/ai";
 import { useChatStore } from "@/stores/chat";
 import { fetchMessages, editMessage, updateSessionTitle } from "@/api/chat_history";
 import type { ChatMessage } from "@/api/chat_history";
-import { ElDialog, ElRadioGroup, ElRadio, ElButton, ElScrollbar, ElMessageBox, ElInput } from "element-plus";
+import { ElDialog, ElRadioGroup, ElRadio, ElButton, ElScrollbar, ElMessageBox, ElInput, ElDropdown, ElDropdownMenu, ElDropdownItem } from "element-plus";
 import KnowledgeBaseCitation from "./KnowledgeBaseCitation.vue";
 import { StreamMarkdown } from "streamdown-vue";
 import ChunkViewerDialog from "./ChunkViewerDialog.vue";
@@ -100,10 +101,10 @@ const citeLoadingByKey = ref<Record<string, boolean>>({});
 const editingTitleSessionId = ref<string | null>(null);
 const editingTitle = ref("");
 const titleInputRef = ref<HTMLInputElement | null>(null);
-const pendingNameGenerations = new Map<string, NodeJS.Timeout>();
+const pendingNameGenerations = new Map<string, ReturnType<typeof setTimeout>>();
 const activeNameGenerations = new Set<string>();
 
-const citePattern = /〔cite:fileId=(\d+),chunkIndex=(\d+)〕/g;
+const citePattern = /〔cite:([^〕]+)〕/g;
 
 // API 地址
 const apiBase = computed<string>(() => {
@@ -195,25 +196,44 @@ async function ensureCitationLoaded(fileId: number, chunkIndex: number): Promise
   }
 }
 
-async function openCitationDialog(fileId: number, chunkIndex: number): Promise<void> {
-  await ensureCitationLoaded(fileId, chunkIndex);
-  const citation = tryResolveFromIndex(fileId, chunkIndex) ?? citeDataByKey.value[citeKey(fileId, chunkIndex)];
-  if (!citation) {
-    console.warn('Citation not found:', { fileId, chunkIndex });
-    return;
+type CitationRef = { fileId: number; chunkIndex: number; lineRanges?: Array<[number, number]> };
+
+async function openCitationDialog(
+  fileIdOrRefs: number | CitationRef[],
+  chunkIndex?: number
+): Promise<void> {
+  const refs: CitationRef[] = Array.isArray(fileIdOrRefs)
+    ? fileIdOrRefs
+    : [{ fileId: fileIdOrRefs, chunkIndex: Number(chunkIndex) }];
+
+  const validRefs = refs.filter((r) => Number.isFinite(r.fileId) && Number.isFinite(r.chunkIndex));
+  if (validRefs.length === 0) return;
+
+  await Promise.all(validRefs.map((r) => ensureCitationLoaded(r.fileId, r.chunkIndex)));
+
+  const chunkItems: any[] = [];
+  for (const r of validRefs) {
+    const citation =
+      tryResolveFromIndex(r.fileId, r.chunkIndex) ?? citeDataByKey.value[citeKey(r.fileId, r.chunkIndex)];
+    if (!citation) continue;
+
+    const metadata = citation.metadata ? { ...citation.metadata } : {};
+    if (citation.filename && citation.filename !== `file-${r.fileId}`) {
+      metadata.filename = citation.filename;
+    }
+
+    chunkItems.push({
+      file_id: citation.file_id,
+      chunk_index: citation.chunk_index,
+      content: citation.content,
+      metadata,
+      ...(Array.isArray(r.lineRanges) ? { line_ranges: r.lineRanges } : {}),
+      ...(Array.isArray(r.lineRanges) && r.lineRanges.length > 0 ? { focus_line: r.lineRanges[0]?.[0] } : {}),
+    });
   }
-  // 确保包含 filename 字段
-  const chunkItem: any = {
-    file_id: citation.file_id,
-    chunk_index: citation.chunk_index,
-    content: citation.content,
-    metadata: citation.metadata || {},
-  };
-  // 将 filename 放入 metadata 中（兼容 ChunkViewerDialog）
-  if (citation.filename && citation.filename !== `file-${fileId}`) {
-    chunkItem.metadata.filename = citation.filename;
-  }
-  citationDialogChunks.value = [chunkItem];
+
+  if (chunkItems.length === 0) return;
+  citationDialogChunks.value = chunkItems;
   citationDialogOpen.value = true;
 }
 
@@ -233,21 +253,37 @@ function cancelEditingTitle() {
   editingTitle.value = "";
 }
 
+const isSavingTitle = ref(false);
+
 async function saveTitle() {
   const sessionId = editingTitleSessionId.value;
+  if (!sessionId) return;
+
   const newTitle = editingTitle.value.trim();
-  if (!sessionId || !newTitle) return;
+  const session = chatStore.sessions.find(s => s.id === sessionId);
+  
+  // 如果标题为空，或者未发生变化，直接退出编辑状态
+  if (!newTitle || (session && newTitle === session.title)) {
+    cancelEditingTitle();
+    return;
+  }
+
+  if (isSavingTitle.value) return;
+  isSavingTitle.value = true;
 
   try {
     await updateSessionTitle(sessionId, newTitle);
     // 更新本地 store 中的标题
-    const session = chatStore.sessions.find(s => s.id === sessionId);
     if (session) {
       session.title = newTitle;
     }
     cancelEditingTitle();
   } catch (error: any) {
     console.error('Failed to update title:', error);
+    // 即使失败也退出编辑状态，避免卡住
+    cancelEditingTitle();
+  } finally {
+    isSavingTitle.value = false;
   }
 }
 
@@ -346,6 +382,74 @@ function scheduleGenerateName(sessionId: string) {
 }
 
 function rehypeInlineCitation() {
+  const parseLineRanges = (raw: string | undefined): Array<[number, number]> | undefined => {
+    const s = String(raw ?? "").trim();
+    if (!s) return undefined;
+    const parts = s.split(/[,，、\s]+/).filter(Boolean);
+    const ranges: Array<[number, number]> = [];
+    for (const part of parts) {
+      const m = part.match(/^(\d+)(?:-(\d+))?$/);
+      if (!m) continue;
+      const start = Number(m[1]);
+      const end = Number(m[2] ?? m[1]);
+      if (!Number.isFinite(start) || !Number.isFinite(end)) continue;
+      if (start <= 0 || end <= 0) continue;
+      ranges.push([Math.min(start, end), Math.max(start, end)]);
+    }
+    return ranges.length ? ranges : undefined;
+  };
+
+  const parseCiteList = (inner: string) => {
+    const items: Array<{ fileId: number; chunkIndex: number; lineRanges?: Array<[number, number]> }> = [];
+    const entries = inner
+      .split(";")
+      .map((s) => s.trim())
+      .filter(Boolean);
+
+    for (const entry of entries) {
+      const tokens = entry
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean);
+
+      const kv: Record<string, string> = {};
+      let i = 0;
+      while (i < tokens.length) {
+        const token = tokens[i];
+        if (!token) {
+          i += 1;
+          continue;
+        }
+        const eq = token.indexOf("=");
+        if (eq <= 0) {
+          i += 1;
+          continue;
+        }
+        const key = token.slice(0, eq).trim();
+        let val = token.slice(eq + 1).trim();
+        if (key === "lines") {
+          let j = i + 1;
+          while (j < tokens.length && !(tokens[j] ?? "").includes("=")) {
+            val = `${val},${tokens[j] ?? ""}`.trim();
+            j += 1;
+          }
+          i = j;
+        } else {
+          i += 1;
+        }
+        kv[key] = val;
+      }
+
+      const fileId = Number(kv.fileId);
+      const chunkIndex = Number(kv.chunkIndex);
+      if (!Number.isFinite(fileId) || !Number.isFinite(chunkIndex)) continue;
+      const lineRanges = parseLineRanges(kv.lines);
+      items.push({ fileId, chunkIndex, ...(lineRanges ? { lineRanges } : {}) });
+    }
+
+    return items;
+  };
+
   return (tree: any) => {
     const walk = (node: any) => {
       const children: any[] | undefined = node?.children;
@@ -365,17 +469,20 @@ function rehypeInlineCitation() {
             const before = value.slice(last, start);
             if (before) nextChildren.push({ type: "text", value: before });
 
-            const fileId = Number(m[1]);
-            const chunkIndex = Number(m[2]);
-            nextChildren.push({
-              type: "element",
-              tagName: "inline-citation",
-              properties: {
-                "data-file-id": String(fileId),
-                "data-chunk-index": String(chunkIndex),
-              },
-              children: [],
-            });
+            const inner = String(m[1] ?? "");
+            const cites = parseCiteList(inner);
+            if (cites.length > 0) {
+              nextChildren.push({
+                type: "element",
+                tagName: "inline-citation",
+                properties: {
+                  "data-cites": JSON.stringify(cites),
+                },
+                children: [],
+              });
+            } else {
+              nextChildren.push({ type: "text", value: m[0] });
+            }
             last = end;
           }
           if (matched) {
@@ -611,6 +718,15 @@ async function createNewChat() {
   chatStore.setStatus(session.id, "ready");
   messages.value = [];
   status.value = "ready";
+}
+
+function handleSessionCommand(command: { action: string; session: any }) {
+  const { action, session } = command;
+  if (action === "rename") {
+    startEditingTitle(session.id, session.title);
+  } else if (action === "delete") {
+    handleDeleteSession(session.id);
+  }
 }
 
 async function handleDeleteSession(id: string) {
@@ -937,22 +1053,37 @@ watch(
               <!-- 显示模式 -->
               <div
                 v-else
-                class="truncate text-sm cursor-pointer flex items-center gap-1"
-                @click.stop="startEditingTitle(session.id, session.title)"
+                class="truncate text-sm flex items-center gap-1"
               >
                 {{ session.title }}
-                <PencilIcon class="size-3 opacity-0 group-hover:opacity-50 transition-opacity" />
               </div>
             </div>
 
-            <!-- Delete button -->
-            <button
-              class="opacity-0 group-hover:opacity-100 p-1.5 hover:bg-destructive/10 hover:text-destructive rounded-lg transition-all duration-normal ease-out"
-              :class="{ 'opacity-100': chatStore.currentSessionId === session.id }"
-              @click.stop="handleDeleteSession(session.id)"
-            >
-              <TrashIcon class="size-3.5" />
-            </button>
+            <!-- Actions Dropdown -->
+            <ElDropdown trigger="click" @command="handleSessionCommand" @click.stop>
+              <button
+                class="opacity-0 group-hover:opacity-100 p-1.5 hover:bg-muted rounded-lg transition-all duration-normal ease-out outline-none text-muted-foreground hover:text-foreground"
+                :class="{ 'opacity-100': chatStore.currentSessionId === session.id }"
+              >
+                <MoreHorizontalIcon class="size-3.5" />
+              </button>
+              <template #dropdown>
+                <ElDropdownMenu>
+                  <ElDropdownItem :command="{ action: 'rename', session }">
+                    <div class="flex items-center gap-2">
+                      <PencilIcon class="size-3.5" />
+                      <span>重命名</span>
+                    </div>
+                  </ElDropdownItem>
+                  <ElDropdownItem :command="{ action: 'delete', session }" divided class="text-destructive">
+                    <div class="flex items-center gap-2">
+                      <TrashIcon class="size-3.5" />
+                      <span>删除</span>
+                    </div>
+                  </ElDropdownItem>
+                </ElDropdownMenu>
+              </template>
+            </ElDropdown>
           </div>
 
           <!-- Empty state for sessions -->

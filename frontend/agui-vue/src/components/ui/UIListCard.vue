@@ -47,12 +47,12 @@ const transitionClasses = computed(() => {
   return ''
 })
 
-const activeIndicator = computed(() => {
-  if (!props.active) return null
-  return (
-    <div class="absolute left-0 top-1/2 -translate-y-1/2 h-8 w-1 bg-primary rounded-r-full" />
-  )
-})
+// const activeIndicator = computed(() => {
+//   if (!props.active) return null
+//   return (
+//     <div class="absolute left-0 top-1/2 -translate-y-1/2 h-8 w-1 bg-primary rounded-r-full" />
+//   )
+// })
 
 function handleClick(event: MouseEvent) {
   if (props.clickable) {

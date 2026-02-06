@@ -31,7 +31,7 @@ const props = defineProps<{
 const emit = defineEmits<{
   'update:modelValue': [value: boolean]
   confirm: [form: ProviderForm]
-  test: []
+  test: [form: ProviderForm]
 }>()
 
 // Form state
@@ -114,7 +114,7 @@ async function handleTestConnection() {
   }
   testingConnection.value = true
   try {
-    emit('test')
+    emit('test', { ...form })
     // Test result will be handled by parent
   } finally {
     testingConnection.value = false

@@ -34,8 +34,10 @@ export async function fetchSessions(): Promise<ChatSession[]> {
 }
 
 export async function createSession(title: string = "New Chat"): Promise<ChatSession> {
-  const res = await fetch(`${getApiBase()}/api/chat/sessions?title=${encodeURIComponent(title)}`, {
-    method: "POST"
+  const res = await fetch(`${getApiBase()}/api/chat/sessions`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ title }),
   });
   const json = await res.json();
   if (json.ok) return json.data;
@@ -68,10 +70,10 @@ export async function editMessage(sessionId: string, messageId: number, content:
 }
 
 export async function updateSessionTitle(sessionId: string, title: string): Promise<void> {
-  const url = new URL(`${getApiBase()}/api/chat/sessions/${sessionId}`);
-  url.searchParams.append("title", encodeURIComponent(title));
-  const res = await fetch(url.toString(), {
+  const res = await fetch(`${getApiBase()}/api/chat/sessions/${sessionId}`, {
     method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ title }),
   });
   const json = await res.json();
   if (!json.ok) {

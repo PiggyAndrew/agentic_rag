@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import type { Component } from 'vue'
-import { Plus, Setting } from '@element-plus/icons-vue'
 
 export interface NavItem {
   key: string
@@ -8,7 +7,7 @@ export interface NavItem {
   icon: Component
 }
 
-const props = defineProps<{
+defineProps<{
   activeTab: string
   navItems: NavItem[]
 }>()

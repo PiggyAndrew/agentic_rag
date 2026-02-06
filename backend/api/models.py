@@ -1,11 +1,20 @@
 from typing import Optional, List, Dict, Any
-from pydantic import BaseModel
+
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
 class Message(BaseModel):
     """聊天消息实体"""
     role: str
     content: str
+
+    @field_validator("role")
+    @classmethod
+    def validate_role(cls, v: str) -> str:
+        s = (v or "").strip()
+        if s not in {"user", "assistant", "system"}:
+            raise ValueError("role 必须是 user/assistant/system")
+        return s
 
 
 class ChatRequest(BaseModel):
@@ -14,6 +23,13 @@ class ChatRequest(BaseModel):
     kbId: Optional[str] = None
     sessionId: Optional[str] = None
     skipSaveUser: Optional[bool] = None
+
+    @field_validator("messages")
+    @classmethod
+    def validate_messages(cls, v: List[Message]) -> List[Message]:
+        if not v:
+            raise ValueError("messages 不能为空")
+        return v
 
 
 class ChatSession(BaseModel):
@@ -35,6 +51,14 @@ class ChatMessageResponse(BaseModel):
 
 class ChatMessageEditRequest(BaseModel):
     content: str
+
+
+class ChatSessionCreateRequest(BaseModel):
+    title: str = "New Chat"
+
+
+class ChatSessionUpdateRequest(BaseModel):
+    title: str
 
 
 class KnowledgeBase(BaseModel):
@@ -102,3 +126,49 @@ class ConfigItem(BaseModel):
 class ConfigSetRequest(BaseModel):
     value: Any
     description: Optional[str] = None
+
+
+class LLMProviderCreateRequest(BaseModel):
+    model_config = ConfigDict(populate_by_name=True)
+
+    name: str
+    category: str = "llm"
+    provider_type: str = Field(alias="providerType")
+    base_url: Optional[str] = Field(default=None, alias="baseUrl")
+    api_key: Optional[str] = Field(default=None, alias="apiKey")
+    model_name: Optional[str] = Field(default=None, alias="modelName")
+    config: Optional[Dict[str, Any]] = None
+    is_default: bool = Field(default=False, alias="isDefault")
+    description: Optional[str] = None
+
+
+class LLMProviderUpdateRequest(BaseModel):
+    model_config = ConfigDict(populate_by_name=True)
+
+    name: Optional[str] = None
+    category: Optional[str] = None
+    provider_type: Optional[str] = Field(default=None, alias="providerType")
+    base_url: Optional[str] = Field(default=None, alias="baseUrl")
+    api_key: Optional[str] = Field(default=None, alias="apiKey")
+    model_name: Optional[str] = Field(default=None, alias="modelName")
+    config: Optional[Dict[str, Any]] = None
+    is_default: Optional[bool] = Field(default=None, alias="isDefault")
+    is_enabled: Optional[bool] = Field(default=None, alias="isEnabled")
+    description: Optional[str] = None
+
+
+class SetActiveLLMRequest(BaseModel):
+    model_config = ConfigDict(populate_by_name=True)
+
+    llm_id: Optional[int] = Field(default=None, alias="llmId")
+    embedding_id: Optional[int] = Field(default=None, alias="embeddingId")
+    reranker_id: Optional[int] = Field(default=None, alias="rerankerId")
+    vll_id: Optional[int] = Field(default=None, alias="vllId")
+
+
+class LLMTestRequest(BaseModel):
+    model_config = ConfigDict(populate_by_name=True)
+
+    base_url: str = Field(alias="baseUrl")
+    api_key: str = Field(default="", alias="apiKey")
+    model_name: str = Field(alias="modelName")

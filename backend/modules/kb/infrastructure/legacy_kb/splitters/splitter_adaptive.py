@@ -1,0 +1,110 @@
+from typing import List, Optional
+import re
+import time
+
+from backend.shared.prompts.system import get_toc_parser_system_prompt, get_toc_parser_user_prompt
+from .splitter_base import Splitter
+from .splitter_utils import detect_toc_bounds, is_toc_line, normalize_title, parse_json_array
+from .splitter_headings import HeadingsSplitter, HeadingItem
+from backend.modules.kb.domain.models import ChunkMetadata, KnowledgeChunk
+from ..services.llm_factory import get_deepseek_chat_llm
+
+
+class AdaptiveSplitter(Splitter):
+    name = "adaptive"
+
+    def __init__(self, use_llm: bool = False, *, llm: Optional[object] = None):
+        self.use_llm = bool(use_llm)
+        self._llm = llm
+
+    def _detect_toc_bounds(self, lines: List[str]) -> Optional[tuple[int, int, str]]:
+        return detect_toc_bounds(lines)
+
+    def _llm_extract_toc_headings(self, toc_text: str) -> List[HeadingItem]:
+        sample = (toc_text or "").strip()
+        if not sample:
+            return []
+
+        llm = self._llm or get_deepseek_chat_llm()
+        if not llm:
+            return []
+
+        sys_prompt = get_toc_parser_system_prompt()
+        user_prompt = get_toc_parser_user_prompt(sample)
+
+        try:
+            msg = llm.invoke(
+                [
+                    ("system", sys_prompt),
+                    ("user", user_prompt),
+                ]
+            )
+            arr = parse_json_array(getattr(msg, "content", "") or "")
+            out: List[HeadingItem] = []
+            seen = set()
+            for h in arr:
+                num = str(h.get("number", "")).strip()
+                title = str(h.get("title", "")).strip()
+                if not title:
+                    continue
+                key = (num, normalize_title(title))
+                if key in seen:
+                    continue
+                seen.add(key)
+                out.append(HeadingItem(number=num, title=title))
+            return out
+        except Exception:
+            return []
+
+    def split(self, text: str, kb_id: int, file_id: int) -> List[KnowledgeChunk]:
+        lines = (text or "").splitlines()
+        bounds = self._detect_toc_bounds(lines)
+        if not bounds:
+            return HeadingsSplitter().split(text, kb_id, file_id)
+        s, e, title = bounds
+        toc_text = (
+            "\n".join(
+                [
+                    ln
+                    for ln in lines[s:e]
+                    if (ln or "").strip()
+                    and (
+                        re.match(r"^\s*(table\s+of\s+contents|contents|目录)\b", (ln or ""), re.IGNORECASE)
+                        or is_toc_line(ln)
+                    )
+                ]
+            )
+            .replace(".....", "")
+            .strip()
+        )
+        rest = "\n".join(lines[:s] + lines[e:])
+        allowed: Optional[List[HeadingItem]] = None
+        if self.use_llm:
+            allowed = self._llm_extract_toc_headings(toc_text)
+        chunks_rest = HeadingsSplitter(allowed_headings=allowed).split(rest, kb_id, file_id)
+        now_ms = int(time.time() * 1000)
+        toc_meta = ChunkMetadata.coerce({"number": "", "title": title, "path": [], "type": "toc"})
+        toc_chunk = KnowledgeChunk(
+            kb_id=int(kb_id),
+            file_id=int(file_id),
+            chunk_index=0,
+            content=toc_text,
+            metadata=toc_meta,
+            created_at_ms=now_ms,
+            updated_at_ms=now_ms,
+        )
+        all_chunks = [toc_chunk] + chunks_rest
+        reindexed: List[KnowledgeChunk] = []
+        for i, c in enumerate(all_chunks):
+            reindexed.append(
+                KnowledgeChunk(
+                    kb_id=int(kb_id),
+                    file_id=int(file_id),
+                    chunk_index=i,
+                    content=str(c.content or ""),
+                    metadata=c.metadata,
+                    created_at_ms=now_ms,
+                    updated_at_ms=now_ms,
+                )
+            )
+        return reindexed

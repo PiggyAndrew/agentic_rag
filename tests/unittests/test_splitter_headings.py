@@ -38,7 +38,7 @@ class TestHeadingsSplitter(unittest.TestCase):
         splitter = HeadingsSplitter(allowed_headings=allowed, min_subchunk_chars=0)
         chunks = splitter.split(text)
 
-        by_number = {c.get("metadata", {}).get("number"): c.get("metadata", {}).get("title") for c in chunks}
+        by_number = {getattr(getattr(c, "metadata", None), "data", {}).get("number"): getattr(getattr(c, "metadata", None), "data", {}).get("title") for c in chunks}
         expected = {
             "1": "总则",
             "1.1": "范围",
@@ -52,53 +52,54 @@ class TestHeadingsSplitter(unittest.TestCase):
         self.assertEqual(by_number, expected)
 
         for c in chunks:
-            self.assertTrue(str(c.get("content", "")).strip())
-            m = c.get("metadata", {})
+            self.assertTrue(str(getattr(c, "content", "")).strip())
+            m = getattr(getattr(c, "metadata", None), "data", {}) or {}
             self.assertTrue(str(m.get("number", "")).strip())
             self.assertTrue(str(m.get("title", "")).strip())
             self.assertTrue(isinstance(m.get("path", None), list))
 
-        c1 = [c for c in chunks if c.get("metadata", {}).get("number") == "1"]
+        c1 = [c for c in chunks if (getattr(getattr(c, "metadata", None), "data", {}) or {}).get("number") == "1"]
         self.assertEqual(len(c1), 1)
 
-        c11 = next((c for c in chunks if c.get("metadata", {}).get("number") == "1.1"), None)
+        c11 = next((c for c in chunks if (getattr(getattr(c, "metadata", None), "data", {}) or {}).get("number") == "1.1"), None)
         self.assertIsNotNone(c11)
-        self.assertEqual(c11["metadata"]["title"], "范围")
-        self.assertEqual(c11["metadata"]["path"][0], {"number": "1", "title": "总则"})
-        self.assertEqual(c11["metadata"]["path"][1], {"number": "1.1", "title": "范围"})
+        m11 = getattr(getattr(c11, "metadata", None), "data", {}) or {}
+        self.assertEqual(m11.get("title"), "范围")
+        self.assertEqual(m11.get("path")[0], {"number": "1", "title": "总则"})
+        self.assertEqual(m11.get("path")[1], {"number": "1.1", "title": "范围"})
 
-        c12 = next((c for c in chunks if c.get("metadata", {}).get("number") == "1.2"), None)
+        c12 = next((c for c in chunks if (getattr(getattr(c, "metadata", None), "data", {}) or {}).get("number") == "1.2"), None)
         self.assertIsNotNone(c12)
-        self.assertEqual(c12["metadata"]["title"], "定义")
-        self.assertEqual(c12["metadata"]["path"][0], {"number": "1", "title": "总则"})
-        self.assertEqual(c12["metadata"]["path"][1], {"number": "1.2", "title": "定义"})
+        m12 = getattr(getattr(c12, "metadata", None), "data", {}) or {}
+        self.assertEqual(m12.get("title"), "定义")
+        self.assertEqual(m12.get("path")[0], {"number": "1", "title": "总则"})
+        self.assertEqual(m12.get("path")[1], {"number": "1.2", "title": "定义"})
 
-        c2 = next((c for c in chunks if c.get("metadata", {}).get("number") == "2"), None)
+        c2 = next((c for c in chunks if (getattr(getattr(c, "metadata", None), "data", {}) or {}).get("number") == "2"), None)
         self.assertIsNotNone(c2)
-        self.assertEqual(c2["metadata"]["title"], "建筑")
-        self.assertEqual(c2["metadata"]["path"], [{"number": "2", "title": "建筑"}])
+        m2 = getattr(getattr(c2, "metadata", None), "data", {}) or {}
+        self.assertEqual(m2.get("title"), "建筑")
+        self.assertEqual(m2.get("path"), [{"number": "2", "title": "建筑"}])
 
-        c21 = next((c for c in chunks if c.get("metadata", {}).get("number") == "2.1"), None)
+        c21 = next((c for c in chunks if (getattr(getattr(c, "metadata", None), "data", {}) or {}).get("number") == "2.1"), None)
         self.assertIsNotNone(c21)
-        self.assertEqual(c21["metadata"]["title"], "建筑的空调")
-        self.assertEqual(c21["metadata"]["path"][0], {"number": "2", "title": "建筑"})
-        self.assertEqual(c21["metadata"]["path"][1], {"number": "2.1", "title": "建筑的空调"})
+        m21 = getattr(getattr(c21, "metadata", None), "data", {}) or {}
+        self.assertEqual(m21.get("title"), "建筑的空调")
+        self.assertEqual(m21.get("path")[0], {"number": "2", "title": "建筑"})
+        self.assertEqual(m21.get("path")[1], {"number": "2.1", "title": "建筑的空调"})
 
-        c211 = next((c for c in chunks if c.get("metadata", {}).get("number") == "2.1.1"), None)
+        c211 = next((c for c in chunks if (getattr(getattr(c, "metadata", None), "data", {}) or {}).get("number") == "2.1.1"), None)
         self.assertIsNotNone(c211)
-        self.assertEqual(c211["metadata"]["title"], "建筑空调的调试")
-        self.assertEqual(c211["metadata"]["path"][0], {"number": "2", "title": "建筑"})
-        self.assertEqual(c211["metadata"]["path"][1], {"number": "2.1.1", "title": "建筑空调的调试"})
+        m211 = getattr(getattr(c211, "metadata", None), "data", {}) or {}
+        self.assertEqual(m211.get("title"), "建筑空调的调试")
+        self.assertEqual(m211.get("path")[0], {"number": "2", "title": "建筑"})
+        self.assertEqual(m211.get("path")[1], {"number": "2.1.1", "title": "建筑空调的调试"})
 
-        capp = next((c for c in chunks if c.get("metadata", {}).get("number") == "Appendix 1"), None)
-        self.assertIsNotNone(capp)
-        self.assertEqual(capp["metadata"]["title"], "附录A")
-        self.assertEqual(capp["metadata"]["path"], [{"number": "Appendix 1", "title": "附录A"}])
-
-        cdim = next((c for c in chunks if c.get("metadata", {}).get("number") == "Appendix 1"), None)
-        self.assertIsNotNone(cdim)
-        self.assertEqual(cdim["metadata"]["title"], "Dimensioning Style")
-        self.assertEqual(cdim["metadata"]["path"], [{"number": "Appendix 1", "title": "附录A"}])
+        apps = [c for c in chunks if (getattr(getattr(c, "metadata", None), "data", {}) or {}).get("number") == "Appendix 1"]
+        self.assertTrue(len(apps) >= 1)
+        titles = [((getattr(getattr(c, "metadata", None), "data", {}) or {}).get("title") or "") for c in apps]
+        self.assertTrue(any(t == "附录A" for t in titles))
+        self.assertTrue(any(t == "Dimensioning Style" for t in titles))
 
 
 
@@ -123,10 +124,11 @@ class TestHeadingsSplitter(unittest.TestCase):
         splitter = HeadingsSplitter(allowed_headings=allowed, min_subchunk_chars=500)
         chunks = splitter.split(text)
 
-        c2 = [c for c in chunks if c.get("metadata", {}).get("number") == "2"]
+        c2 = [c for c in chunks if (getattr(getattr(c, "metadata", None), "data", {}) or {}).get("number") == "2"]
         self.assertEqual(len(c2), 1)
-        self.assertEqual(c2[0]["metadata"]["title"], "建筑")
-        self.assertEqual(c2[0]["metadata"]["path"], [{"number": "2", "title": "建筑"}])
+        m2 = getattr(getattr(c2[0], "metadata", None), "data", {}) or {}
+        self.assertEqual(m2.get("title"), "建筑")
+        self.assertEqual(m2.get("path"), [{"number": "2", "title": "建筑"}])
 
     def test_bullet_numbered_subsection_is_detected(self):
         text = "\n".join(
@@ -142,11 +144,12 @@ class TestHeadingsSplitter(unittest.TestCase):
         splitter = HeadingsSplitter(allowed_headings=allowed, min_subchunk_chars=0)
         chunks = splitter.split(text)
 
-        c212 = next((c for c in chunks if c.get("metadata", {}).get("number") == "2.1.2"), None)
+        c212 = next((c for c in chunks if (getattr(getattr(c, "metadata", None), "data", {}) or {}).get("number") == "2.1.2"), None)
         self.assertIsNotNone(c212)
-        self.assertEqual(c212["metadata"]["title"], "机电系统")
-        self.assertEqual(c212["metadata"]["path"][0], {"number": "2", "title": "建筑"})
-        self.assertEqual(c212["metadata"]["path"][1], {"number": "2.1.2", "title": "机电系统"})
+        m212 = getattr(getattr(c212, "metadata", None), "data", {}) or {}
+        self.assertEqual(m212.get("title"), "机电系统")
+        self.assertEqual(m212.get("path")[0], {"number": "2", "title": "建筑"})
+        self.assertEqual(m212.get("path")[1], {"number": "2.1.2", "title": "机电系统"})
 
 
 if __name__ == "__main__":

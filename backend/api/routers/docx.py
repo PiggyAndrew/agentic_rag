@@ -3,7 +3,8 @@ from __future__ import annotations
 from fastapi import APIRouter, HTTPException, Request, UploadFile, Form
 from fastapi.responses import StreamingResponse
 
-from backend.services.docx_rewrite_service import resolve_llm_config, rewrite_docx_mvp
+from backend.modules.docx.application.rewrite_service import resolve_llm_config, rewrite_docx_mvp
+from backend.api.deps import get_llm_config_from_headers
 
 
 router = APIRouter()
@@ -23,10 +24,11 @@ async def rewrite_docx_endpoint(
     if not content:
         raise HTTPException(status_code=400, detail="文件内容为空")
 
+    headers_cfg = get_llm_config_from_headers(raw_request) or {}
     llm_cfg = resolve_llm_config(
-        api_key=(raw_request.headers.get("x-llm-api-key") or "").strip() or None,
-        base_url=(raw_request.headers.get("x-llm-base-url") or "").strip() or None,
-        model=(raw_request.headers.get("x-llm-model") or "").strip() or None,
+        api_key=(headers_cfg.get("api_key") or "").strip() or None,
+        base_url=(headers_cfg.get("base_url") or "").strip() or None,
+        model=(headers_cfg.get("model") or "").strip() or None,
     )
     if llm_cfg is None:
         raise HTTPException(status_code=400, detail="未配置 LLM：请设置 x-llm-api-key 或环境变量 DEEPSEEK_API_KEY/OPENAI_API_KEY")

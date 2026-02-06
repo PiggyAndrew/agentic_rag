@@ -9,8 +9,7 @@ ROOT_DIR = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
 if ROOT_DIR not in sys.path:
     sys.path.insert(0, ROOT_DIR)
 
-from backend.kb.knowledge_base import PersistentKnowledgeBaseController
-from backend.kb.ingestion import ingest_pdf
+from backend.kb import PersistentKnowledgeBaseController, ingest_pdf
 def run_ingest(pdf_path: str, kb_id: int, chunk_size: int, overlap: int) -> Tuple[Dict, List[Dict]]:
     """执行PDF导入流程并返回文件信息与片段列表
 
@@ -94,7 +93,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--pdf",
-        default=r"tests\\testfiles\\CPX_NTC_BEP_r5.pdf",
+        default=r"tests\\testfiles\\Attachment E - BIM Guide for Facilities Upkeep_Ver2.0_Jun21-20211007-113450.pdf",
         help="PDF文件路径",
     )
     parser.add_argument("--kb", type=int, default=1, help="知识库ID")

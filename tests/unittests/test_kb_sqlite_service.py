@@ -22,6 +22,10 @@ class TestSqliteKnowledgeService(unittest.TestCase):
         self._svc = KnowledgeService(controller=self._ctrl, repo=self._repo)
 
     def tearDown(self):
+        try:
+            self._ctrl.close()
+        except Exception:
+            pass
         self._manager.engine.dispose()
         self._tmp.cleanup()
 

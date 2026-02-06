@@ -17,6 +17,10 @@ class TestPersistentKnowledgeBaseControllerSqlite(unittest.TestCase):
         self._kb = PersistentKnowledgeBaseController(base_dir=self._base_dir, manager=self._manager)
 
     def tearDown(self):
+        try:
+            self._kb.close()
+        except Exception:
+            pass
         self._manager.engine.dispose()
         self._tmp.cleanup()
 

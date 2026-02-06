@@ -1,21 +1,19 @@
-from .types import FileChunk, FileInfo
-from .knowledge_base import PersistentKnowledgeBaseController
-from .ingestion import (
-    read_pdf_markdown_with_images,
-    read_chm_text,
-    read_excel_text,
-    ingest_pdf,
+from __future__ import annotations
+
+from backend.modules.kb.infrastructure.legacy import (
+    KnowledgeConflictError,
+    KnowledgeNotFoundError,
+    PersistentKnowledgeBaseController,
+    SqlAlchemyKnowledgeRepository,
     ingest_excel,
+    ingest_pdf,
 )
 
-
 __all__ = [
-    "FileInfo",
-    "FileChunk",
+    "KnowledgeConflictError",
+    "KnowledgeNotFoundError",
     "PersistentKnowledgeBaseController",
-    "read_pdf_markdown_with_images",
-    "read_chm_text",
-    "read_excel_text",
+    "SqlAlchemyKnowledgeRepository",
     "ingest_pdf",
     "ingest_excel",
 ]

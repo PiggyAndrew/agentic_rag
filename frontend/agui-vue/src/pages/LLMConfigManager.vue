@@ -56,6 +56,18 @@ const llmProviders = computed(() =>
   }))
 )
 
+// 转换为 ProviderLibraryPanel 期望的 Provider 类型
+const libraryProviders = computed(() =>
+  providers.value.map(p => ({
+    id: p.id,
+    name: p.name,
+    providerType: p.providerType,
+    baseUrl: p.baseUrl || undefined,
+    modelName: p.modelName || undefined,
+    category: p.category || undefined,
+  }))
+)
+
 const embeddingProviders = computed(() =>
   providers.value.filter(p => (p.category || '') === 'embedding').map(p => ({
     id: p.id,
@@ -86,7 +98,7 @@ const dialogFormInitial = computed<ProviderForm | undefined>(() => {
   if (!currentProvider.value) return undefined
   return {
     name: currentProvider.value.name,
-    category: currentProvider.value.category || 'llm',
+    category: (currentProvider.value.category || 'llm') as 'llm' | 'embedding' | 'reranker' | 'vll',
     providerType: currentProvider.value.providerType,
     baseUrl: currentProvider.value.baseUrl || '',
     apiKey: currentProvider.value.apiKey || '',
@@ -94,6 +106,10 @@ const dialogFormInitial = computed<ProviderForm | undefined>(() => {
     description: currentProvider.value.description || '',
   }
 })
+
+function updateGlobalForm(next: ActiveConfigForm) {
+  Object.assign(globalForm, next)
+}
 
 // API 基础 URL
 function getApiBase(): string {
@@ -162,9 +178,11 @@ function openAddDialog() {
   showProviderDialog.value = true
 }
 
-function openEditDialog(provider: LLMProvider) {
+function openEditDialog(provider: LibraryProvider) {
   dialogMode.value = 'edit'
-  currentProvider.value = provider
+  // 根据 ID 查找对应的 LLMProvider
+  const llmProvider = providers.value.find(p => p.id === provider.id)
+  currentProvider.value = llmProvider || null
   showProviderDialog.value = true
 }
 
@@ -185,7 +203,7 @@ async function handleProviderConfirm(form: ProviderForm) {
   }
 }
 
-async function handleProviderDelete(provider: LibraryProvider) {
+async function handleProviderDelete(provider: LibraryProvider | LLMProvider) {
   try {
     await ElMessageBox.confirm(
       `确定要删除配置 "${provider.name}" 吗？`,
@@ -239,14 +257,14 @@ onMounted(async () => {
         :embedding-providers="embeddingProviders"
         :reranker-providers="rerankerProviders"
         :vll-providers="vllProviders"
-        @update:form="globalForm = $event"
+        @update:form="updateGlobalForm"
         @save="saveGlobalConfig"
       />
 
       <!-- 提供商库 -->
       <ProviderLibraryPanel
         v-show="activeTab === 'provider-library'"
-        :providers="providers"
+        :providers="libraryProviders"
         :loading="loading"
         @add="openAddDialog"
         @edit="openEditDialog"

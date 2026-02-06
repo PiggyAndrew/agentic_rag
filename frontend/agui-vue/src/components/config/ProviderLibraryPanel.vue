@@ -10,7 +10,7 @@ export interface Provider {
   category?: string
 }
 
-const props = defineProps<{
+defineProps<{
   providers: Provider[]
   loading: boolean
 }>()

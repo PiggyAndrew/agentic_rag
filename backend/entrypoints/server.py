@@ -3,8 +3,8 @@ import sys
 from fastapi import FastAPI
 import uvicorn
 from backend.api.main import create_app as create_api_app
-from backend.config.logging import configure_logging
-from backend.config.settings import get_settings, AppEnv
+from backend.modules.config.infrastructure.logging import configure_logging
+from backend.modules.config.infrastructure.boot_config import AppEnv, get_boot_config
 
 
 def _uvicorn_logging_config(level: str, access_level: str) -> dict:
@@ -52,7 +52,7 @@ app = create_app()
 
 def main():
     """启动 uvicorn 服务入口"""
-    s = get_settings()
+    s = get_boot_config()
     is_dev = s.APP_ENV == AppEnv.development
     
     # 如果是打包后的环境，强制禁用 reload，避免无限重启
@@ -76,6 +76,8 @@ def main():
         host="0.0.0.0",
         port=port,
         reload=is_dev,
+        reload_dirs=["backend"] if is_dev else None,
+        reload_delay=0.5 if is_dev else None,
         log_level=uv_level,
         access_log=is_dev,
         log_config=log_config,

@@ -64,7 +64,7 @@ function getProviderName(id: number | undefined, providers: ProviderOption[]): s
         <label class="text-sm text-muted-foreground">选择模型提供商</label>
         <select
           :value="form.activeLlmProviderId"
-          @change="updateForm('activeLlmProviderId', Number($event.target.value))"
+          @change="updateForm('activeLlmProviderId', Number(($event.target as HTMLSelectElement).value))"
           class="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
         >
           <option :value="undefined">请选择预设配置</option>
@@ -87,7 +87,7 @@ function getProviderName(id: number | undefined, providers: ProviderOption[]): s
         <label class="text-sm text-muted-foreground">选择模型提供商</label>
         <select
           :value="form.activeEmbeddingProviderId"
-          @change="updateForm('activeEmbeddingProviderId', Number($event.target.value))"
+          @change="updateForm('activeEmbeddingProviderId', Number(($event.target as HTMLSelectElement).value))"
           class="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
         >
           <option :value="undefined">请选择预设配置</option>
@@ -107,7 +107,7 @@ function getProviderName(id: number | undefined, providers: ProviderOption[]): s
         <label class="text-sm text-muted-foreground">选择模型提供商</label>
         <select
           :value="form.activeRerankerProviderId"
-          @change="updateForm('activeRerankerProviderId', Number($event.target.value))"
+          @change="updateForm('activeRerankerProviderId', Number(($event.target as HTMLSelectElement).value))"
           class="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
         >
           <option :value="undefined">请选择预设配置</option>
@@ -127,7 +127,7 @@ function getProviderName(id: number | undefined, providers: ProviderOption[]): s
         <label class="text-sm text-muted-foreground">选择模型提供商</label>
         <select
           :value="form.activeVllProviderId"
-          @change="updateForm('activeVllProviderId', Number($event.target.value))"
+          @change="updateForm('activeVllProviderId', Number(($event.target as HTMLSelectElement).value))"
           class="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
         >
           <option :value="undefined">请选择预设配置</option>

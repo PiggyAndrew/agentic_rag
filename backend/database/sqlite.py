@@ -2,13 +2,14 @@ from __future__ import annotations
 
 from contextlib import contextmanager
 from dataclasses import dataclass
-from typing import Iterator, Optional
+from typing import Iterator, Optional, Sequence
 import os
 
 from sqlalchemy import create_engine
 from sqlalchemy import event
 from sqlalchemy.engine import Engine
 from sqlalchemy.orm import Session, sessionmaker
+from sqlalchemy.schema import MetaData
 
 
 @dataclass(frozen=True, slots=True)
@@ -67,9 +68,9 @@ def get_default_sqlite_manager() -> SqliteSessionManager:
     global _default_manager
     if _default_manager is not None:
         return _default_manager
-    from backend.config.settings import get_settings
+    from backend.modules.config.infrastructure.boot_config import get_boot_config
 
-    settings = get_settings()
+    settings = get_boot_config()
     _default_manager = SqliteSessionManager.from_url(
         settings.KB_SQLITE_URL,
         echo=bool(settings.KB_SQLITE_ECHO),
@@ -77,29 +78,37 @@ def get_default_sqlite_manager() -> SqliteSessionManager:
     return _default_manager
 
 
+def build_sqlite_manager(*, url: Optional[str] = None, echo: Optional[bool] = None) -> SqliteSessionManager:
+    from backend.modules.config.infrastructure.boot_config import get_boot_config
+
+    settings = get_boot_config()
+    return SqliteSessionManager.from_url(
+        url or settings.KB_SQLITE_URL,
+        echo=bool(settings.KB_SQLITE_ECHO) if echo is None else bool(echo),
+    )
+
+
 def init_sqlite_database(
     *,
     manager: Optional[SqliteSessionManager] = None,
     migrations_dir: Optional[str] = None,
+    metadatas: Optional[Sequence[MetaData]] = None,
 ) -> None:
     """初始化数据库：优先执行迁移脚本，随后创建 ORM 表结构。"""
     mgr = manager or get_default_sqlite_manager()
 
     from backend.database.migrations.runner import apply_sql_migrations
-    from backend.kb.knowledge_models import Base
-    from backend.config.config_models import ConfigBase
-    from backend.database.chat_models import ChatBase
 
     apply_sql_migrations(
         mgr.engine,
         migrations_dir=migrations_dir or _default_migrations_dir(),
     )
-    Base.metadata.create_all(bind=mgr.engine)
-    ConfigBase.metadata.create_all(bind=mgr.engine)
-    ChatBase.metadata.create_all(bind=mgr.engine)
+    if metadatas:
+        for metadata in metadatas:
+            metadata.create_all(bind=mgr.engine)
 
 
 def _default_migrations_dir() -> str:
-    from backend.config.settings import get_settings
+    from backend.modules.config.infrastructure.boot_config import get_boot_config
 
-    return get_settings().KB_SQLITE_MIGRATIONS_DIR
+    return get_boot_config().KB_SQLITE_MIGRATIONS_DIR

@@ -41,10 +41,12 @@ def _applied_versions(engine: Engine) -> set[str]:
 
 
 def _should_ignore_migration_error(version: str, error: Exception) -> bool:
-    if version != "0002_add_llm_provider_category.sql":
-        return False
     msg = str(error).lower()
-    return "no such table: llm_providers" in msg or "duplicate column name: category" in msg
+    if version == "0002_add_llm_provider_category.sql":
+        return "no such table: llm_providers" in msg or "duplicate column name: category" in msg
+    if version == "0003_add_chat_message_citations.sql":
+        return "no such table: chat_messages" in msg or "duplicate column name: citations" in msg
+    return False
 
 
 def apply_sql_migrations(engine: Engine, *, migrations_dir: str) -> None:

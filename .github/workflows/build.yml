@@ -46,6 +46,9 @@ jobs:
       run: |
         pip install .
         pip install cx_Freeze
+
+    - name: DDD Architecture Check
+      run: python backend/tools/ddd_check.py --repo-root .
         
     - name: Run Build Script
       run: .\setup\auto_setup.bat

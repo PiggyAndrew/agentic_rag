@@ -1,9 +1,6 @@
-from .splitter_normal import NormalSplitter
-from .splitter_headings import HeadingsSplitter
-from .splitter_adaptive import AdaptiveSplitter
+from __future__ import annotations
 
-__all__ = [
-    "NormalSplitter",
-    "HeadingsSplitter",
-    "AdaptiveSplitter",
-]
+from backend.modules.kb.infrastructure.legacy_kb.splitters import AdaptiveSplitter, HeadingsSplitter, NormalSplitter
+from backend.modules.kb.infrastructure.legacy_kb.splitters.splitter_headings import HeadingItem
+
+__all__ = ["AdaptiveSplitter", "NormalSplitter", "HeadingsSplitter", "HeadingItem"]
