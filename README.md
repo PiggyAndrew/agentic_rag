@@ -10,23 +10,6 @@ It is designed for **Local Deployment**, ensuring your data remains private with
 
 https://github.com/user-attachments/assets/0da5cbba-e5fc-4ac6-a668-28fce6d973b4
 
-## 📸 Screenshots
-
-<div align="center">
-  <img src="assets/photos/chat_view.png" alt="Chat Interface" width="800"/>
-  <p><em>Intelligent Chat Interface with RAG Support</em></p>
-</div>
-
-<div align="center">
-  <img src="assets/photos/repositoy.png" alt="Knowledge Base" width="800"/>
-  <p><em>Knowledge Base Management</em></p>
-</div>
-
-<div align="center">
-  <img src="assets/photos/ai_provider_settings.png" alt="AI Settings" width="800"/>
-  <p><em>Flexible AI Provider Configuration</em></p>
-</div>
-
 ## ✨ Key Features
 
 - **🔒 Local & Private**: Built with privacy in mind. Runs entirely locally with **Local Vector Store (ChromaDB)** and **Local Database (SQLite)**. Your data stays on your machine.
