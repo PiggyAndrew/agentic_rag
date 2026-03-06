@@ -6,6 +6,10 @@ Agentic RAG is a comprehensive Retrieval-Augmented Generation (RAG) application 
 
 It is designed for **Local Deployment**, ensuring your data remains private with a local vector store and database.
 
+## Video
+
+https://github.com/user-attachments/assets/0da5cbba-e5fc-4ac6-a668-28fce6d973b4
+
 ## 📸 Screenshots
 
 <div align="center">
@@ -110,6 +114,8 @@ To build the standalone Windows application (installer):
 ## ⚙️ Configuration (.env)
 
 | Variable | Description | Example |
+
+
 | :--- | :--- | :--- |
 | `APP_ENV` | Environment (development/production) | `development` |
 | `LLM_BASE_URL` | Base URL for LLM provider | `https://api.openai.com/v1` |
