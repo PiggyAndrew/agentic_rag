@@ -47,7 +47,7 @@ def seed_providers():
         ))
 
         # 4. DeepSeek
-        ds_key ="sk-7582a5657fc042519669979db6cabd71"
+        ds_key ="sk-XXXXXXX" # 请替换为实际的 DeepSeek API Key
         repo.create(LLMProviderCreate(
             name="DeepSeek Chat",
             category=ModelCategory.llm,
@@ -60,7 +60,7 @@ def seed_providers():
         ))
 
         # 5. DashScope Embedding (Aliyun)
-        ak = "sk-7576587807914f3db18eaa1787704614"
+        ak = "sk-XXXXXX"    # 请替换为实际的 DashScope API Key
         base =  "https://dashscope.aliyuncs.com/compatible-mode/v1"
         repo.create(LLMProviderCreate(
             name="Aliyun Embedding",
