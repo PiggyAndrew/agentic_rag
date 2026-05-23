@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia'
+import { getApiBase } from '../api/api_base'
 
 export interface KnowledgeBase {
   id: string
@@ -26,11 +27,6 @@ interface ApiResponse<T = any> {
   ok: boolean
   data?: T
   error?: ApiError | null
-}
-
-function getApiBase(): string {
-  const base = (import.meta as any).env?.VITE_API_BASE || (import.meta as any).env?.VITE_API_URL || 'http://localhost:8000'
-  return base.replace(/\/$/, '')
 }
 
 async function apiRequest<T>(path: string, init?: RequestInit): Promise<T> {
@@ -186,6 +182,17 @@ export const useKbStore = defineStore('kb', {
       const list = this.filesByKb[kbId] || []
       this.filesByKb[kbId] = list.filter(f => f.id !== fileId)
       await this.fetchFiles(kbId)
+    },
+
+    patchFileLocal(kbId: string, fileId: string, patch: Partial<KBFile>): void {
+      const list = this.filesByKb[kbId]
+      if (!Array.isArray(list) || list.length === 0) return
+      const idx = list.findIndex(f => f.id === fileId)
+      if (idx < 0) return
+      const current = list[idx]
+      if (!current) return
+      list[idx] = { ...current, ...patch }
+      this.filesByKb[kbId] = [...list]
     },
   },
 })

@@ -5,13 +5,7 @@
 type ApiError = { code: number; message: string }
 type ApiResponse<T = any> = { ok: boolean; data?: T; error?: ApiError | null }
 
-function getApiBase(): string {
-  const raw = (import.meta as any).env?.VITE_API_BASE || (import.meta as any).env?.VITE_API_URL || 'http://localhost:8000'
-  const s = String(raw || '').trim()
-  if (!s) return 'http://localhost:8000'
-  if (s.endsWith('/api/chat')) return s.slice(0, -'/api/chat'.length)
-  return s.replace(/\/+$/, '')
-}
+import { getApiBase } from './api_base'
 
 async function apiRequest<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(`${getApiBase()}${path}`, init)

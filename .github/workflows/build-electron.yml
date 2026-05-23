@@ -1,0 +1,49 @@
+name: Build Electron (Windows)
+
+on:
+  workflow_dispatch:
+  push:
+    branches: ["main"]
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Python deps
+        run: |
+          pip install .
+          pip install cx_Freeze
+
+      - name: Build Vue
+        working-directory: frontend/agui-vue
+        run: |
+          npm ci
+          npm run build
+
+      - name: Build Python (cx_Freeze)
+        run: python setup/setup.py build
+
+      - name: Build Electron
+        working-directory: frontend/agui-electron
+        run: |
+          npm install
+          npm run dist
+
+      - name: Upload Installer
+        uses: actions/upload-artifact@v4
+        with:
+          name: AgenticRAG-Electron-Windows
+          path: frontend/agui-electron/release/**

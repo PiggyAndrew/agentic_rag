@@ -78,3 +78,6 @@ tests/outputs/
 .shared/
 .trae/
 .claude/
+resources/
+tmp/
+reference_program_code/

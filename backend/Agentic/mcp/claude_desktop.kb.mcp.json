@@ -1,0 +1,19 @@
+{
+  "mcpServers": {
+    "agentic-rag-kb": {
+      "command": "uv",
+      "args": [
+        "run",
+        "--project",
+        "d:\\GitHub\\agentic_rag",
+        "python",
+        "-m",
+        "backend.mcp.kb_server"
+      ],
+      "env": {
+        "PYTHONPATH": "d:\\GitHub\\agentic_rag",
+        "AGENTIC_RAG_MCP_KB_ID": "1"
+      }
+    }
+  }
+}

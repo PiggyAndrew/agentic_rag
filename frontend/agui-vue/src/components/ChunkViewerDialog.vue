@@ -3,6 +3,7 @@ import { computed, ref, nextTick, watch, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Document, CopyDocument, Search } from '@element-plus/icons-vue'
 import { StreamMarkdown } from 'streamdown-vue'
+import { getApiBase } from '@/api/api_base'
 
 interface ChunkItem {
   file_id: number
@@ -51,7 +52,47 @@ function parseUrlFragment(): { fileId?: number | null; chunkIndex: number | null
   return { fileId: Number.isFinite(fileId) ? fileId : null, chunkIndex, line: Number.isFinite(line) ? line : null }
 }
 
-// 后端已统一重写图片URL至静态HTTP路径，这里直接渲染内容
+function resolveAssetUrl(raw: unknown): string {
+  const s = String(raw ?? "").trim()
+  if (!s) return s
+  if (s.startsWith('data:') || s.startsWith('blob:')) return s
+
+  const base = getApiBase().replace(/\/$/, '')
+
+  if (s.startsWith('/assets/')) return `${base}${s}`
+  if (s.startsWith('assets/')) return `${base}/${s}`
+
+  if (/^https?:\/\//i.test(s)) {
+    try {
+      const u = new URL(s)
+      if ((u.pathname || '').startsWith('/assets/')) {
+        return `${base}${u.pathname}${u.search}${u.hash}`
+      }
+    } catch {
+    }
+  }
+
+  return s
+}
+
+function rehypeRewriteAssetUrls() {
+  return (tree: any) => {
+    const walk = (node: any) => {
+      if (!node) return
+      if (node.type === 'element' && node.tagName && node.properties) {
+        if (node.tagName === 'img' && node.properties.src) {
+          node.properties.src = resolveAssetUrl(node.properties.src)
+        } else if (node.tagName === 'a' && node.properties.href) {
+          node.properties.href = resolveAssetUrl(node.properties.href)
+        }
+      }
+      const children: any[] | undefined = node?.children
+      if (!Array.isArray(children) || children.length === 0) return
+      for (const child of children) walk(child)
+    }
+    walk(tree)
+  }
+}
 
 const filteredChunks = computed(() => {
   if (!searchQuery.value) return props.chunks
@@ -426,6 +467,7 @@ onMounted(() => {
                       <StreamMarkdown
                         :content="item.content"
                         :shiki-theme="{ light: 'github-light', dark: 'github-dark' }"
+                        :rehype-plugins="[rehypeRewriteAssetUrls]"
                         class="text-sm leading-7 text-foreground font-normal prose prose-sm max-w-none prose-p:my-2 prose-headings:mb-3 prose-headings:mt-4 prose-code:bg-muted prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-code:before:content-none prose-code:after:content-none"
                       />
                     </div>

@@ -1,4 +1,5 @@
 import { ref } from 'vue';
+import { getApiBase } from '../api/api_base';
 
 export interface Message {
   id: string;
@@ -37,7 +38,7 @@ export function useChat(options: { api?: string } = {}) {
     status.value = 'streaming';
 
     try {
-      const apiUrl = options.api || (import.meta as any).env?.VITE_API_URL || 'http://localhost:8000/api/chat';
+      const apiUrl = options.api || `${getApiBase()}/api/chat`;
       console.log('Sending request to:', apiUrl);
       const res = await fetch(apiUrl, {
         method: 'POST',

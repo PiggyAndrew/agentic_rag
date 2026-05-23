@@ -1,7 +1,4 @@
-const getApiBase = () => {
-  const raw = (import.meta as any).env?.VITE_API_URL || "http://localhost:8000";
-  return String(raw).replace(/\/$/, "");
-}
+import { getApiBase } from "./api_base";
 
 export interface ChatSession {
   id: string;

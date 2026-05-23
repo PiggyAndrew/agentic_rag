@@ -33,14 +33,31 @@ class _FakePdfExtractor:
         return 'hello ![x](x.png) <img src="y.jpg" />'
 
 
+class _FakeTextSplitter:
+    def split(self, text: str, kb_id: int, file_id: int):
+        return [
+            {
+                "kb_id": kb_id,
+                "file_id": file_id,
+                "chunk_index": 0,
+                "content": text,
+                "metadata": None,
+                "created_at_ms": 0,
+                "updated_at_ms": 0,
+            }
+        ]
+
+
 class TestFileIngestionServicePdf(unittest.TestCase):
     def test_ingest_pdf_builds_chunks_and_metadata(self):
         with tempfile.TemporaryDirectory() as tmp:
+            writer = _FakeChunkWriter()
             svc = FileIngestionService(
                 file_resolver=_FakeFileResolver(),
                 asset_paths=_FakeAssetPaths(tmp),
-                chunk_writer=_FakeChunkWriter(),
+                chunk_writer=writer,
                 pdf_extractor=_FakePdfExtractor(),
+                text_splitter=_FakeTextSplitter(),
                 image_captioner=None,
                 excel_text_extractor=None,
                 table_chunker=None,
@@ -49,6 +66,12 @@ class TestFileIngestionServicePdf(unittest.TestCase):
             self.assertEqual(info.id, 10)
             self.assertEqual(info.filename, "a.pdf")
             self.assertGreater(info.chunk_count, 0)
+            self.assertEqual(len(writer.saved), 1)
+            _, _, chunks = writer.saved[0]
+            self.assertEqual(len(chunks), 1)
+            content = chunks[0]["content"]
+            self.assertIn("![x](/assets/1/assets/images/10/x.png)", content)
+            self.assertIn('src="/assets/1/assets/images/10/y.jpg"', content)
 
 
 if __name__ == "__main__":

@@ -1,0 +1,34 @@
+{
+  "name": "agui-electron",
+  "private": true,
+  "version": "0.0.0",
+  "description": "Electron desktop wrapper for Agentic RAG",
+  "author": "Agentic RAG",
+  "type": "module",
+  "main": "dist/main/index.cjs",
+  "scripts": {
+    "dev": "cross-env ELECTRON_DEV=1 electron .",
+    "build": "tsup",
+    "build:python": "node scripts/build-python.mjs",
+    "build:renderer": "cd ../agui-vue && npm run build",
+    "build:all": "npm run build && npm run build:renderer && npm run build:python && npm run prepare:renderer && npm run prepare:python",
+    "start": "electron .",
+    "prepare:renderer": "node scripts/prepare-renderer.mjs",
+    "prepare:python": "node scripts/prepare-python.mjs",
+    "prepare:all": "npm run prepare:renderer && npm run prepare:python",
+    "dist": "npm run build:all && electron-builder --config electron-builder.json",
+    "dist:win": "npm run build:all && electron-builder --config electron-builder.json --win",
+    "dist:mac": "npm run build:all && electron-builder --config electron-builder.json --mac",
+    "dist:linux": "npm run build:all && electron-builder --config electron-builder.json --linux"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.1",
+    "ajv-keywords": "3.5.2",
+    "cross-env": "^7.0.3",
+    "debug": "^4.4.3",
+    "electron": "^37.0.0",
+    "electron-builder": "^26.0.12",
+    "tsup": "^8.5.0",
+    "typescript": "~5.9.3"
+  }
+}

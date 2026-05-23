@@ -12,6 +12,7 @@ project_root = os.path.dirname(current_dir)
 
 # 将项目根目录加入 sys.path，解决 "ModuleNotFoundError: No module named 'backend'"
 # 这样 cx_Freeze 在分析 imports 时能正确找到 backend 包
+# 注意：这个路径只在打包时使用，运行时不会使用
 if project_root not in sys.path:
     sys.path.insert(0, project_root)
 
@@ -37,6 +38,10 @@ build_exe_options = {
         "chromadb",  # Explicitly include chromadb
         "opentelemetry",  # Explicitly include opentelemetry
         "opentelemetry.context.contextvars_context", # Explicitly include the missing module
+        "tiktoken",
+        "tenacity",
+        "sqlite3",
+        "requests",
     ],
     # 排除不需要的大型库以减小体积
     "excludes": [
@@ -48,6 +53,8 @@ build_exe_options = {
         "sklearn",
         "tkinter",
     ],
+    # 确保所有 backend 模块都被包含
+    "zip_include_packages": ["backend"],
     # 包含必要的非 Python 数据文件
     # 格式: (源路径, 目标路径)
     "include_files": [
@@ -59,11 +66,6 @@ build_exe_options = {
         ),
     ],
 }
-
-# 如果 .env 存在，也将其打包
-env_path = os.path.join(project_root, ".env")
-if os.path.exists(env_path):
-    build_exe_options["include_files"].append((env_path, ".env"))
 
 # ------------------------------------------------------------------------------
 # Setup 配置

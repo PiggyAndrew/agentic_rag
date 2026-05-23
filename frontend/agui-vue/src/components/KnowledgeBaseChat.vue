@@ -52,6 +52,7 @@ import { computed, ref, onMounted, watch, provide, nextTick } from "vue";
 import { useKbStore } from "@/stores/kb";
 import { useAiStore } from "@/stores/ai";
 import { useChatStore } from "@/stores/chat";
+import { getApiBase } from "@/api/api_base";
 import { fetchMessages, editMessage, updateSessionTitle } from "@/api/chat_history";
 import type { ChatMessage } from "@/api/chat_history";
 import { ElDialog, ElRadioGroup, ElRadio, ElButton, ElScrollbar, ElMessageBox, ElInput, ElDropdown, ElDropdownMenu, ElDropdownItem } from "element-plus";
@@ -105,18 +106,6 @@ const pendingNameGenerations = new Map<string, ReturnType<typeof setTimeout>>();
 const activeNameGenerations = new Set<string>();
 
 const citePattern = /〔cite:([^〕]+)〕/g;
-
-// API 地址
-const apiBase = computed<string>(() => {
-  const raw =
-    (import.meta as any).env?.VITE_API_BASE ||
-    (import.meta as any).env?.VITE_API_URL ||
-    "http://localhost:8000";
-  const s = String(raw).replace(/\/$/, "");
-  if (s.endsWith("/api/chat")) return s.slice(0, -"/api/chat".length);
-  if (s.endsWith("/api")) return s.slice(0, -"/api".length);
-  return s;
-});
 
 // 工具函数
 function citeKey(fileId: number, chunkIndex: number): string {
@@ -321,7 +310,8 @@ ${messagesText}
 
 只返回标题，不要包含任何其他内容或标点符号。`;
 
-    const response = await fetch(`${apiBase.value}/api/chat`, {
+    const base = getApiBase().trim().replace(/\/+$/, '');
+    const response = await fetch(`${base}/api/chat`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -504,9 +494,51 @@ function rehypeInlineCitation() {
   };
 }
 
+function resolveAssetUrl(raw: unknown): string {
+  const s = String(raw ?? "").trim();
+  if (!s) return s;
+  if (s.startsWith("data:") || s.startsWith("blob:")) return s;
+
+  const base = getApiBase().replace(/\/$/, "");
+
+  if (s.startsWith("/assets/")) return `${base}${s}`;
+  if (s.startsWith("assets/")) return `${base}/${s}`;
+
+  if (/^https?:\/\//i.test(s)) {
+    try {
+      const u = new URL(s);
+      if ((u.pathname || "").startsWith("/assets/")) {
+        return `${base}${u.pathname}${u.search}${u.hash}`;
+      }
+    } catch {
+    }
+  }
+
+  return s;
+}
+
+function rehypeRewriteAssetUrls() {
+  return (tree: any) => {
+    const walk = (node: any) => {
+      if (!node) return;
+      if (node.type === "element" && node.tagName && node.properties) {
+        if (node.tagName === "img" && node.properties.src) {
+          node.properties.src = resolveAssetUrl(node.properties.src);
+        } else if (node.tagName === "a" && node.properties.href) {
+          node.properties.href = resolveAssetUrl(node.properties.href);
+        }
+      }
+      const children: any[] | undefined = node?.children;
+      if (!Array.isArray(children) || children.length === 0) return;
+      for (const child of children) walk(child);
+    };
+    walk(tree);
+  };
+}
+
 provide('citationContext', {
   selectedKbId,
-  apiBase,
+  getApiBase: () => getApiBase(),
   ensureLoaded: ensureCitationLoaded,
   openDialog: openCitationDialog,
   getCitation: (fileId: number, chunkIndex: number) =>
@@ -852,7 +884,6 @@ async function streamResponse(
       history,
       selectedKbId.value ? selectedKbId.value : undefined,
       {
-        apiUrl: aiStore.chatApiUrl,
         llmApiKey: aiStore.llmApiKey,
         llmBaseUrl: aiStore.llmBaseUrl,
         llmModel: aiStore.llmModel,
@@ -1190,7 +1221,7 @@ watch(
                           }"
                           :content="part.text"
                           :components="markdownComponents"
-                          :rehype-plugins="[rehypeInlineCitation]"
+                          :rehype-plugins="[rehypeInlineCitation, rehypeRewriteAssetUrls]"
                           class="w-fit min-w-0 [&>*:first-child]:mt-0 [&>*:last-child]:mb-0 whitespace-normal break-words"
                         />
                       </MessageContent>

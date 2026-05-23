@@ -13,10 +13,12 @@ export type StreamChatOptions = {
   skipSaveUser?: boolean
 }
 
+import { getApiBase } from './api_base'
+
 function resolveChatUrl(raw?: string): string {
-  const fallback = (import.meta as any).env?.VITE_API_URL || 'http://localhost:8000/api/chat'
+  const fallback = (import.meta as any).env?.VITE_API_URL || `${getApiBase()}/api/chat`
   const url = (raw || fallback).trim()
-  if (!url) return 'http://localhost:8000/api/chat'
+  if (!url) return `${getApiBase()}/api/chat`
   if (url.endsWith('/api/chat')) return url
   return url.replace(/\/+$/, '') + '/api/chat'
 }

@@ -65,7 +65,7 @@ const isValid = computed(() => citeRefs.value.length > 0)
 const sourceUrls = computed(() => {
   if (!citationContext || !isValid.value) return []
   const kbId = citationContext.selectedKbId.value
-  const base = citationContext.apiBase.value
+  const base = citationContext.getApiBase ? citationContext.getApiBase() : ''
   return citeRefs.value.map((r) => {
     const fid = r.fileId
     return kbId

@@ -20,6 +20,7 @@ interface FileItem {
   kbId: string
   createdAt: number
   chunkCount: number
+  status: string
 }
 
 const kbStore = useKbStore()
@@ -166,11 +167,15 @@ async function viewChunks(fileId: string): Promise<void> {
  */
 async function vectorizeFile(file: FileItem): Promise<void> {
   if (!selectedKbId.value) return
+  kbStore.patchFileLocal(selectedKbId.value, file.id, { status: 'uploaded', chunkCount: 0 })
   parsingFileIds.value.add(file.id)
   try {
     await kbStore.vectorizeFile(selectedKbId.value, file.name)
     ElMessage.success('向量化完成')
     await kbStore.fetchFiles(selectedKbId.value)
+  } catch (e) {
+    await kbStore.fetchFiles(selectedKbId.value)
+    throw e
   } finally {
     parsingFileIds.value.delete(file.id)
   }

@@ -1,6 +1,0 @@
-{
-  "forbidden_import_substrings": [".infrastructure.", "backend.infrastructure."],
-  "allow_ui_infrastructure_import_files": ["backend/api/main.py"],
-  "allow_application_infrastructure_import_files": ["backend/modules/kb/application/usecase.py"]
-}
-

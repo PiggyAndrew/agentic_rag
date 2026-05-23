@@ -14,6 +14,7 @@ import {
   type LLMPreset,
   type LLMProvider,
 } from '@/api/llm'
+import { getApiBase as resolveApiBase } from '@/api/api_base'
 import ConfigSidebar, { type NavItem } from '@/components/config/ConfigSidebar.vue'
 import ActiveConfigPanel, { type ActiveConfigForm } from '@/components/config/ActiveConfigPanel.vue'
 import ProviderLibraryPanel, { type Provider as LibraryProvider } from '@/components/config/ProviderLibraryPanel.vue'
@@ -113,11 +114,7 @@ function updateGlobalForm(next: ActiveConfigForm) {
 
 // API 基础 URL
 function getApiBase(): string {
-  const raw = (import.meta as any).env?.VITE_API_BASE || (import.meta as any).env?.VITE_API_URL || 'http://localhost:8000'
-  const s = String(raw || '').trim()
-  if (!s) return 'http://localhost:8000'
-  if (s.endsWith('/api/chat')) return s.slice(0, -'/api/chat'.length)
-  return s.replace(/\/+$/, '')
+  return resolveApiBase()
 }
 
 // 全局配置操作

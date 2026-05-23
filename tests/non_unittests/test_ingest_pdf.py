@@ -4,33 +4,67 @@ import os
 import sys
 from typing import List, Dict, Tuple
 
-# 将项目根目录加入模块搜索路径，确保可导入顶层包 `kb`
 ROOT_DIR = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
 if ROOT_DIR not in sys.path:
     sys.path.insert(0, ROOT_DIR)
 
-from backend.kb import PersistentKnowledgeBaseController, ingest_pdf
-def run_ingest(pdf_path: str, kb_id: int, chunk_size: int, overlap: int) -> Tuple[Dict, List[Dict]]:
+from backend.modules.kb.domain.enums import PdfDocumentType
+from backend.modules.kb.domain.services import render_document_chunk_for_ai
+from backend.modules.kb.infrastructure.legacy_kb import PersistentKnowledgeBaseController, ingest_pdf
+
+
+def run_ingest(
+    pdf_path: str,
+    kb_id: int,
+    chunk_size: int,
+    overlap: int,
+    document_type: PdfDocumentType,
+) -> Tuple[Dict, List[Dict]]:
     """执行PDF导入流程并返回文件信息与片段列表
 
     - `pdf_path`：PDF文件路径
     - `kb_id`：知识库ID
     - `chunk_size`：片段长度
     - `overlap`：片段重叠长度
+    - `document_type`：PDF 文档类型，决定导入策略
     - 返回：`(file_info_dict, chunks_dict_list)`
     """
     kb = PersistentKnowledgeBaseController()
-    info = ingest_pdf(kb, kb_id, pdf_path, chunk_size=chunk_size, overlap=overlap)
-    chunks = kb.readFileChunks(
+    kb.ensure_kb(kb_id)
+
+    filename = os.path.basename(pdf_path)
+
+    try:
+        kb.find_document_id_by_name(kb_id, filename)
+    except Exception:
+        kb.add_document(kb_id, filename, chunk_count=0, status="pending")
+
+    info = ingest_pdf(
+        kb,
         kb_id,
-        [{"fileId": info.id, "chunkIndex": i} for i in range(info.chunk_count)],
+        pdf_path,
+        chunk_size=chunk_size,
+        overlap=overlap,
+        document_type=document_type,
     )
+    persisted_chunks = kb._repository.list_document_chunks(kb_id, info.document_id)
+    chunks = [
+        {
+            "chunk_index": chunk.chunk_index,
+            "content": render_document_chunk_for_ai(chunk),
+            "page_start": chunk.page_start,
+            "page_end": chunk.page_end,
+        }
+        for chunk in persisted_chunks
+    ]
     return (
         {
-            "id": info.id,
+            "id": info.document_id,
             "filename": info.filename,
             "chunk_count": info.chunk_count,
-            "status": info.status,
+            "status": str(info.status),
+            "document_type": str(document_type.value),
+            "page_count": None if info.details is None else info.details.page_count,
         },
         chunks,
     )
@@ -93,16 +127,28 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--pdf",
-        default=r"tests\\testfiles\\Attachment E - BIM Guide for Facilities Upkeep_Ver2.0_Jun21-20211007-113450.pdf",
+        default=r"tests\\testfiles\\test drawing reading.pdf",
         help="PDF文件路径",
     )
     parser.add_argument("--kb", type=int, default=1, help="知识库ID")
     parser.add_argument("--chunk_size", type=int, default=500, help="片段长度")
     parser.add_argument("--overlap", type=int, default=100, help="片段重叠长度")
+    parser.add_argument(
+        "--document_type",
+        choices=[item.value for item in PdfDocumentType],
+        default=PdfDocumentType.drawing.value,
+        help="PDF 文档类型：document 按普通文本切分，drawing 按页切分并生成整页图片",
+    )
     parser.add_argument("--gui", action="store_true", help="是否打开窗口展示")
     args = parser.parse_args()
 
-    info, chunks = run_ingest(args.pdf, args.kb, args.chunk_size, args.overlap)
+    info, chunks = run_ingest(
+        args.pdf,
+        args.kb,
+        args.chunk_size,
+        args.overlap,
+        PdfDocumentType.coerce(args.document_type),
+    )
     print_summary(info, chunks)
     if args.gui:
         show_gui(chunks)
