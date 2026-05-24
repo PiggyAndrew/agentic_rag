@@ -77,3 +77,6 @@ tests/outputs/
 
 .shared/
 .trae/
+tmp/
+resources/
+.claude/

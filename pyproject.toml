@@ -33,4 +33,14 @@ dependencies = [
     "pymupdf>=1.26.7",
     "langchain-ollama>=1.0.1",
     "chroma>=0.2.0",
+<<<<<<< Updated upstream
+=======
+    "mcp[cli]>=1.27.0",
+    "lightrag-hku[api]",
+    "raganything",
+>>>>>>> Stashed changes
 ]
+
+[tool.uv.sources]
+lightrag-hku = { path = "backend/LightRAG", editable = true }
+raganything = { path = "backend/RAG-Anything", editable = true }
